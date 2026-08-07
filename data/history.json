@@ -50,5 +50,89 @@
       "tp2": 0.013510000000000001,
       "timestamp": "Friday, 07 Aug 2026, 17:20 WIB"
     }
+  ],
+  "2026-08-07 20:06": [
+    {
+      "symbol": "BABYUSDT",
+      "base": "BABY",
+      "action": "BUY",
+      "entry": 0.01125,
+      "sl": 0.01115395,
+      "tp1": 0.01138,
+      "tp2": 0.01151,
+      "timestamp": "Friday, 07 Aug 2026, 20:06 WIB"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "base": "BTC",
+      "action": "BUY",
+      "entry": 65262.72,
+      "sl": 64063.562549999995,
+      "tp1": 70483.73760000001,
+      "tp2": 75704.75520000001,
+      "timestamp": "Friday, 07 Aug 2026, 20:06 WIB"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "base": "ETH",
+      "action": "BUY",
+      "entry": 1931.16,
+      "sl": 1898.86795,
+      "tp1": 2085.6528000000003,
+      "tp2": 2240.1456000000007,
+      "timestamp": "Friday, 07 Aug 2026, 20:06 WIB"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "base": "SOL",
+      "action": "NEUTRAL",
+      "entry": 73.81,
+      "sl": 71.5957,
+      "tp1": 76.02430000000001,
+      "tp2": 78.2386,
+      "timestamp": "Friday, 07 Aug 2026, 20:06 WIB"
+    },
+    {
+      "symbol": "XRPUSDT",
+      "base": "XRP",
+      "action": "NEUTRAL",
+      "entry": 1.0369,
+      "sl": 1.005793,
+      "tp1": 1.068007,
+      "tp2": 1.099114,
+      "timestamp": "Friday, 07 Aug 2026, 20:06 WIB"
+    }
+  ],
+  "2026-08-07 20:46": [
+    {
+      "symbol": "BTCUSDT",
+      "base": "BTC",
+      "action": "BUY",
+      "entry": 65182.01,
+      "sl": 64063.562549999995,
+      "tp1": 67137.4703,
+      "tp2": 69092.93059999999,
+      "timestamp": "Friday, 07 Aug 2026, 20:46 WIB"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "base": "ETH",
+      "action": "BUY",
+      "entry": 1927.69,
+      "sl": 1898.86795,
+      "tp1": 1928.0,
+      "tp2": 1928.31,
+      "timestamp": "Friday, 07 Aug 2026, 20:46 WIB"
+    },
+    {
+      "symbol": "ERAUSDT",
+      "base": "ERA",
+      "action": "BUY",
+      "entry": 0.0679,
+      "sl": 0.06736149999999999,
+      "tp1": 0.0687,
+      "tp2": 0.06949999999999999,
+      "timestamp": "Friday, 07 Aug 2026, 20:46 WIB"
+    }
   ]
 }
