@@ -320,7 +320,7 @@ def _signal_lines(sig: Signal) -> List[str]:
     reason_lines = []
     if sig.reasons:
         reason_lines.append("📝 " + sig.reasons[0])
-        reason_lines.extend(sig.reasons[1:])
+        reason_lines.extend("    - " + reason for reason in sig.reasons[1:])
     else:
         reason_lines.append("📝 —")
     lines = [

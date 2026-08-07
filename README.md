@@ -91,7 +91,7 @@ Di `bot._eligible_pair()`:
 
 ## Format pesan Telegram
 
-`engine.format_message()` — sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`, alasan `📝` dicetak per-baris, dan baris `📊 Skor` merangkum semua komponen:
+`engine.format_message()` — sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`, alasan `📝` dicetak dengan baris pertama (indikator utama) tanpa dash dan baris berikutnya diindentasi `    - `, dan baris `📊 Skor` merangkum semua komponen:
 
 ```
 📊 DAILY BRIEFING — SINYAL TRADING v2
@@ -107,12 +107,12 @@ Di `bot._eligible_pair()`:
 🎯 TP2: $0.895000
 💹 24j: +5.24%
 📝 MACD bullish (histogram +)
-Momentum 24j +5.2%
-Struktur bullish (BOS/higher high)
-OB support 0.59
-FVG bullish di bawah harga
-Support dekat (2.6%)
-Fear&Greed 29
+    - Momentum 24j +5.2%
+    - Struktur bullish (BOS/higher high)
+    - OB support 0.59
+    - FVG bullish di bawah harga
+    - Support dekat (2.6%)
+    - Fear&Greed 29
 📊 Skor: +0.45  (Tek +0.55 · SMC +0.85 · Sent +0.40 · Whale +0.00 · Onch +0.00)
 
 ───
@@ -126,10 +126,10 @@ Fear&Greed 29
 🎯 TP2: $0.866040
 💹 24j: -2.31%
 📝 RSI 37 mendekati oversold
-MACD bearish (histogram -)
-Struktur bearish (CHoCH/lower low)
-FVG bearish di atas harga
-Fear&Greed 29
+    - MACD bearish (histogram -)
+    - Struktur bearish (CHoCH/lower low)
+    - FVG bearish di atas harga
+    - Fear&Greed 29
 📊 Skor: -0.12  (Tek -0.25 · SMC -0.40 · Sent +0.40 · Whale +0.00 · Onch +0.00)
 
 ───

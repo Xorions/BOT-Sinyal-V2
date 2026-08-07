@@ -71,7 +71,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 ## 4. Format pesan (baca `engine.format_message()`)
 
 - Header seksi: `<b>📈 SINYAL LONG (BUY)</b>`, `<b>📉 SINYAL SHORT (SELL)</b>`, `<b>⚪ WATCHLIST (NEUTRAL)</b>` (seksi kosong di-skip).
-- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝`, sisanya **per-baris** tanpa prefix) → `📊 Skor` (total + breakdown Tek/SMC/Sent/Whale/Onch) → pemisah `───`.
+- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝` tanpa dash, sisanya diindentasi **4 spasi + `- `**) → `📊 Skor` (total + breakdown Tek/SMC/Sent/Whale/Onch) → pemisah `───`.
 - Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
 - Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
 
