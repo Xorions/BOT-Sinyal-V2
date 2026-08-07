@@ -100,7 +100,7 @@ Di `bot._eligible_pair()`:
 
 ## Format pesan Telegram
 
-`engine.format_message()` — sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`, alasan `📝` dicetak dengan baris pertama (headline zona SMC/S&D H1) tanpa dash dan baris berikutnya diindentasi `    - ` (per timeframe `[H4]`/`[H1]`/`[M15]`), dan baris `📊 Skor` merangkum semua komponen:
+`engine.format_message()` — sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`. Alasan `📝` dicetak dengan baris pertama (headline zona SMC/S&D H1) tanpa dash; alasan selanjutnya **dikelompokkan per timeframe** — tag `+ [H4]`/`+ [H1]`/`+ [M15]` hanya ditulis 1x sebagai header grup, sub-alasan diindentasi `- ` (dengan 7 spasi) di bawah grup yang sama. Baris momentum dipisahkan emoji `💸` tepat sebelum `📊 Skor`:
 
 ```
 📊 DAY TRADING BRIEFING — MTF SMC + S&D
@@ -117,13 +117,16 @@ Di `bot._eligible_pair()`:
 🎯 TP2: $75,705
 💹 24j: +1.92%
 📝 Demand Zone & Bullish OB H1 Tersentuh
-    - [H4] Tren utama Bullish (BOS skala besar)
-    - [H1] Harga masuk Demand Zone
-    - [H1] Bullish OB di bawah harga
-    - [H1] FVG tervalidasi di bawah harga
-    - [H1] Liquidity Sweep tereksekusi (EQL tersapu)
-    - [M15] MACD Golden Cross & RSI Rebound
-    - Momentum 24j +1.9% | Fear&Greed 29
+    + [H4] Tren utama Bullish (higher high)
+    + [H1] 
+       - Harga masuk Demand Zone
+       - Bullish OB di bawah harga
+       - FVG tervalidasi di bawah harga
+       - Liquidity Sweep tereksekusi (EQL tersapu)
+       - Support dekat (0.4%)
+       - Resistance dekat (1.2%)
+    + [M15] MACD Golden Cross & RSI Rebound
+💸 Momentum 24j +1.9% | Fear&Greed 29
 📊 Skor: +0.38  (Tek +0.30 · SMC +1.00 · Sent +0.40 · Whale +0.00 · Onch +0.00)
 
 ───
@@ -137,12 +140,13 @@ Di `bot._eligible_pair()`:
 🎯 TP2: $0.866040
 💹 24j: -2.31%
 📝 Supply Zone & Bearish OB H1 Tersentuh
-    - [H4] Tren utama Bearish (CHoCH skala besar)
-    - [H1] Harga masuk Supply Zone
-    - [H1] Bearish OB di atas harga
-    - [H1] FVG tervalidasi di atas harga
-    - [M15] MACD Death Cross & RSI Melemah
-    - Momentum 24j -2.3% | Fear&Greed 29
+    + [H4] Tren utama Bearish (CHoCH skala besar)
+    + [H1] 
+       - Harga masuk Supply Zone
+       - Bearish OB di atas harga
+       - FVG tervalidasi di atas harga
+    + [M15] MACD Death Cross & RSI Melemah
+💸 Momentum 24j -2.3% | Fear&Greed 29
 📊 Skor: -0.21  (Tek -0.30 · SMC -0.85 · Sent +0.40 · Whale +0.00 · Onch +0.00)
 
 ───
@@ -158,16 +162,30 @@ Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
 
 - **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
 - **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current 24j** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**.
-- **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP2/TP1/SL/Floating).
+- **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP1/TP2/SL/Floating).
 - Recap disisipkan tepat sebelum blok `📊 DAY TRADING BRIEFING — MTF SMC + S&D`:
 
 ```
-📊 EVALUASI SINYAL SESI SEBELUMNYA — 07 Agu 2026 13:30
-🏆 Win rate: 60% (3/5)  ·  🎯 TP2: 1 · ✅ TP1: 2 · ❌ SL: 0 · ⏳ Floating: 2
+📊 EVALUASI SINYAL SESI SEBELUMNYA — 07 Aug 2026 13:30
+🏆 Win rate: 60% (3/5)
+💰 TP1: 1
+🎯 TP2: 2
+🛡️ SL: 1
+⏳ Floating: 1
+───
 
-#BTC BUY · Entry $104,000 → 🎯 TP2
-#XRP SELL · Entry $1.03 → ❌ SL
-#LIT BUY · Entry $0.74 → ⏳ Floating
+#BTC BUY
+🔑 Entry $104,000 → 🎯 TP2
+📋 Hit TP2 di $112,000
+
+#XRP SELL
+🔑 Entry $1.03 → 🛡️ SL
+📋 Hit SL di $1.070000
+
+#LIT BUY
+🔑 Entry $0.74 → ⏳ FLOATING
+📋 Harga saat ini $0.752000
+───
 ```
 
 Bila belum ada riwayat (sesi pertama) atau semua data harga gagal diambil, recap dilewati tanpa menggagalkan scan.

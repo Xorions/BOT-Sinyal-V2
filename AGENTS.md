@@ -78,6 +78,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 - **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (`previous_session_signals`, robust terhadap hari/sesi kosong), mengambil `(high, low, current)` 24j via `fetch_fn` (dari `binance.get_ticker_24h`), lalu menentukan status.
 - Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari **seluruh** sinyal yang dievaluasi (Floating ikut penyebut). Nilai SL/TP dari `history.json`.
+- **Format recap**: statistik di baris terpisah (`🏆 Win rate` → `💰 TP1` → `🎯 TP2` → `🛡️ SL` → `⏳ Floating`), lalu pemisah `───`, lalu tiap sinyal = `#BASE AKSI` + `🔑 Entry $.. → <emoji> STATUS` + `📋 Hit <STATUS> di $..` (floating: `📋 Harga saat ini $..`). Harga acuan disimpan sebagai `ref` oleh `_evaluate()`; `STATUS_EMOJI`: TP2=🎯, TP1=💰, SL=🛡️, FLOATING=⏳.
 - Recap **jangan menggagalkan scan**: fetch gagal → status `None` → sinyal itu dilewati; tak ada riwayat/semua gagal → `build_recap` mengembalikan `None`.
 - **CI commit-back**: runner di-reset tiap run, jadi workflow wajib men-*commit balik* `data/history.json` (step "Commit balik riwayat sinyal", `permissions: contents: write` + `concurrency` agar tidak race). Jangan pernah menambahkan `data/history.json` ke `.gitignore`.
 
@@ -85,8 +86,8 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 - Header seksi: `<b>📈 SINYAL LONG (BUY)</b>`, `<b>📉 SINYAL SHORT (SELL)</b>`, `<b>⚪ WATCHLIST (NEUTRAL)</b>` (seksi kosong di-skip).
 - Baris meta briefing (dari `engine.meta_lines()`): `📊 DAY TRADING BRIEFING — MTF SMC + S&D`, `🕐 <tanggal jam> WIB`, `⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15`, `🌐 Fear&Greed: N`.
-- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝` tanpa dash, sisanya diindentasi **4 spasi + `- `**) → `📊 Skor` (total + breakdown SMC/Tek/Sent/Whale/Onch) → pemisah `───`.
-- **Alasan wajib MTF**: baris pertama `📝` = headline zona H1 (mis. "Demand Zone & Bullish OB H1 Tersentuh"); baris alasan menyertakan prefix `[H4]`/`[D1]` (kompas) → `[H1]` (zona/OB/FVG/Sweep/S&R) → `[M15]` (RSI/MACD/BOS trigger); baris terakhir `Momentum 24j ... | Fear&Greed N`.
+- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝` tanpa dash) → `💸` momentum → `📊 Skor` (total + breakdown SMC/Tek/Sent/Whale/Onch) → pemisah `───`.
+- **Alasan wajib MTF (kelompok per timeframe)**: baris pertama `📝` = headline zona H1 (mis. "Demand Zone & Bullish OB H1 Tersentuh"). Alasan berikutnya dipakai `engine._group_reason_lines()`: tag `+ [H4]`/`+ [H1]`/`+ [M15]` ditulis **1x** sebagai header grup (indent 4 spasi); sub-alasan berindent **7 spasi + `- `**. Grup dgn 1 item → inline (`+ [H4] Tren utama Bullish`); banyak item → header lalu daftar `- ...`. Baris non-tag (momentum) dicetak ber-prefix `💸` sebagai baris terpisah.
 - Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
 - Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
 

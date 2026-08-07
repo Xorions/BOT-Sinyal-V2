@@ -303,15 +303,17 @@ def score_smc_mtf(
         score += 0.30
     elif near_demand:
         dist = _dist_pct(near_demand["high"], price)
-        reasons.append(f"[H1] Harga dekat Demand Zone ({dist:.1f}% jika < 2)")
-        score += 0.15
+        if dist is not None and dist <= 2.0:
+            reasons.append(f"[H1] Harga dekat Demand Zone ({dist:.1f}%)")
+            score += 0.15
     if in_supply:
         reasons.append("[H1] Harga masuk Supply Zone")
         score -= 0.30
     elif near_supply:
         dist = _dist_pct(price, near_supply["low"])
-        reasons.append(f"[H1] Harga dekat Supply Zone ({dist:.1f}% jika < 2)")
-        score -= 0.15
+        if dist is not None and dist <= 2.0:
+            reasons.append(f"[H1] Harga dekat Supply Zone ({dist:.1f}%)")
+            score -= 0.15
 
     if h1_map.get("bullish_ob"):
         reasons.append("[H1] Bullish OB di bawah harga")
@@ -528,14 +530,23 @@ def _levels_mtf(
         sl_cands += [b["low"] for b in ob_bull if b["low"] < price]
         sl = max(sl_cands) * 0.995 if sl_cands else price * 0.96
         resistance = levels.get("resistance") if levels else None
-        tp1 = resistance if resistance and resistance > price else price * 1.08
+        dist_r = _dist_pct(price, resistance)
+        # TP day-trading: pakai resistance H1 bila dekat (<=4%), else target scalp 3%.
+        if resistance and resistance > price and dist_r is not None and dist_r <= 4.0:
+            tp1 = resistance
+        else:
+            tp1 = price * 1.03
         tp2 = price + 2 * (tp1 - price)
     elif action == ACTION_SELL:
         sl_cands = [z["high"] for z in supply if z["high"] > price]
         sl_cands += [b["high"] for b in ob_bear if b["high"] > price]
         sl = min(sl_cands) * 1.005 if sl_cands else price * 1.04
         support = levels.get("support") if levels else None
-        tp1 = support if support and support < price else price * 0.92
+        dist_s = _dist_pct(support, price)
+        if support and support < price and dist_s is not None and dist_s <= 4.0:
+            tp1 = support
+        else:
+            tp1 = price * 0.97
         tp2 = price - 2 * (price - tp1)
     else:
         sl = price * 0.97
@@ -558,12 +569,44 @@ def _fmt_price(value: float) -> str:
     return f"${value:.6f}"
 
 
+def _group_reason_lines(reasons: List[str]) -> List[str]:
+    """Kelompokkan alasan per timeframe untuk format pesan baru.
+
+    Tag `[TF]` ditulis 1x sebagai header grup; sub-alasan diindentasi `- `.
+    Baris tanpa tag (mis. momentum) dicetak sebagai baris terpisah ber-prefix 💸.
+    """
+    out: List[str] = []
+    groups: List[tuple] = []  # [(tf, [item, ...])]
+    standalone: List[str] = []
+    for reason in reasons:
+        if reason.startswith("["):
+            end = reason.find("]")
+            tf = reason[1:end] if end > 0 else ""
+            item = reason[end + 1:].strip() if end > 0 else reason
+            if groups and groups[-1][0] == tf:
+                groups[-1][1].append(item)
+            else:
+                groups.append((tf, [item]))
+        else:
+            standalone.append(reason)
+    for tf, items in groups:
+        if len(items) == 1:
+            out.append(f"    + [{tf}] {items[0]}")
+        else:
+            out.append(f"    + [{tf}] ")
+            for item in items:
+                out.append(f"       - {item}")
+    for line in standalone:
+        out.append(f"💸 {line}")
+    return out
+
+
 def _signal_lines(sig: Signal) -> List[str]:
     b = sig.breakdown
     reason_lines = []
     if sig.reasons:
         reason_lines.append("📝 " + sig.reasons[0])
-        reason_lines.extend("    - " + reason for reason in sig.reasons[1:])
+        reason_lines.extend(_group_reason_lines(sig.reasons[1:]))
     else:
         reason_lines.append("📝 —")
     lines = [

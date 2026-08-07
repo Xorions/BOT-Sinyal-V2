@@ -301,3 +301,7 @@ class TestFormat:
         assert "DAY TRADING BRIEFING" in message
         assert "BTC" in message
         assert "BUY" in message or "SELL" in message or "NEUTRAL" in message
+        assert "+ [H4]" in message
+        assert "+ [H1]" in message
+        assert "+ [M15]" in message
+        assert "💸 Momentum 24j" in message

@@ -130,10 +130,13 @@ class TestBuildRecap:
         assert recap is not None
         assert "EVALUASI SINYAL SESI SEBELUMNYA" in recap
         assert "06 Aug 2026 13:30" in recap
-        assert "TP2: 1" in recap
-        assert "TP1: 1" in recap
-        assert "SL: 1" in recap
+        assert "💰 TP1: 1" in recap
+        assert "🎯 TP2: 1" in recap
+        assert "🛡️ SL: 1" in recap
+        assert "⏳ Floating: 0" in recap
         assert "67%" in recap
+        assert "🔑 Entry" in recap
+        assert "📋 Hit" in recap
         assert "#BTC" in recap and "TP2" in recap
         assert "#LIT" in recap and "SL" in recap
         assert "#XRP" in recap and "TP1" in recap

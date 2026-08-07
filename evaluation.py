@@ -30,9 +30,16 @@ STATUS_FLOATING = "FLOATING"
 
 STATUS_EMOJI = {
     STATUS_TP2: "🎯",
-    STATUS_TP1: "✅",
-    STATUS_SL: "❌",
+    STATUS_TP1: "💰",
+    STATUS_SL: "🛡️",
     STATUS_FLOATING: "⏳",
+}
+
+STATUS_LABEL = {
+    STATUS_TP2: "TP2",
+    STATUS_TP1: "TP1",
+    STATUS_SL: "SL",
+    STATUS_FLOATING: "FLOATING",
 }
 
 
@@ -114,8 +121,8 @@ def previous_session_signals(history: Dict[str, List[Dict]], now_key: Optional[s
 
 
 # ---------------------------------------------------------------- evaluasi
-def evaluate_signal(sig: Dict, high: float, low: float, current: float) -> str:
-    """Status sinyal berdasar high/low/current 24j terakhir.
+def _evaluate(sig: Dict, high: float, low: float, current: float):
+    """(status, harga acuan) berdasar high/low/current 24j terakhir.
 
     Urutan cek: TP2 → TP1 → SL → Floating (TP diperiksa lebih dulu).
     current dipakai untuk sinyal yang masih berjalan (floating).
@@ -123,23 +130,32 @@ def evaluate_signal(sig: Dict, high: float, low: float, current: float) -> str:
     action = sig.get("action")
     if action == "BUY":
         if high >= sig["tp2"]:
-            return STATUS_TP2
+            return STATUS_TP2, sig["tp2"]
         if high >= sig["tp1"]:
-            return STATUS_TP1
+            return STATUS_TP1, sig["tp1"]
         if low <= sig["sl"]:
-            return STATUS_SL
+            return STATUS_SL, sig["sl"]
     elif action == "SELL":
         if low <= sig["tp2"]:
-            return STATUS_TP2
+            return STATUS_TP2, sig["tp2"]
         if low <= sig["tp1"]:
-            return STATUS_TP1
+            return STATUS_TP1, sig["tp1"]
         if high >= sig["sl"]:
-            return STATUS_SL
-    return STATUS_FLOATING
+            return STATUS_SL, sig["sl"]
+    return STATUS_FLOATING, current
+
+
+def evaluate_signal(sig: Dict, high: float, low: float, current: float) -> str:
+    """Status sinyal berdasar high/low/current 24j terakhir."""
+    status, _ = _evaluate(sig, high, low, current)
+    return status
 
 
 def evaluate_signals(signals: List[Dict], fetch_fn) -> List[Dict]:
-    """Isi 'status' tiap sinyal. fetch_fn(pair) -> (high, low, current) atau None."""
+    """Isi 'status' + 'ref' (harga acuan) tiap sinyal.
+
+    fetch_fn(pair) -> (high, low, current) atau None.
+    """
     out: List[Dict] = []
     for sig in signals:
         try:
@@ -150,7 +166,8 @@ def evaluate_signals(signals: List[Dict], fetch_fn) -> List[Dict]:
             out.append({**sig, "status": None})
             continue
         high, low, current = high_low_cur
-        out.append({**sig, "status": evaluate_signal(sig, high, low, current)})
+        status, ref = _evaluate(sig, high, low, current)
+        out.append({**sig, "status": status, "ref": ref})
     return out
 
 
@@ -178,13 +195,25 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
 
     lines = [
         f"<b>📊 EVALUASI SINYAL SESI SEBELUMNYA — {_display_key(date)}</b>",
-        f"🏆 Win rate: <b>{win_rate}%</b> ({won}/{total})  ·  🎯 TP2: {tp2} · ✅ TP1: {tp1} · ❌ SL: {sl} · ⏳ Floating: {floating}",
+        f"🏆 Win rate: <b>{win_rate}%</b> ({won}/{total})",
+        f"💰 TP1: {tp1}",
+        f"🎯 TP2: {tp2}",
+        f"🛡️ SL: {sl}",
+        f"⏳ Floating: {floating}",
+        "───",
         "",
     ]
     for r in evaluated:
-        emoji = STATUS_EMOJI[r["status"]]
-        lines.append(
-            f"#{r['base']} {r['action']} · Entry {_fmt_price(r['entry'])} → {emoji} <b>{r['status']}</b>"
-        )
-    lines.append("")
+        status = r["status"]
+        label = STATUS_LABEL[status]
+        ref = r.get("ref")
+        ref_str = _fmt_price(ref) if ref is not None else "n/a"
+        lines.append(f"#{r['base']} {r['action']}")
+        lines.append(f"🔑 Entry {_fmt_price(r['entry'])} → {STATUS_EMOJI[status]} <b>{label}</b>")
+        if status == STATUS_FLOATING:
+            lines.append(f"📋 Harga saat ini {ref_str}")
+        else:
+            lines.append(f"📋 Hit {label} di {ref_str}")
+        lines.append("")
+    lines.append("───")
     return "\n".join(lines)
