@@ -9,7 +9,7 @@ Uji lokal tanpa Telegram:  python bot.py
 
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
@@ -35,10 +35,15 @@ from data._client import DataSourceError
 from data.onchain import get_btc_stats, get_exchange_flow_eth
 from data.sentiment import get_fear_greed_current
 from engine import assemble_signal, format_message, rank_signals
+from evaluation import add_signals_today, build_recap, load_history
 from telegram_sender import TelegramSendError, send_telegram
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("signal-bot-v2")
+
+# WIB = UTC+7 — dipakai untuk timestamp briefing & key tanggal riwayat evaluasi,
+# agar konsisten antara mesin lokal dan runner GitHub Actions (UTC).
+WIB = timezone(timedelta(hours=7))
 
 # Aset yang di-skip (bukan koin kripto yang valid untuk sinyal)
 STABLECOINS = {
@@ -138,7 +143,15 @@ def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale
     )
 
 
-def run_scan() -> str:
+def _ticker_range(pair: str) -> Optional[tuple]:
+    """(high_24h, low_24h, current) untuk evaluasi sinyal kemarin; None bila gagal."""
+    ticker = binance.get_ticker_24h(pair)
+    if not ticker:
+        return None
+    return ticker["high_24h"], ticker["low_24h"], ticker["price"]
+
+
+def run_scan() -> tuple:
     log.info("Mengambil ticker 24j Binance...")
     tickers = binance.get_all_tickers_24h()
     log.info("Tersedia %d pasangan USDT di Binance.", len(tickers))
@@ -191,16 +204,22 @@ def run_scan() -> str:
     ranked = rank_signals(signals)
     log.info("Terpilih %d sinyal terbaik.", len(ranked))
 
-    timestamp = datetime.now().strftime("%A, %d %b %Y, %H:%M WIB")
+    now = datetime.now(WIB)
+    timestamp = now.strftime("%A, %d %b %Y, %H:%M WIB")
     market_note = f"Fear&Greed: {fg_value:.0f}"
     if whale_flow is not None:
         market_note += f" · Whale net ETH ${whale_flow['net_usd'] / 1e6:+.1f}M"
-    return format_message(ranked, timestamp, market_note)
+
+    # Evaluasi sinyal kemarin → disisipkan tepat sebelum blok DAILY BRIEFING.
+    recap = build_recap(load_history(), _ticker_range)
+    briefing = format_message(ranked, timestamp, market_note)
+    message = (recap + "\n" + briefing) if recap else briefing
+    return message, ranked, timestamp
 
 
 def main() -> int:
     try:
-        message = run_scan()
+        message, ranked, timestamp = run_scan()
     except Exception as exc:  # noqa: BLE001 - tampilkan error apa pun agar terlihat di CI
         log.error("Gagal menjalankan scan: %s", exc)
         return 1
@@ -208,11 +227,13 @@ def main() -> int:
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         log.warning("Kredensial belum diisi di .env - hasil hanya ditampilkan di konsol.")
         print("\n" + message + "\n")
+        add_signals_today(ranked, timestamp)
         return 0
 
     try:
         send_telegram(message)
         log.info("Pesan terkirim ke Telegram.")
+        add_signals_today(ranked, timestamp)
         return 0
     except TelegramSendError as exc:
         log.error("Gagal mengirim: %s", exc)

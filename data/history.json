@@ -1,0 +1,54 @@
+{
+  "2026-08-07": [
+    {
+      "symbol": "SAHARAUSDT",
+      "base": "SAHARA",
+      "action": "BUY",
+      "entry": 0.00836,
+      "sl": 0.00819,
+      "tp1": 0.00868,
+      "tp2": 0.009000000000000001,
+      "timestamp": "Friday, 07 Aug 2026, 17:16 WIB"
+    },
+    {
+      "symbol": "LITUSDT",
+      "base": "LIT",
+      "action": "BUY",
+      "entry": 0.743,
+      "sl": 0.724,
+      "tp1": 0.819,
+      "tp2": 0.8949999999999999,
+      "timestamp": "Friday, 07 Aug 2026, 17:16 WIB"
+    },
+    {
+      "symbol": "GALAUSDT",
+      "base": "GALA",
+      "action": "BUY",
+      "entry": 0.001791,
+      "sl": 0.001767,
+      "tp1": 0.001811,
+      "tp2": 0.0018309999999999997,
+      "timestamp": "Friday, 07 Aug 2026, 17:16 WIB"
+    },
+    {
+      "symbol": "CHIPUSDT",
+      "base": "CHIP",
+      "action": "BUY",
+      "entry": 0.02495,
+      "sl": 0.02464,
+      "tp1": 0.02499,
+      "tp2": 0.025029999999999997,
+      "timestamp": "Friday, 07 Aug 2026, 17:16 WIB"
+    },
+    {
+      "symbol": "UTKUSDT",
+      "base": "UTK",
+      "action": "BUY",
+      "entry": 0.00795,
+      "sl": 0.00666,
+      "tp1": 0.00939,
+      "tp2": 0.010830000000000001,
+      "timestamp": "Friday, 07 Aug 2026, 17:16 WIB"
+    }
+  ]
+}

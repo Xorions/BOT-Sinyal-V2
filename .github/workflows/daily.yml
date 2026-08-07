@@ -6,16 +6,24 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+# Mencegah tumpang-tindih (cron + manual) agar history.json tidak race
+concurrency:
+  group: daily-briefing
+  cancel-in-progress: false
+
 jobs:
   run-daily-briefing:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout kode
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -30,3 +38,17 @@ jobs:
           # CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
           # ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
         run: python bot.py
+
+      # Runner GitHub Actions di-reset tiap run → riwayat sinyal di-commit balik
+      # agar data evaluasi esok hari tidak hilang.
+      - name: Commit balik riwayat sinyal
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json
+          if git diff --cached --quiet; then
+            echo "history.json tidak berubah — riwayat sudah terbaru."
+          else
+            git commit -m "chore: update signal history"
+            git push origin HEAD
+          fi

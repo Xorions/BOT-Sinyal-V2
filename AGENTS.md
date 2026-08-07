@@ -10,6 +10,7 @@ Bot Telegram sinyal trading crypto versi lanjutan. Dijalankan **sekali sehari (0
 bot.py                     # Entry point: orkestrasi data → skoring → kirim
 config.py                  # Kredensial & parameter (semua bisa via .env)
 engine.py                  # Skoring 5 kategori + format pesan HTML
+evaluation.py              # Riwayat sinyal + evaluasi/recap sinyal kemarin
 telegram_sender.py         # HTTP Bot API sendMessage
 data/
   _client.py               # http_get_json: retry + backoff + 429 Retry-After
@@ -17,12 +18,13 @@ data/
   cmc.py                   # top symbols + market overview (free tier)
   sentiment.py             # Fear & Greed + score_fear_greed (contrarian)
   onchain.py               # whale netflow ETH (Etherscan), BTC stats (blockchain.info)
+  history.json             # Riwayat sinyal harian — DI-COMMIT BALIK oleh CI
 indicators/                # murni, tanpa I/O
   rsi.py                   # Wilder RSI
   macd.py                  # EMA + MACD line/signal/histogram
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure
-tests/                     # pytest (22 kasus)
+tests/                     # pytest (39 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -57,6 +59,15 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 > **Penting:** koin kripto asli yang berakhiran `B` (**BNB, ARB, SHIB, TRB, DGB, CKB, BB**) **tidak boleh** terkena filter — deteksi selalu via lookup ke `US_STOCK_TICKERS`, bukan sekadar cek suffix `B`. Jika ada token saham baru, tambahkan ticker polosnya (tanpa `B`) ke set.
 
+## 5. Evaluasi Sinyal & Riwayat (`evaluation.py`) — aturan baku
+
+- **`add_signals_today()`** dipanggil di `bot.py` **setelah pesan berhasil dikirim** — menyimpan sinyal terpilih hari itu ke `data/history.json` (key tanggal WIB `YYYY-MM-DD`, menimpa entri hari yang sama).
+- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca hari terakhir **sebelum** hari ini (`previous_day_signals`, robust terhadap hari kosong), mengambil `(high, low, current)` 24j via `fetch_fn` (dari `binance.get_ticker_24h`), lalu menentukan status.
+- Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
+- **Win rate** = % sinyal yang menyentuh TP1/TP2 dari **seluruh** sinyal yang dievaluasi (Floating ikut penyebut). Nilai SL/TP dari `history.json`.
+- Recap **jangan menggagalkan scan**: fetch gagal → status `None` → sinyal itu dilewati; tak ada riwayat/semua gagal → `build_recap` mengembalikan `None`.
+- **CI commit-back**: runner di-reset tiap run, jadi workflow wajib men-*commit balik* `data/history.json` (step "Commit balik riwayat sinyal", `permissions: contents: write` + `concurrency` agar tidak race). Jangan pernah menambahkan `data/history.json` ke `.gitignore`.
+
 ## 4. Format pesan (baca `engine.format_message()`)
 
 - Header seksi: `<b>📈 SINYAL LONG (BUY)</b>`, `<b>📉 SINYAL SHORT (SELL)</b>`, `<b>⚪ WATCHLIST (NEUTRAL)</b>` (seksi kosong di-skip).
@@ -64,7 +75,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 - Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
 - Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
 
-## 5. Panduan Pengembangan
+## 6. Panduan Pengembangan
 
 ### Menambah indikator baru
 1. Fungsi **murni** di `indicators/<nama>.py` (list angka/candle → angka/None), lalu tambah unit test di `tests/`.
@@ -82,11 +93,11 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 22 test
+venv\Scripts\python.exe -m pytest tests -v   # 39 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 
-## 6. Keamanan Kredensial
+## 7. Keamanan Kredensial
 - `.env` di-ignore (`gitignore`) — jangan pernah commit token/key.
 - Secrets GitHub Actions: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, opsional `CMC_API_KEY`, `ETHERSCAN_API_KEY`.
 - Jangan print token/secret ke log.

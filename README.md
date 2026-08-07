@@ -15,7 +15,8 @@ Dijalankan otomatis oleh GitHub Actions (cron `0 0 * * *` = **07:00 WIB**):
 3. Tiap coin: candle 1d + 4h dari Binance → RSI, MACD, OB, FVG, struktur market, level S&R; funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
 4. Data agregat: Fear & Greed Index, whale netflow ETH (Etherscan), statistik jaringan BTC (blockchain.info).
 5. Skoring **berbobot 5 kategori** → BUY/SELL/NEUTRAL + confidence, SL/TP berbasis level S&R/OB.
-6. Kirim Daily Briefing (Top 5) ke Telegram (HTML parse mode).
+6. **Evaluasi sinyal kemarin** (`data/history.json`): cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate harian → disisipkan tepat sebelum briefing.
+7. Kirim Daily Briefing (Top 5) ke Telegram (HTML parse mode), lalu simpan sinyal hari ini ke `history.json` (di-commit balik oleh GitHub Actions).
 
 ## Sumber Data
 
@@ -50,6 +51,7 @@ Semua data via `data/_client.py` (retry + backoff + handling HTTP 429). Satu sum
 bot.py                     # Entry point: kumpulkan data → skoring → kirim Telegram
 config.py                  # Kredensial & parameter dari .env
 engine.py                  # Skoring 5 kategori berbobot + format pesan HTML
+evaluation.py              # Riwayat sinyal (history.json) + evaluasi/recap kemarin
 telegram_sender.py         # Kirim pesan ke Telegram
 data/
   _client.py               # HTTP client (retry, backoff, rate-limit)
@@ -57,12 +59,13 @@ data/
   cmc.py                   # Top coins + market overview (free tier)
   sentiment.py             # Fear & Greed Index + skoring contrarian
   onchain.py               # Whale netflow ETH, statistik BTC (proxy)
+  history.json             # Riwayat sinyal harian (di-commit balik oleh CI)
 indicators/
   rsi.py                   # RSI Wilder
   macd.py                  # EMA 12/26 + signal 9 + histogram
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, struktur market
-tests/                     # pytest (22 kasus)
+tests/                     # pytest
 .github/workflows/daily.yml
 ```
 
@@ -135,6 +138,26 @@ Fear&Greed 29
 ```
 
 Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
+
+## Evaluasi Sinyal Kemarin (Daily Recap)
+
+`evaluation.py` + `data/history.json`:
+
+- **Penyimpanan riwayat**: tiap run menyimpan sinyal terpilih hari itu (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan key tanggal WIB (`YYYY-MM-DD`). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo (step "Commit balik riwayat sinyal").
+- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca hari terakhir sebelum hari ini, mengambil **high/low/current 24j** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**.
+- **Win rate harian** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP2/TP1/SL/Floating).
+- Recap disisipkan tepat sebelum blok `📊 DAILY BRIEFING — SINYAL TRADING v2`:
+
+```
+📊 EVALUASI SINYAL KEMARIN — 06 Agu 2026
+🏆 Win rate: 60% (3/5)  ·  🎯 TP2: 1 · ✅ TP1: 2 · ❌ SL: 0 · ⏳ Floating: 2
+
+#BTC BUY · Entry $104,000 → 🎯 TP2
+#XRP SELL · Entry $1.03 → ❌ SL
+#LIT BUY · Entry $0.74 → ⏳ Floating
+```
+
+Bila belum ada riwayat (hari pertama) atau semua data harga gagal diambil, recap dilewati tanpa menggagalkan scan.
 
 ## Catatan penting
 
