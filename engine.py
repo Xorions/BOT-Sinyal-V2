@@ -315,18 +315,26 @@ def _fmt_price(value: float) -> str:
     return f"${value:.6f}"
 
 
-def _signal_lines(sig: Signal, number: int) -> List[str]:
-    arrow = "🟢" if sig.action == ACTION_BUY else ("🔴" if sig.action == ACTION_SELL else "⚪")
+def _signal_lines(sig: Signal) -> List[str]:
     b = sig.breakdown
+    reason_lines = []
+    if sig.reasons:
+        reason_lines.append("📝 " + sig.reasons[0])
+        reason_lines.extend(sig.reasons[1:])
+    else:
+        reason_lines.append("📝 —")
     lines = [
-        f"{number}. <b>{arrow} {sig.base} ({sig.symbol})</b> — {sig.action} · Confidence {sig.confidence}%",
-        f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (Tek {b['teknikal']:+.2f} · SMC {b['smc']:+.2f} · Sent {b['sentimen']:+.2f} · Whale {b['whale']:+.2f} · Onch {b['onchain']:+.2f})",
-        f"💹 24j: {sig.pct_change_24h:+.2f}%",
+        f"<b>#{sig.base} ({sig.symbol})</b> — {sig.action} · Confidence {sig.confidence}%",
         f"🔑 Entry: <b>{_fmt_price(sig.entry)}</b>",
         f"🛡️ SL: <b>{_fmt_price(sig.sl)}</b>",
-        f"🎯 TP1: <b>{_fmt_price(sig.tp1)}</b>  ·  TP2: <b>{_fmt_price(sig.tp2)}</b>",
-        "📝 " + (" · ".join(sig.reasons) if sig.reasons else "—"),
+        f"🎯 TP1: <b>{_fmt_price(sig.tp1)}</b>",
+        f"🎯 TP2: <b>{_fmt_price(sig.tp2)}</b>",
+        f"💹 24j: {sig.pct_change_24h:+.2f}%",
+        *reason_lines,
+        f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (Tek {b['teknikal']:+.2f} · SMC {b['smc']:+.2f} · Sent {b['sentimen']:+.2f} · Whale {b['whale']:+.2f} · Onch {b['onchain']:+.2f})",
+        "",
         "───",
+        "",
     ]
     return lines
 
@@ -344,10 +352,9 @@ def format_message(signals: List[Signal], timestamp: str, market_note: str = "")
         lines.append(f"🌐 {market_note}")
     lines.append("")
 
-    number = 1
     for label, group in (
-        ("<b>🟢 SINYAL LONG (BUY)</b>", buys),
-        ("<b>🔴 SINYAL SHORT (SELL)</b>", sells),
+        ("<b>📈 SINYAL LONG (BUY)</b>", buys),
+        ("<b>📉 SINYAL SHORT (SELL)</b>", sells),
         ("<b>⚪ WATCHLIST (NEUTRAL)</b>", neutrals),
     ):
         if not group:
@@ -355,8 +362,7 @@ def format_message(signals: List[Signal], timestamp: str, market_note: str = "")
         lines.append(label)
         lines.append("")
         for sig in group:
-            lines.extend(_signal_lines(sig, number))
-            number += 1
+            lines.extend(_signal_lines(sig))
 
     lines.append(DISCLAIMER)
     return "\n".join(lines)

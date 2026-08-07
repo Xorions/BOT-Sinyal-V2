@@ -50,6 +50,25 @@ STABLECOINS = {
 }
 # Binance leveraged token (BTCUP/BTCDOWN/BTCBULL/BTCBEAR) — bukan aset riil
 SKIP_SUFFIXES = ("UP", "DOWN", "BULL", "BEAR")
+# Token saham/ETF Binance (Binance Shares) — base = ticker US, atau ticker US + "B"
+# (mis. NVDAB -> NVDA, QQQB -> QQQ, SPYB -> SPY). MUB/BB sudah bertipe langsung.
+US_STOCK_TICKERS = {
+    "aapl", "amzn", "googl", "goog", "meta", "msft", "nvda", "tsla", "avgo",
+    "aaoi", "alab", "amat", "amd", "arm", "asml", "asts", "axti", "baba", "be",
+    "bmnr", "cbrs", "cohr", "coin", "crcl", "crdo", "crwv", "dell", "dram", "ewy",
+    "flnc", "glw", "gs", "hood", "ibm", "intc", "intw", "iren", "koru", "lite",
+    "mrvl", "mstr", "muu", "mub", "mvll", "nbis", "nflx", "nok", "orcl", "pltr",
+    "pypl", "qcom", "qqq", "rklb", "skhy", "smci", "smh", "sndk", "snxx", "soxl",
+    "soxs", "spcx", "spy", "tqqq", "tsm", "usar", "wdc",
+}
+
+
+def _is_stock_token(base: str) -> bool:
+    if base in US_STOCK_TICKERS:
+        return True
+    if base.endswith("b") and base[:-1] in US_STOCK_TICKERS:
+        return True
+    return False
 
 
 def _eligible_pair(pair: str) -> bool:
@@ -59,6 +78,8 @@ def _eligible_pair(pair: str) -> bool:
     if base in STABLECOINS:
         return False
     if base.endswith(SKIP_SUFFIXES):
+        return False
+    if _is_stock_token(base):
         return False
     return True
 
