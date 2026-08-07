@@ -1,8 +1,9 @@
-"""Entry point bot sinyal trading v2.
+"""Entry point bot sinyal trading v2 — Day Trading Multi-Timeframe (MTF SMC + S&D).
 
 Alur: ambil ticker 24j Binance (1 panggilan) → tentukan top coin (CMC bila
-dikonfigurasi, else fallback) → kumpulkan klines/funding/LS tiap coin →
-agregat data sentiment/whale/on-chain → skoring berbobot → kirim Telegram.
+dikonfigurasi, else fallback) → kumpulkan klines MTF (D1/H4 kompas, H1 pemetaan,
+M15 pelatuk) + funding/LS tiap coin → agregat sentiment/whale/on-chain → skoring
+MTF berbobot → evaluasi sinyal sesi sebelumnya → kirim Telegram.
 
 Uji lokal tanpa Telegram:  python bot.py
 """
@@ -124,8 +125,11 @@ def _pick_pairs(tickers: Dict[str, Dict]) -> List[str]:
 
 def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale_flow: Optional[Dict], btc_stats: Optional[Dict], futures_ok: bool):
     info = tickers[pair]
-    closes = [c["close"] for c in binance.get_klines(pair, binance.INTERVAL_1D, 60)]
-    candles = binance.get_klines(pair, binance.INTERVAL_4H, 60)
+    # MTF Day Trading: kompas (D1/H4), pemetaan zona (H1), pelatuk (M15)
+    d1 = binance.get_klines(pair, binance.INTERVAL_1D, binance.MTF_LIMITS[binance.INTERVAL_1D])
+    h4 = binance.get_klines(pair, binance.INTERVAL_4H, binance.MTF_LIMITS[binance.INTERVAL_4H])
+    h1 = binance.get_klines(pair, binance.INTERVAL_1H, binance.MTF_LIMITS[binance.INTERVAL_1H])
+    m15 = binance.get_klines(pair, binance.INTERVAL_M15, binance.MTF_LIMITS[binance.INTERVAL_M15])
     funding = binance.get_funding_rate(pair, 8) if futures_ok else []
     ls_ratio = binance.get_long_short_ratio(pair, 1) if futures_ok else None
     return assemble_signal(
@@ -133,8 +137,10 @@ def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale
         base=pair.replace("USDT", ""),
         price=info["price"],
         pct_change_24h=info["price_change_pct_24h"],
-        closes=closes,
-        candles=candles,
+        h4_candles=h4,
+        d1_candles=d1,
+        h1_candles=h1,
+        m15_candles=m15,
         fg_value=fg_value,
         funding_rates=funding,
         ls_ratio=ls_ratio,
@@ -157,7 +163,7 @@ def run_scan() -> tuple:
     log.info("Tersedia %d pasangan USDT di Binance.", len(tickers))
 
     pairs = _pick_pairs(tickers)
-    log.info("Dianalisa %d koin (top oleh volume, min volume 24j $%.1fM).", len(pairs), MIN_VOLUME_USD / 1e6)
+    log.info("Dianalisa %d koin (MTF: kompas H4/D1 -> zona H1 -> pelatuk M15).", len(pairs))
     if not pairs:
         raise DataSourceError("Tidak ada pasangan kandidat — periksa MIN_VOLUME_USD / koneksi.")
 

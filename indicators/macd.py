@@ -50,3 +50,29 @@ def macd(
         "signal": last_sig,
         "histogram": last_macd - last_sig,
     }
+
+
+def macd_histogram_series(
+    closes: List[float],
+    fast: int = MACD_FAST,
+    slow: int = MACD_SLOW,
+    signal: int = MACD_SIGNAL,
+) -> List[float]:
+    """Histogram MACD untuk seluruh seri (deteksi Golden/Death Cross).
+
+    Panjang == len(closes); nilai awal (sebelum data cukup) berupa NaN.
+    """
+    if len(closes) < slow + signal:
+        return []
+    ema_fast = ema(closes, fast)
+    ema_slow = ema(closes, slow)
+    macd_line = [
+        f - s if f == f and s == s else float("nan")
+        for f, s in zip(ema_fast, ema_slow)
+    ]
+    valid = [v for v in macd_line if v == v]
+    if len(valid) < signal:
+        return []
+    sig = ema(valid, signal)
+    prefix = [float("nan")] * (len(macd_line) - len(sig))
+    return prefix + [m - s for m, s in zip(macd_line[-len(sig):], sig)]

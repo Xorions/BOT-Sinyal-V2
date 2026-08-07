@@ -9,10 +9,22 @@ from typing import Any, Dict, List, Optional
 from config import BINANCE_BASE_URL, BINANCE_FUTURES_URL
 from data._client import DataSourceError, http_get_json
 
-# Interval kline yang dipakai untuk indikator
+# Interval kline untuk analisa Multi-Timeframe (MTF):
+#   - Kompas (arah utama): D1 & H4
+#   - Pemetaan (zona institusional): H1
+#   - Pelatuk (konfirmasi eksekusi): M15
+INTERVAL_M15 = "15m"
 INTERVAL_1H = "1h"
 INTERVAL_4H = "4h"
 INTERVAL_1D = "1d"
+
+# Limit default tiap timeframe (cukup untuk RSI/MACD/structure/swing di tiap lapis).
+MTF_LIMITS = {
+    INTERVAL_1D: 90,
+    INTERVAL_4H: 120,
+    INTERVAL_1H: 120,
+    INTERVAL_M15: 200,
+}
 
 
 def _klines(symbol: str, interval: str, limit: int) -> List[Dict[str, float]]:
@@ -40,6 +52,18 @@ def _klines(symbol: str, interval: str, limit: int) -> List[Dict[str, float]]:
 def get_klines(symbol: str, interval: str = INTERVAL_1D, limit: int = 60) -> List[Dict[str, float]]:
     """Candle OHLCV untuk satu pair. Default daily (60 bar = ~2 bulan)."""
     return _klines(symbol, interval, limit)
+
+
+def get_klines_multi(symbol: str, limits: Optional[Dict[str, int]] = None) -> Dict[str, List[Dict[str, float]]]:
+    """Klines multi-timeframe (Day Trading MTF): D1/H4 (kompas), H1 (pemetaan), M15 (pelatuk).
+
+    Return {interval: [candle, ...]}. Satu sumber gagal -> interval itu tidak ada.
+    """
+    limits = limits or MTF_LIMITS
+    out: Dict[str, List[Dict[str, float]]] = {}
+    for interval, limit in limits.items():
+        out[interval] = _klines(symbol, interval, limit)
+    return out
 
 
 def get_ticker_24h(symbol: str) -> Optional[Dict[str, Any]]:

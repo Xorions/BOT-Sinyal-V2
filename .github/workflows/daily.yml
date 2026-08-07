@@ -1,9 +1,14 @@
-name: Crypto Daily Briefing v2
+name: Crypto Day Trading Briefing v2
 
-# 00:00 UTC = 07:00 WIB (satu kali sehari)
+# 2x sehari (Opsi A — Day Trading, MTF SMC + S&D):
+#   - Sesi Siang: 13:30 WIB  = 06:30 UTC  -> cron "30 6 * * *"
+#   - Sesi Malam: 19:00 WIB  = 12:00 UTC  -> cron "0 12 * * *"
+# Evaluasi sinyal sesi sebelumnya (history.json) dieksekusi di awal tiap run
+# sebelum briefing baru, via build_recap() di bot.py.
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "30 6 * * *"
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
@@ -30,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Jalankan Daily Briefing v2
+      - name: Jalankan Day Trading Briefing v2
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

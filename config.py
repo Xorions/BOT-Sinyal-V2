@@ -52,8 +52,9 @@ SELL_THRESHOLD: float = _env_float("SELL_THRESHOLD", -0.10)
 CONFIDENCE_BASE: int = _env_int("CONFIDENCE_BASE", 55)
 
 # --- Bobot kategori skoring (jumlah harus 1.0) ---
-WEIGHT_TECHNICAL: float = _env_float("WEIGHT_TECHNICAL", 0.40)
-WEIGHT_SMC: float = _env_float("WEIGHT_SMC", 0.20)
+# Prioritas day trading MTF: SMC + S&D (kompas H4/D1 + zona H1) paling besar.
+WEIGHT_TECHNICAL: float = _env_float("WEIGHT_TECHNICAL", 0.20)
+WEIGHT_SMC: float = _env_float("WEIGHT_SMC", 0.40)
 WEIGHT_SENTIMENT: float = _env_float("WEIGHT_SENTIMENT", 0.15)
 WEIGHT_WHALE: float = _env_float("WEIGHT_WHALE", 0.15)
 WEIGHT_ONCHAIN: float = _env_float("WEIGHT_ONCHAIN", 0.10)

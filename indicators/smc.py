@@ -65,6 +65,9 @@ def detect_structure(
 
     - BOS (bullish): close menembus swing high terakhir → lanjut tren naik.
     - CHoCH (bearish): close menembus swing low terakhir → pembalikan turun.
+
+    Robust terhadap tren kuat satu arah: hanya butuh swing yang tersedia
+    (high saja / low saja), tidak wajib keduanya.
     """
     highs = [c["high"] for c in candles]
     lows = [c["low"] for c in candles]
@@ -72,18 +75,18 @@ def detect_structure(
     swings = find_swings(highs, lows, left, right)
     sw_highs = swings["highs"]
     sw_lows = swings["lows"]
-    if not sw_highs or not sw_lows:
+    if not sw_highs and not sw_lows:
         return {"trend": None, "bos": None, "choch": None}
 
-    last_high = sw_highs[-1]["value"]
-    last_low = sw_lows[-1]["value"]
+    last_high = sw_highs[-1]["value"] if sw_highs else None
+    last_low = sw_lows[-1]["value"] if sw_lows else None
     price = closes[-1]
 
     structure: Dict[str, Optional[str]] = {"trend": None, "bos": None, "choch": None}
-    if price > last_high:
+    if sw_highs and price > last_high:
         structure["trend"] = "bullish"
         structure["bos"] = "bullish"
-    elif price < last_low:
+    elif sw_lows and price < last_low:
         structure["trend"] = "bearish"
         structure["choch"] = "bearish"
     else:
@@ -91,10 +94,12 @@ def detect_structure(
         lo_higher = len(sw_lows) >= 2 and sw_lows[-1]["value"] > sw_lows[-2]["value"]
         if hi_higher and lo_higher:
             structure["trend"] = "bullish"
-        elif sw_highs and len(sw_highs) >= 2 and sw_highs[-1]["value"] < sw_highs[-2]["value"]:
+        elif len(sw_highs) >= 2 and sw_highs[-1]["value"] < sw_highs[-2]["value"]:
             structure["trend"] = "bearish"
-    structure["last_swing_high"] = last_high
-    structure["last_swing_low"] = last_low
+    if last_high is not None:
+        structure["last_swing_high"] = last_high
+    if last_low is not None:
+        structure["last_swing_low"] = last_low
     return structure
 
 
@@ -104,6 +109,84 @@ def nearest_order_block(price: float, blocks: List[Dict[str, float]]) -> Optiona
     if not candidates:
         return None
     return max(candidates, key=lambda b: b["high"])
+
+
+def nearest_bullish_ob(price: float, blocks: List[Dict[str, float]]) -> Optional[Dict[str, float]]:
+    """Bullish OB terdekat di bawah harga (support institutional BUY)."""
+    candidates = [b for b in blocks if b["type"] == "bullish" and b["high"] < price]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda b: b["high"])
+
+
+def nearest_bearish_ob(price: float, blocks: List[Dict[str, float]]) -> Optional[Dict[str, float]]:
+    """Bearish OB terdekat di atas harga (resistance institutional SELL)."""
+    candidates = [b for b in blocks if b["type"] == "bearish" and b["low"] > price]
+    if not candidates:
+        return None
+    return min(candidates, key=lambda b: b["low"])
+
+
+def detect_equal_highs_lows(
+    candles: List[Dict[str, float]],
+    left: int = 3,
+    right: int = 3,
+    tolerance_pct: float = 0.25,
+) -> List[Dict[str, float]]:
+    """Equal Highs (EQH) / Equal Lows (EQL) — pool likuiditas.
+
+    Dua swing high/low berurutan dengan selisih < tolerance_pct dianggap "equal".
+    Level ini menjadi magnet likuiditas (target Liquidity Sweep).
+    """
+    if len(candles) < left + right + 3:
+        return []
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
+    swings = find_swings(highs, lows, left, right)
+    out: List[Dict[str, float]] = []
+    swh = swings["highs"]
+    swl = swings["lows"]
+    for a, b in zip(swh, swh[1:]):
+        if b["value"] > 0 and abs(b["value"] - a["value"]) / b["value"] * 100 <= tolerance_pct:
+            out.append({"type": "eqh", "value": (a["value"] + b["value"]) / 2, "index": b["index"]})
+    for a, b in zip(swl, swl[1:]):
+        if b["value"] > 0 and abs(b["value"] - a["value"]) / b["value"] * 100 <= tolerance_pct:
+            out.append({"type": "eql", "value": (a["value"] + b["value"]) / 2, "index": b["index"]})
+    return out
+
+
+def detect_liquidity_sweep(
+    candles: List[Dict[str, float]],
+    left: int = 3,
+    right: int = 3,
+    lookback: int = 12,
+) -> List[Dict[str, float]]:
+    """Liquidity Sweep — likuiditas di bawah swing/EQL atau di atas swing/EQH tersapu.
+
+    - sell_sweep: harga menembus swing low / EQL lalu menutup kembali di atasnya
+      → likuiditas sell tersapu → bullish.
+    - buy_sweep:  harga menembus swing high / EQH lalu menutup kembali di bawahnya
+      → likuiditas buy tersapu → bearish.
+    """
+    if len(candles) < left + right + 2:
+        return []
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
+    swings = find_swings(highs, lows, left, right)
+    out: List[Dict[str, float]] = []
+    for i in range(max(1, len(candles) - lookback), len(candles)):
+        candle = candles[i]
+        lows_before = [s for s in swings["lows"] if s["index"] < i and s["value"] > candle["low"]]
+        if lows_before:
+            nearest = min(lows_before, key=lambda s: s["value"] - candle["low"])
+            if candle["close"] > nearest["value"]:
+                out.append({"type": "sell_sweep", "value": nearest["value"], "index": i})
+        highs_before = [s for s in swings["highs"] if s["index"] < i and s["value"] < candle["high"]]
+        if highs_before:
+            nearest = min(highs_before, key=lambda s: candle["high"] - s["value"])
+            if candle["close"] < nearest["value"]:
+                out.append({"type": "buy_sweep", "value": nearest["value"], "index": i})
+    return out
 
 
 def _dedupe_blocks(blocks: List[Dict[str, float]]) -> List[Dict[str, float]]:

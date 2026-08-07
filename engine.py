@@ -1,9 +1,17 @@
-"""Mesin skoring sinyal v2 — skor per-kategori berbobot.
+"""Mesin skoring sinyal v2.3 — Day Trading Multi-Timeframe (MTF SMC + Supply & Demand).
 
-Skor tiap kategori dinormalisasi -1.0..+1.0, lalu digabung berbobot:
-  Teknikal 40% · SMC/S&R 20% · Sentiment 15% · Whale 15% · On-chain 10%
+Alur analisa 3 lapis:
+  [Kompas H4/D1]   -> arah utama (BUY bila bullish, SELL bila bearish; BOS/CHoCH skala besar).
+  [Pemetaan H1]    -> area institusional: Supply & Demand, OB, FVG, EQH/EQL, Liquidity
+                      Sweep, pivot & swing Support/Resistance. Entry/SL/TP dari zona H1.
+  [Pelatuk M15]    -> konfirmasi eksekusi akhir (RSI / MACD cross / momentum / BOS M15).
 
-Output: Signal (BUY/SELL/NEUTRAL) + confidence + SL/TP berbasis level S&R/OB.
+Aturan baku:
+  - H4 bullish  -> HANYA izinkan sinyal BUY.
+  - H4 bearish  -> HANYA izinkan sinyal SELL.
+  - Sinyal tervalidasi bila M15 searah H4/D1 DAN harga menyentuh zona SMC/S&D H1.
+
+Output: Signal (BUY/SELL/NEUTRAL) + confidence + Entry/SL/TP1/TP2 dari zona H1.
 """
 
 from dataclasses import dataclass, field
@@ -22,13 +30,22 @@ from config import (
     WEIGHT_WHALE,
 )
 from data.sentiment import score_fear_greed
-from indicators.macd import macd
+from indicators.macd import macd_histogram_series
 from indicators.rsi import rsi
 from indicators.smc import (
+    detect_equal_highs_lows,
     detect_fvg,
+    detect_liquidity_sweep,
     detect_order_blocks,
     detect_structure,
-    nearest_order_block,
+    nearest_bearish_ob,
+    nearest_bullish_ob,
+)
+from indicators.supply_demand import (
+    detect_supply_demand,
+    in_zone,
+    nearest_demand,
+    nearest_supply,
 )
 from indicators.support_resistance import nearest_levels
 
@@ -59,42 +76,175 @@ class Signal:
     reasons: List[str] = field(default_factory=list)
 
 
-# ---------------------------------------------------------------- teknikal
-def score_technical(closes: List[float], pct_change_24h: float) -> tuple:
-    """RSI + MACD + momentum 24h → skor -1.0..+1.0."""
+# ---------------------------------------------------------------- kompas H4/D1
+def analyze_compass(h4_candles: List[Dict[str, float]], d1_candles: List[Dict[str, float]]) -> Dict[str, Optional[str]]:
+    """[Kompas] Tren utama skala besar: H4 utama, D1 sebagai fallback bila H4 netral."""
+    h4 = detect_structure(h4_candles)
+    d1 = detect_structure(d1_candles)
+    h4_trend = h4.get("trend")
+    d1_trend = d1.get("trend")
+
+    direction: Optional[str] = None
+    if h4_trend == "bullish":
+        direction = ACTION_BUY
+    elif h4_trend == "bearish":
+        direction = ACTION_SELL
+    elif d1_trend == "bullish":
+        direction = ACTION_BUY
+    elif d1_trend == "bearish":
+        direction = ACTION_SELL
+
+    return {
+        "direction": direction,
+        "h4_trend": h4_trend,
+        "d1_trend": d1_trend,
+        "h4_bos": h4.get("bos"),
+        "h4_choch": h4.get("choch"),
+        "d1_bos": d1.get("bos"),
+        "d1_choch": d1.get("choch"),
+    }
+
+
+# ---------------------------------------------------------------- pemetaan H1
+def map_h1_zones(h1_candles: List[Dict[str, float]], price: float) -> Dict:
+    """[Pemetaan] Area institusional H1: S&D, OB, FVG, EQH/EQL, Liquidity Sweep, S&R."""
+    highs = [c["high"] for c in h1_candles]
+    lows = [c["low"] for c in h1_candles]
+    closes = [c["close"] for c in h1_candles]
+    blocks = detect_order_blocks(h1_candles)
+    zones = detect_supply_demand(h1_candles)
+    return {
+        "price": price,
+        "closes": closes,
+        "zones": zones,
+        "demand_zones": [z for z in zones if z["type"] == "demand"],
+        "supply_zones": [z for z in zones if z["type"] == "supply"],
+        "order_blocks": blocks,
+        "fvgs": detect_fvg(h1_candles),
+        "equal_hl": detect_equal_highs_lows(h1_candles),
+        "sweeps": detect_liquidity_sweep(h1_candles),
+        "levels": nearest_levels(price, highs, lows),
+        "bullish_ob": nearest_bullish_ob(price, blocks),
+        "bearish_ob": nearest_bearish_ob(price, blocks),
+    }
+
+
+# ---------------------------------------------------------------- pelatuk M15
+def analyze_trigger(m15_candles: List[Dict[str, float]]) -> Dict:
+    """[Pelatuk] Konfirmasi M15: RSI, histogram/cross MACD, struktur BOS/CHoCH."""
+    closes = [c["close"] for c in m15_candles]
+    struct = detect_structure(m15_candles)
+    rsi_val = rsi(closes, RSI_PERIOD)
+    hist = macd_histogram_series(closes, MACD_FAST, MACD_SLOW, MACD_SIGNAL)
+    hist_now = hist[-1] if hist else None
+    if hist_now is not None and hist_now != hist_now:
+        hist_now = None
+    cross: Optional[str] = None
+    if len(hist) >= 2 and hist[-2] == hist[-2] and hist_now is not None:
+        if hist[-2] <= 0 < hist_now:
+            cross = "golden"
+        elif hist[-2] >= 0 > hist_now:
+            cross = "death"
+    return {
+        "closes": closes,
+        "rsi": rsi_val,
+        "histogram": hist_now,
+        "cross": cross,
+        "trend": struct.get("trend"),
+        "bos": struct.get("bos"),
+        "choch": struct.get("choch"),
+    }
+
+
+def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> bool:
+    """Validasi: harga menyentuh zona SMC/S&D H1 DAN M15 searah kompas."""
+    price = h1_map["price"]
+    if compass_dir == ACTION_BUY:
+        zone_ok = bool(
+            [z for z in h1_map["demand_zones"] if in_zone(price, z)]
+            or h1_map["bullish_ob"]
+            or [s for s in h1_map["sweeps"] if s["type"] == "sell_sweep"]
+        )
+        trig_ok = bool(
+            (trigger["histogram"] is not None and trigger["histogram"] > 0)
+            or trigger["cross"] == "golden"
+            or trigger["bos"] == "bullish"
+        )
+        return zone_ok and trig_ok
+    if compass_dir == ACTION_SELL:
+        zone_ok = bool(
+            [z for z in h1_map["supply_zones"] if in_zone(price, z)]
+            or h1_map["bearish_ob"]
+            or [s for s in h1_map["sweeps"] if s["type"] == "buy_sweep"]
+        )
+        trig_ok = bool(
+            (trigger["histogram"] is not None and trigger["histogram"] < 0)
+            or trigger["cross"] == "death"
+            or trigger["choch"] == "bearish"
+        )
+        return zone_ok and trig_ok
+    return False
+
+
+# ---------------------------------------------------------------- skor pelatuk
+def score_trigger(m15_candles: List[Dict[str, float]], pct_change_24h: float) -> tuple:
+    """[Pelatuk] Skor konfirmasi M15 + momentum 24j -> -1.0..+1.0."""
     reasons: List[str] = []
     score = 0.0
+    if not m15_candles:
+        return 0.0, reasons
+    closes = [c["close"] for c in m15_candles]
 
     rsi_val = rsi(closes, RSI_PERIOD)
+    hist = macd_histogram_series(closes, MACD_FAST, MACD_SLOW, MACD_SIGNAL)
+    hist_now = hist[-1] if hist else None
+    if hist_now is not None and hist_now != hist_now:
+        hist_now = None
+    cross: Optional[str] = None
+    if len(hist) >= 2 and hist[-2] == hist[-2] and hist_now is not None:
+        if hist[-2] <= 0 < hist_now:
+            cross = "golden"
+        elif hist[-2] >= 0 > hist_now:
+            cross = "death"
+
+    m15_parts: List[str] = []
+    if cross == "golden":
+        m15_parts.append("MACD Golden Cross")
+        score += 0.15
+    elif cross == "death":
+        m15_parts.append("MACD Death Cross")
+        score -= 0.15
+    elif hist_now is not None:
+        if hist_now > 0:
+            m15_parts.append("MACD Bullish")
+            score += 0.25
+        else:
+            m15_parts.append("MACD Bearish")
+            score -= 0.25
+
     if rsi_val is not None:
         if rsi_val < 30:
-            reasons.append(f"RSI {rsi_val:.0f} oversold")
-            score += 0.30
-        elif rsi_val < 40:
-            reasons.append(f"RSI {rsi_val:.0f} mendekati oversold")
-            score += 0.15
+            m15_parts.append("RSI Rebound")
+            score += 0.20
         elif rsi_val > 70:
-            reasons.append(f"RSI {rsi_val:.0f} overbought")
-            score -= 0.30
-        elif rsi_val > 60:
-            reasons.append(f"RSI {rsi_val:.0f} mendekati overbought")
-            score -= 0.15
+            m15_parts.append("RSI Melemah")
+            score -= 0.20
 
-    macd_val = macd(closes, MACD_FAST, MACD_SLOW, MACD_SIGNAL)
-    if macd_val is not None:
-        if macd_val["histogram"] > 0:
-            reasons.append("MACD bullish (histogram +)")
-            score += 0.35
-        else:
-            reasons.append("MACD bearish (histogram -)")
-            score -= 0.35
+    struct = detect_structure(m15_candles)
+    if struct.get("bos") == "bullish":
+        m15_parts.append("BOS Bullish")
+        score += 0.20
+    elif struct.get("choch") == "bearish":
+        m15_parts.append("CHoCH Bearish")
+        score -= 0.20
+
+    if m15_parts:
+        reasons.append("[M15] " + " & ".join(m15_parts))
 
     if pct_change_24h is not None:
         if pct_change_24h >= 3:
-            reasons.append(f"Momentum 24j +{pct_change_24h:.1f}%")
             score += 0.20
         elif pct_change_24h <= -3:
-            reasons.append(f"Momentum 24j {pct_change_24h:.1f}%")
             score -= 0.20
         elif pct_change_24h >= 0.5:
             score += 0.05
@@ -104,61 +254,101 @@ def score_technical(closes: List[float], pct_change_24h: float) -> tuple:
     return max(-1.0, min(1.0, score)), reasons
 
 
-# ---------------------------------------------------------------- SMC & S&R
-def score_smc(candles: List[Dict[str, float]], price: float) -> tuple:
-    """OB, FVG, struktur (BOS/CHoCH), level S&R → skor -1.0..+1.0."""
+# ---------------------------------------------------------------- skor SMC MTF
+def _dist_pct(price: float, level: Optional[float]) -> Optional[float]:
+    if level is None or not price:
+        return None
+    return abs((level - price) / price) * 100.0
+
+
+def score_smc_mtf(
+    h4_candles: List[Dict[str, float]],
+    d1_candles: List[Dict[str, float]],
+    h1_map: Dict,
+    price: float,
+) -> tuple:
+    """[Kompas + Pemetaan] Skor struktur H4/D1 + zona H1 -> -1.0..+1.0."""
     reasons: List[str] = []
     score = 0.0
-    if len(candles) < 15 or price <= 0:
-        return 0.0, reasons
+    compass = analyze_compass(h4_candles, d1_candles)
+    h4_trend = compass["h4_trend"]
+    d1_trend = compass["d1_trend"]
 
-    highs = [c["high"] for c in candles]
-    lows = [c["low"] for c in candles]
-    closes = [c["close"] for c in candles]
+    if h4_trend == "bullish":
+        label = "BOS skala besar" if compass["h4_bos"] == "bullish" else "higher high"
+        reasons.append(f"[H4] Tren utama Bullish ({label})")
+        score += 0.45
+    elif h4_trend == "bearish":
+        label = "CHoCH skala besar" if compass["h4_choch"] == "bearish" else "lower low"
+        reasons.append(f"[H4] Tren utama Bearish ({label})")
+        score -= 0.45
+    elif d1_trend == "bullish":
+        reasons.append("[D1] Tren Bullish (fallback)")
+        score += 0.30
+    elif d1_trend == "bearish":
+        reasons.append("[D1] Tren Bearish (fallback)")
+        score -= 0.30
 
-    structure = detect_structure(candles)
-    trend = structure.get("trend")
-    if trend == "bullish":
-        reasons.append("Struktur bullish (BOS/higher high)")
+    demand = h1_map.get("demand_zones", [])
+    supply = h1_map.get("supply_zones", [])
+    sweeps = h1_map.get("sweeps", [])
+
+    in_demand = [z for z in demand if in_zone(price, z)]
+    in_supply = [z for z in supply if in_zone(price, z)]
+    near_demand = nearest_demand(price, h1_map.get("zones", []))
+    near_supply = nearest_supply(price, h1_map.get("zones", []))
+
+    if in_demand:
+        reasons.append("[H1] Harga masuk Demand Zone")
+        score += 0.30
+    elif near_demand:
+        dist = _dist_pct(near_demand["high"], price)
+        reasons.append(f"[H1] Harga dekat Demand Zone ({dist:.1f}% jika < 2)")
+        score += 0.15
+    if in_supply:
+        reasons.append("[H1] Harga masuk Supply Zone")
+        score -= 0.30
+    elif near_supply:
+        dist = _dist_pct(price, near_supply["low"])
+        reasons.append(f"[H1] Harga dekat Supply Zone ({dist:.1f}% jika < 2)")
+        score -= 0.15
+
+    if h1_map.get("bullish_ob"):
+        reasons.append("[H1] Bullish OB di bawah harga")
+        score += 0.20
+    if h1_map.get("bearish_ob"):
+        reasons.append("[H1] Bearish OB di atas harga")
+        score -= 0.20
+
+    fvgs = h1_map.get("fvgs", [])
+    if [g for g in fvgs if g["type"] == "bullish" and g["bottom"] < price]:
+        reasons.append("[H1] FVG tervalidasi di bawah harga")
+        score += 0.15
+    elif [g for g in fvgs if g["type"] == "bearish" and g["top"] > price]:
+        reasons.append("[H1] FVG tervalidasi di atas harga")
+        score -= 0.15
+
+    if [s for s in sweeps if s["type"] == "sell_sweep"]:
+        reasons.append("[H1] Liquidity Sweep tereksekusi (EQL tersapu)")
         score += 0.25
-    elif trend == "bearish":
-        reasons.append("Struktur bearish (CHoCH/lower low)")
+    elif [s for s in sweeps if s["type"] == "buy_sweep"]:
+        reasons.append("[H1] Liquidity Sweep tereksekusi (EQH tersapu)")
         score -= 0.25
 
-    blocks = detect_order_blocks(candles)
-    if blocks:
-        nearest = nearest_order_block(price, blocks)
-        if nearest:
-            reasons.append(f"OB support {nearest['low']:.2f}")
-            score += 0.25
-
-    fvgs = detect_fvg(candles)
-    if fvgs:
-        recent = [g for g in fvgs if g["type"] == "bullish" and g["bottom"] < price]
-        recent_sell = [g for g in fvgs if g["type"] == "bearish" and g["top"] > price]
-        if recent:
-            reasons.append("FVG bullish di bawah harga")
-            score += 0.15
-        elif recent_sell:
-            reasons.append("FVG bearish di atas harga")
-            score -= 0.15
-
-    levels = nearest_levels(price, highs, lows)
-    if levels["support"] is not None and levels["support_dist_pct"] is not None:
-        if levels["support_dist_pct"] <= 3:
-            reasons.append(f"Support dekat ({levels['support_dist_pct']:.1f}%)")
-            score += 0.20
-    if levels["resistance"] is not None and levels["resistance_dist_pct"] is not None:
-        if levels["resistance_dist_pct"] <= 3:
-            reasons.append(f"Resistance dekat ({levels['resistance_dist_pct']:.1f}%)")
-            score -= 0.20
+    levels = h1_map.get("levels", {})
+    if levels.get("support_dist_pct") is not None and levels["support_dist_pct"] <= 3:
+        reasons.append(f"[H1] Support dekat ({levels['support_dist_pct']:.1f}%)")
+        score += 0.15
+    if levels.get("resistance_dist_pct") is not None and levels["resistance_dist_pct"] <= 3:
+        reasons.append(f"[H1] Resistance dekat ({levels['resistance_dist_pct']:.1f}%)")
+        score -= 0.15
 
     return max(-1.0, min(1.0, score)), reasons
 
 
-# ---------------------------------------------------------------- sentiment
+# ---------------------------------------------------------------- sentiment / whale / onchain
 def score_sentiment(fg_value: float, funding_rates: List[float], ls_ratio: Optional[float]) -> tuple:
-    """Fear&Greed (contrarian) + funding rate + long/short ratio → -1.0..+1.0."""
+    """Fear&Greed (contrarian) + funding rate + long/short ratio -> -1.0..+1.0."""
     reasons: List[str] = []
     score = score_fear_greed(fg_value)
     reasons.append(f"Fear&Greed {fg_value:.0f}")
@@ -184,7 +374,6 @@ def score_sentiment(fg_value: float, funding_rates: List[float], ls_ratio: Optio
     return max(-1.0, min(1.0, score)), reasons
 
 
-# ---------------------------------------------------------------- whale
 def score_whale(flow: Optional[Dict[str, float]]) -> tuple:
     """Netflow exchange ETH (proxy whale). Net positif (masuk exchange) = bearish."""
     reasons: List[str] = []
@@ -200,7 +389,6 @@ def score_whale(flow: Optional[Dict[str, float]]) -> tuple:
     return 0.0, reasons
 
 
-# ---------------------------------------------------------------- onchain
 def score_onchain(btc_stats: Optional[Dict]) -> tuple:
     """Proxy aktivitas on-chain BTC (jumlah tx / volume jaringan)."""
     reasons: List[str] = []
@@ -214,21 +402,58 @@ def score_onchain(btc_stats: Optional[Dict]) -> tuple:
 
 
 # ---------------------------------------------------------------- agregasi
+def _build_reasons(
+    action: str,
+    h1_map: Dict,
+    pct_change_24h: Optional[float],
+    fg_value: float,
+    smc_reasons: List[str],
+    trigger_reasons: List[str],
+) -> List[str]:
+    price = h1_map["price"]
+    if action == ACTION_BUY:
+        parts = []
+        if [z for z in h1_map["demand_zones"] if in_zone(price, z)]:
+            parts.append("Demand Zone")
+        if h1_map.get("bullish_ob"):
+            parts.append("Bullish OB")
+        headline = " & ".join(parts) + " H1 Tersentuh" if parts else "Setup BUY MTF H1"
+    elif action == ACTION_SELL:
+        parts = []
+        if [z for z in h1_map["supply_zones"] if in_zone(price, z)]:
+            parts.append("Supply Zone")
+        if h1_map.get("bearish_ob"):
+            parts.append("Bearish OB")
+        headline = " & ".join(parts) + " H1 Tersentuh" if parts else "Setup SELL MTF H1"
+    else:
+        headline = "Analisa MTF — Setup Belum Tervalidasi"
+
+    pct_str = f"{pct_change_24h:+.1f}%" if pct_change_24h is not None else "n/a"
+    last_line = f"Momentum 24j {pct_str} | Fear&Greed {fg_value:.0f}"
+    return [headline] + smc_reasons + trigger_reasons + [last_line]
+
+
 def assemble_signal(
     symbol: str,
     base: str,
     price: float,
     pct_change_24h: float,
-    closes: List[float],
-    candles: List[Dict[str, float]],
+    h4_candles: List[Dict[str, float]],
+    d1_candles: List[Dict[str, float]],
+    h1_candles: List[Dict[str, float]],
+    m15_candles: List[Dict[str, float]],
     fg_value: float,
     funding_rates: List[float],
     ls_ratio: Optional[float],
     whale_flow: Optional[Dict[str, float]],
     btc_stats: Optional[Dict],
 ) -> Signal:
-    tech, tech_reasons = score_technical(closes, pct_change_24h)
-    smc, smc_reasons = score_smc(candles, price)
+    compass = analyze_compass(h4_candles, d1_candles)
+    h1_map = map_h1_zones(h1_candles, price)
+    trigger = analyze_trigger(m15_candles)
+
+    tech, tech_reasons = score_trigger(m15_candles, pct_change_24h)
+    smc, smc_reasons = score_smc_mtf(h4_candles, d1_candles, h1_map, price)
     senti, senti_reasons = score_sentiment(fg_value, funding_rates, ls_ratio)
     whale, whale_reasons = score_whale(whale_flow)
     onchain, onchain_reasons = score_onchain(btc_stats)
@@ -242,15 +467,17 @@ def assemble_signal(
     )
     total = max(-1.0, min(1.0, total))
 
-    if total >= BUY_THRESHOLD:
+    compass_dir = compass["direction"]
+    valid = _setup_valid(compass_dir, h1_map, trigger)
+    if valid and compass_dir == ACTION_BUY and total >= BUY_THRESHOLD:
         action = ACTION_BUY
-    elif total <= SELL_THRESHOLD:
+    elif valid and compass_dir == ACTION_SELL and total <= SELL_THRESHOLD:
         action = ACTION_SELL
     else:
         action = ACTION_NEUTRAL
 
     confidence = max(25, min(95, CONFIDENCE_BASE + int(abs(total) * 40)))
-    entry, sl, tp1, tp2 = _levels(price, closes, candles, action)
+    entry, sl, tp1, tp2 = _levels_mtf(price, h1_candles, h1_map, action)
     breakdown = {
         "teknikal": round(tech, 2),
         "smc": round(smc, 2),
@@ -258,7 +485,7 @@ def assemble_signal(
         "whale": round(whale, 2),
         "onchain": round(onchain, 2),
     }
-    reasons = tech_reasons + smc_reasons + senti_reasons + whale_reasons + onchain_reasons
+    reasons = _build_reasons(action, h1_map, pct_change_24h, fg_value, smc_reasons, tech_reasons)
 
     return Signal(
         symbol=symbol,
@@ -277,21 +504,37 @@ def assemble_signal(
     )
 
 
-def _levels(price: float, closes: List[float], candles: List[Dict[str, float]], action: str) -> tuple:
-    """SL/TP dari level S&R terdekat, fallback ke persentase (SL 4%, TP 8%/15%)."""
-    if not closes or price <= 0:
-        return price, price * 0.96, price * 1.08, price * 1.15
-    highs = [c["high"] for c in candles] if candles else closes
-    lows = [c["low"] for c in candles] if candles else closes
-    levels = nearest_levels(price, highs, lows)
-    support, resistance = levels["support"], levels["resistance"]
+def _levels_mtf(
+    price: float,
+    h1_candles: List[Dict[str, float]],
+    h1_map: Dict,
+    action: str,
+) -> tuple:
+    """Entry/SL/TP1/TP2 dipetakan dari zona SMC/S&D H1 (fallback persentase).
+
+    - BUY : SL di bawah Demand Zone / Bullish OB; TP dari resistance H1.
+    - SELL: SL di atas Supply Zone / Bearish OB; TP dari support H1.
+    """
+    highs = [c["high"] for c in h1_candles] if h1_candles else []
+    lows = [c["low"] for c in h1_candles] if h1_candles else []
+    levels = h1_map.get("levels") or nearest_levels(price, highs or [price], lows or [price])
+    demand = h1_map.get("demand_zones", []) or []
+    supply = h1_map.get("supply_zones", []) or []
+    ob_bull = [b for b in h1_map.get("order_blocks", []) if b["type"] == "bullish"]
+    ob_bear = [b for b in h1_map.get("order_blocks", []) if b["type"] == "bearish"]
 
     if action == ACTION_BUY:
-        sl = support if support and support < price else price * 0.96
+        sl_cands = [z["low"] for z in demand if z["low"] < price]
+        sl_cands += [b["low"] for b in ob_bull if b["low"] < price]
+        sl = max(sl_cands) * 0.995 if sl_cands else price * 0.96
+        resistance = levels.get("resistance") if levels else None
         tp1 = resistance if resistance and resistance > price else price * 1.08
         tp2 = price + 2 * (tp1 - price)
     elif action == ACTION_SELL:
-        sl = resistance if resistance and resistance > price else price * 1.04
+        sl_cands = [z["high"] for z in supply if z["high"] > price]
+        sl_cands += [b["high"] for b in ob_bear if b["high"] > price]
+        sl = min(sl_cands) * 1.005 if sl_cands else price * 1.04
+        support = levels.get("support") if levels else None
         tp1 = support if support and support < price else price * 0.92
         tp2 = price - 2 * (price - tp1)
     else:
@@ -345,8 +588,9 @@ def format_message(signals: List[Signal], timestamp: str, market_note: str = "")
     neutrals = [s for s in signals if s.action == ACTION_NEUTRAL]
 
     lines = [
-        "<b>📊 DAILY BRIEFING — SINYAL TRADING v2</b>",
+        "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&D</b>",
         f"🕐 {timestamp}",
+        "⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15",
     ]
     if market_note:
         lines.append(f"🌐 {market_note}")

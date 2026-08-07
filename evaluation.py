@@ -1,12 +1,13 @@
-"""Evaluasi Sinyal Kemarin (Daily Recap) + penyimpanan riwayat sinyal.
+"""Evaluasi Sinyal Sesi Sebelumnya (Daily Recap) + penyimpanan riwayat sinyal.
 
-- `add_signals_today()` mencatat sinyal terpilih hari ini ke `data/history.json`
-  (key = tanggal WIB `YYYY-MM-DD`). Dipakai sebagai data evaluasi esok hari.
-- `build_recap()` dipanggil SEBELUM Daily Briefing baru dikirim: membaca riwayat
-  hari sebelumnya, mengambil harga 24j terakhir tiap pair (high/low/current) dari
-  Binance, menentukan status tiap sinyal (TP2 / TP1 / SL / Floating), menghitung
-  win rate harian, lalu menyusun teks ringkasan yang disisipkan tepat sebelum
-  blok DAILY BRIEFING.
+- `add_signals_today()` mencatat sinyal terpilih pada sesi ini ke `data/history.json`
+  (key = timestamp sesi WIB `YYYY-MM-DD HH:MM`). Dipakai sebagai data evaluasi
+  sesi berikutnya (2x sehari: 13:30 & 19:00 WIB).
+- `build_recap()` dipanggil SEBELUM Day Trading Briefing baru dikirim: membaca
+  riwayat sesi sebelumnya (termasuk sesi pagi yang sama), mengambil harga 24j
+  terakhir tiap pair (high/low/current) dari Binance, menentukan status tiap
+  sinyal (TP2 / TP1 / SL / Floating), menghitung win rate, lalu menyusun teks
+  ringkasan yang disisipkan tepat sebelum blok DAILY BRIEFING.
 """
 
 import json
@@ -43,11 +44,19 @@ def today_str() -> str:
     return wib_now().strftime("%Y-%m-%d")
 
 
-def _display_date(date_key: str) -> str:
-    try:
-        return datetime.strptime(date_key, "%Y-%m-%d").strftime("%d %b %Y")
-    except ValueError:
-        return date_key
+def session_now_str() -> str:
+    """Kunci sesi WIB `YYYY-MM-DD HH:MM` — unik per run (2x sehari)."""
+    return wib_now().strftime("%Y-%m-%d %H:%M")
+
+
+def _display_key(key: str) -> str:
+    """Terima kunci sesi (`YYYY-MM-DD HH:MM`) atau kunci tanggal (`YYYY-MM-DD`)."""
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(key, fmt).strftime("%d %b %Y %H:%M")
+        except ValueError:
+            continue
+    return key
 
 
 # ---------------------------------------------------------------- riwayat
@@ -70,11 +79,11 @@ def save_history(history: Dict[str, List[Dict]], path: str = HISTORY_PATH) -> No
     os.replace(tmp_path, path)
 
 
-def add_signals_today(signals: List[Signal], timestamp: str, path: str = HISTORY_PATH) -> None:
-    """Simpan sinyal terpilih hari ini (menimpa entri tanggal yang sama)."""
-    date = today_str()
+def add_signals_today(signals: List[Signal], timestamp: str, path: str = HISTORY_PATH, session_key: Optional[str] = None) -> None:
+    """Simpan sinyal terpilih sesi ini (menimpa entri sesi yang sama)."""
+    key = session_key or session_now_str()
     history = load_history(path)
-    history[date] = [
+    history[key] = [
         {
             "symbol": s.symbol,
             "base": s.base,
@@ -90,10 +99,14 @@ def add_signals_today(signals: List[Signal], timestamp: str, path: str = HISTORY
     save_history(history, path)
 
 
-def previous_day_signals(history: Dict[str, List[Dict]], today: Optional[str] = None):
-    """Ambil sinyal pada hari terakhir sebelum hari ini (tahan hari yang dilewati)."""
-    today = today or today_str()
-    older = sorted(d for d in history if d < today)
+def previous_session_signals(history: Dict[str, List[Dict]], now_key: Optional[str] = None):
+    """Sinyal pada sesi terakhir SEBELUM sesi sekarang (tahan hari yang dilewati).
+
+    Kunci sesi (`YYYY-MM-DD HH:MM`) & kunci tanggal lama (`YYYY-MM-DD`) campur
+    dibandingkan leksikografis — urutan waktu tetap benar.
+    """
+    now_key = now_key or session_now_str()
+    older = sorted(k for k in history if k < now_key)
     if not older:
         return None, []
     date = older[-1]
@@ -142,12 +155,12 @@ def evaluate_signals(signals: List[Dict], fetch_fn) -> List[Dict]:
 
 
 # ---------------------------------------------------------------- recap
-def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] = None) -> Optional[str]:
-    """Teks ringkasan evaluasi sinyal kemarin; None bila tak ada riwayat / semua gagal.
+def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] = None, now_key: Optional[str] = None) -> Optional[str]:
+    """Teks ringkasan evaluasi sinyal sesi sebelumnya; None bila tak ada riwayat / semua gagal.
 
     Win rate = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi.
     """
-    date, signals = previous_day_signals(history, today)
+    date, signals = previous_session_signals(history, now_key or today)
     if not signals:
         return None
     results = evaluate_signals(signals, fetch_fn)
@@ -164,7 +177,7 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     win_rate = round(won / total * 100) if total else 0
 
     lines = [
-        f"<b>📊 EVALUASI SINYAL KEMARIN — {_display_date(date)}</b>",
+        f"<b>📊 EVALUASI SINYAL SESI SEBELUMNYA — {_display_key(date)}</b>",
         f"🏆 Win rate: <b>{win_rate}%</b> ({won}/{total})  ·  🎯 TP2: {tp2} · ✅ TP1: {tp1} · ❌ SL: {sl} · ⏳ Floating: {floating}",
         "",
     ]

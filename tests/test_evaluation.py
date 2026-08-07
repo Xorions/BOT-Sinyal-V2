@@ -1,4 +1,4 @@
-"""Test evaluasi sinyal kemarin + penyimpanan riwayat (tanpa network)."""
+"""Test evaluasi sinyal sesi sebelumnya + penyimpanan riwayat (tanpa network)."""
 
 from engine import Signal
 from evaluation import (
@@ -10,7 +10,7 @@ from evaluation import (
     build_recap,
     evaluate_signal,
     load_history,
-    previous_day_signals,
+    previous_session_signals,
     save_history,
     today_str,
 )
@@ -57,7 +57,7 @@ class TestEvaluateSignal:
 class TestHistory:
     def test_save_load_roundtrip(self, tmp_path):
         path = str(tmp_path / "history.json")
-        history = {"2026-08-06": [_sig()]}
+        history = {"2026-08-06 13:30": [_sig()]}
         save_history(history, path)
         assert load_history(path) == history
 
@@ -70,30 +70,48 @@ class TestHistory:
             fh.write("{{{bukan json")
         assert load_history(path) == {}
 
-    def test_add_signals_today_overwrites(self, tmp_path):
+    def test_add_signals_today_overwrites_same_session(self, tmp_path):
         path = str(tmp_path / "history.json")
         s1 = Signal("BTCUSDT", "BTC", 100.0, 1.0, 0.5, "BUY", 70, 100.0, 90.0, 110.0, 120.0)
         s2 = Signal("XRPUSDT", "XRP", 1.0, -2.0, -0.2, "SELL", 60, 1.0, 1.1, 0.9, 0.8)
-        add_signals_today([s1], "today", path)
-        add_signals_today([s2], "today", path)
+        add_signals_today([s1], "today", path, session_key="2026-08-07 13:30")
+        add_signals_today([s2], "today", path, session_key="2026-08-07 13:30")
         history = load_history(path)
-        assert today_str() in history
-        assert len(history[today_str()]) == 1
-        assert history[today_str()][0]["symbol"] == "XRPUSDT"
+        assert "2026-08-07 13:30" in history
+        assert len(history["2026-08-07 13:30"]) == 1
+        assert history["2026-08-07 13:30"][0]["symbol"] == "XRPUSDT"
 
-    def test_previous_day_signals(self):
-        history = {"2026-08-05": [_sig()], "2026-08-06": [_sig()], "2026-08-07": []}
-        date, sigs = previous_day_signals(history, today="2026-08-08")
-        assert date == "2026-08-07"
+    def test_add_signals_today_defaults_to_now(self, tmp_path):
+        path = str(tmp_path / "history.json")
+        s1 = Signal("BTCUSDT", "BTC", 100.0, 1.0, 0.5, "BUY", 70, 100.0, 90.0, 110.0, 120.0)
+        add_signals_today([s1], "today", path)
+        history = load_history(path)
+        assert today_str() in " ".join(history.keys())
+
+    def test_previous_session_signals(self):
+        history = {
+            "2026-08-05 19:00": [_sig()],
+            "2026-08-06 13:30": [_sig()],
+            "2026-08-06 19:00": [],
+        }
+        date, sigs = previous_session_signals(history, now_key="2026-08-07 13:30")
+        assert date == "2026-08-06 19:00"
         assert sigs == []
 
-    def test_previous_day_signals_none_same_day(self):
-        assert previous_day_signals({"2026-08-06": [_sig()]}, today="2026-08-06") == (None, [])
+    def test_previous_session_signals_none_same_session(self):
+        history = {"2026-08-07 13:30": [_sig()]}
+        assert previous_session_signals(history, now_key="2026-08-07 13:30") == (None, [])
+
+    def test_mixed_old_date_and_session_keys_ordered(self):
+        history = {"2026-08-06": [_sig()], "2026-08-07 13:30": [_sig()]}
+        date, sigs = previous_session_signals(history, now_key="2026-08-07 19:00")
+        assert date == "2026-08-07 13:30"
+        assert sigs
 
 
 class TestBuildRecap:
     HISTORY = {
-        "2026-08-06": [
+        "2026-08-06 13:30": [
             _sig("BUY", 100.0, 90.0, 110.0, 120.0),
             _sig("BUY", 50.0, 45.0, 55.0, 60.0, symbol="LITUSDT", base="LIT"),
             _sig("SELL", 1.0, 1.1, 0.9, 0.8, symbol="XRPUSDT", base="XRP"),
@@ -108,10 +126,10 @@ class TestBuildRecap:
         }[pair]
 
     def test_recap_winrate_and_statuses(self):
-        recap = build_recap(self.HISTORY, self._fetch, today="2026-08-07")
+        recap = build_recap(self.HISTORY, self._fetch, now_key="2026-08-07 13:30")
         assert recap is not None
-        assert "EVALUASI SINYAL KEMARIN" in recap
-        assert "06 Aug 2026" in recap
+        assert "EVALUASI SINYAL SESI SEBELUMNYA" in recap
+        assert "06 Aug 2026 13:30" in recap
         assert "TP2: 1" in recap
         assert "TP1: 1" in recap
         assert "SL: 1" in recap
@@ -121,8 +139,8 @@ class TestBuildRecap:
         assert "#XRP" in recap and "TP1" in recap
 
     def test_recap_none_when_no_previous(self):
-        assert build_recap({}, self._fetch, today="2026-08-07") is None
+        assert build_recap({}, self._fetch, now_key="2026-08-07 13:30") is None
 
     def test_recap_none_when_all_fetch_fail(self):
-        history = {"2026-08-06": [_sig()]}
-        assert build_recap(history, lambda pair: None, today="2026-08-07") is None
+        history = {"2026-08-06 13:30": [_sig()]}
+        assert build_recap(history, lambda pair: None, now_key="2026-08-07 13:30") is None

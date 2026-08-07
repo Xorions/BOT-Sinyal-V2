@@ -1,6 +1,9 @@
 # BOT-Sinyal-Trading-V2
 
-Bot Telegram **Daily Briefing sinyal trading crypto** (versi lanjutan) dengan multi-sumber data gratis dan indikator advance: **RSI, MACD, Order Block, SMC (BOS/CHoCH/FVG), Support & Resistance, whale proxy, on-chain, dan sentiment pasar (Fear & Greed)**.
+Bot Telegram **Day Trading Briefing sinyal trading crypto** (versi lanjutan) dengan
+analisa **Multi-Timeframe (MTF) berbasis Smart Money Concept (SMC) + Supply & Demand**:
+**RSI, MACD, Order Block, FVG, BOS/CHoCH, Supply/Demand Zone, EQH/EQL, Liquidity Sweep,
+Support & Resistance, whale proxy, on-chain, dan sentiment pasar (Fear & Greed)**.
 
 > Dibangun dari pengalaman BOT-Sinyal-Trading v1 (CoinGecko only). v2 memakai
 > Binance (candle/ticker) sebagai sumber utama teknikal + CoinMarketCap (ranking) +
@@ -8,21 +11,26 @@ Bot Telegram **Daily Briefing sinyal trading crypto** (versi lanjutan) dengan mu
 
 ## Cara Kerja
 
-Dijalankan otomatis oleh GitHub Actions (cron `0 0 * * *` = **07:00 WIB**):
+Dijalankan otomatis oleh GitHub Actions **2x sehari** (cron `30 6 * * *` = **13:30 WIB**
+dan `0 12 * * *` = **19:00 WIB**):
 
 1. Satu panggilan ticker 24j Binance (`data-api.binance.vision` — tidak geo-block, aman untuk runner AS).
 2. Pilih top coin: daftar CoinMarketCap bila `CMC_API_KEY` diisi, else **semua pasangan USDT Binance**. Filter aset non-koin (stablecoin, leveraged token, token saham Binance) + likuiditas (`MIN_VOLUME_USD`), urut volume, ambil `TOP_COINS` (maks 250).
-3. Tiap coin: candle 1d + 4h dari Binance → RSI, MACD, OB, FVG, struktur market, level S&R; funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
+3. Tiap coin diambil klines **4 timeframe** untuk analisa MTF:
+   - **D1 & H4** → *kompas* (tren utama & struktur SMC BOS/CHoCH skala besar).
+   - **H1** → *pemetaan* zona institusional (S&D, OB, FVG, EQH/EQL, Liquidity Sweep, S&R pivot/swing). Entry/SL/TP dipetakan dari zona H1.
+   - **M15** → *pelatuk* konfirmasi eksekusi (RSI / MACD cross / momentum / BOS M15).
+   - Funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
 4. Data agregat: Fear & Greed Index, whale netflow ETH (Etherscan), statistik jaringan BTC (blockchain.info).
-5. Skoring **berbobot 5 kategori** → BUY/SELL/NEUTRAL + confidence, SL/TP berbasis level S&R/OB.
-6. **Evaluasi sinyal kemarin** (`data/history.json`): cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate harian → disisipkan tepat sebelum briefing.
-7. Kirim Daily Briefing (Top 5) ke Telegram (HTML parse mode), lalu simpan sinyal hari ini ke `history.json` (di-commit balik oleh GitHub Actions).
+5. Skoring **berbobot** (prioritas SMC + S&D) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1.
+6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate → disisipkan sebelum briefing.
+7. Kirim Day Trading Briefing (Top 5) ke Telegram (HTML parse mode), lalu simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions).
 
 ## Sumber Data
 
 | Sumber | Dipakai untuk | Akses |
 |---|---|---|
-| Binance Spot (`data-api.binance.vision`) | ticker 24j, klines 1d/4h → indikator teknikal | publik, tanpa key |
+| Binance Spot (`data-api.binance.vision`) | ticker 24j, klines 1d/4h/1h/15m → indikator MTF | publik, tanpa key |
 | Binance Futures (`fapi.binance.com`) | funding rate, long/short ratio | opsional — dapat diblokir region |
 | CoinMarketCap (`pro-api.coinmarketcap.com`) | ranking top coin | `CMC_API_KEY` (opsional, free tier) |
 | alternative.me | Fear & Greed Index | publik, tanpa key |
@@ -48,24 +56,25 @@ Semua data via `data/_client.py` (retry + backoff + handling HTTP 429). Satu sum
 ## Struktur
 
 ```
-bot.py                     # Entry point: kumpulkan data → skoring → kirim Telegram
+bot.py                     # Entry point: kumpulkan data MTF → skoring → kirim Telegram
 config.py                  # Kredensial & parameter dari .env
-engine.py                  # Skoring 5 kategori berbobot + format pesan HTML
-evaluation.py              # Riwayat sinyal (history.json) + evaluasi/recap kemarin
+engine.py                  # Skoring MTF (Kompas H4/D1 → Zona H1 → Pelatuk M15) + format pesan HTML
+evaluation.py              # Riwayat sinyal (history.json) + evaluasi/recap sesi sebelumnya
 telegram_sender.py         # Kirim pesan ke Telegram
 data/
   _client.py               # HTTP client (retry, backoff, rate-limit)
-  binance.py               # Klines, ticker 24j, funding, long/short ratio
+  binance.py               # Klines MTF (1d/4h/1h/15m), ticker 24j, funding, long/short ratio
   cmc.py                   # Top coins + market overview (free tier)
   sentiment.py             # Fear & Greed Index + skoring contrarian
   onchain.py               # Whale netflow ETH, statistik BTC (proxy)
-  history.json             # Riwayat sinyal harian (di-commit balik oleh CI)
+  history.json             # Riwayat sinyal per sesi (di-commit balik oleh CI)
 indicators/
   rsi.py                   # RSI Wilder
-  macd.py                  # EMA 12/26 + signal 9 + histogram
+  macd.py                  # EMA 12/26 + signal 9 + histogram + histogram series (cross)
   support_resistance.py    # Swing high/low, pivot, level terdekat
-  smc.py                   # Order Block, FVG, BOS/CHoCH, struktur market
-tests/                     # pytest
+  smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
+  supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
+tests/                     # pytest (57 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -73,13 +82,13 @@ tests/                     # pytest
 
 | Kategori | Bobot | Isi |
 |---|---|---|
-| Teknikal | 40% | RSI, MACD histogram, momentum 24j |
-| SMC & S&R | 20% | OB, FVG, BOS/CHoCH, jarak ke support/resistance |
+| SMC & S&D (MTF) | 40% | Kompas H4/D1 (BOS/CHoCH) + zona H1 (S&D, OB, FVG, EQH/EQL, Liquidity Sweep, S&R) |
+| Teknikal (M15) | 20% | RSI, MACD (cross/histogram), BOS M15, momentum 24j |
 | Sentiment | 15% | Fear & Greed (contrarian), funding rate, long/short ratio |
 | Whale | 15% | Netflow exchange ETH (proxy) |
 | On-chain | 10% | Aktivitas jaringan BTC (jumlah tx) |
 
-Skor tiap kategori -1.0..+1.0. **BUY** ≥ `BUY_THRESHOLD` (0.10), **SELL** ≤ `SELL_THRESHOLD` (-0.10), selain itu NEUTRAL. Confidence `clamp(25, 95, 55 + |skor|*40)`. Konvensi **kontrarian**: RSI > 70 / funding tinggi / Fear & Greed ekstrem = negatif (antisipasi pullback). SL/TP diambil dari level S&R/OB terdekat, fallback ke persentase statis.
+Skor tiap kategori -1.0..+1.0. **BUY** ≥ `BUY_THRESHOLD` (0.10), **SELL** ≤ `SELL_THRESHOLD` (-0.10). **Aturan kompas MTF:** H4 bullish → HANYA BUY, H4 bearish → HANYA SELL (D1 sebagai fallback). Sinyal tervalidasi bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1. Confidence `clamp(25, 95, 55 + |skor|*40)`. Entry/SL/TP dipetakan dari zona H1 (SL di luar Demand/Supply zone/OB; TP di level S&R H1), fallback persentase statis bila tak ada zona.
 
 ## Filter aset (bukan koin kripto yang valid)
 
@@ -91,29 +100,31 @@ Di `bot._eligible_pair()`:
 
 ## Format pesan Telegram
 
-`engine.format_message()` — sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`, alasan `📝` dicetak dengan baris pertama (indikator utama) tanpa dash dan baris berikutnya diindentasi `    - `, dan baris `📊 Skor` merangkum semua komponen:
+`engine.format_message()` — sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`, alasan `📝` dicetak dengan baris pertama (headline zona SMC/S&D H1) tanpa dash dan baris berikutnya diindentasi `    - ` (per timeframe `[H4]`/`[H1]`/`[M15]`), dan baris `📊 Skor` merangkum semua komponen:
 
 ```
-📊 DAILY BRIEFING — SINYAL TRADING v2
-🕐 Friday, 07 Aug 2026, 16:08 WIB
+📊 DAY TRADING BRIEFING — MTF SMC + S&D
+🕐 Friday, 07 Aug 2026, 13:30 WIB
+⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15
 🌐 Fear&Greed: 29
 
 📈 SINYAL LONG (BUY)
 
-#LIT (LITUSDT) — BUY · Confidence 73%
-🔑 Entry: $0.743000
-🛡️ SL: $0.724000
-🎯 TP1: $0.819000
-🎯 TP2: $0.895000
-💹 24j: +5.24%
-📝 MACD bullish (histogram +)
-    - Momentum 24j +5.2%
-    - Struktur bullish (BOS/higher high)
-    - OB support 0.59
-    - FVG bullish di bawah harga
-    - Support dekat (2.6%)
-    - Fear&Greed 29
-📊 Skor: +0.45  (Tek +0.55 · SMC +0.85 · Sent +0.40 · Whale +0.00 · Onch +0.00)
+#BTC (BTCUSDT) — BUY · Confidence 73%
+🔑 Entry: $65,263
+🛡️ SL: $64,064
+🎯 TP1: $70,484
+🎯 TP2: $75,705
+💹 24j: +1.92%
+📝 Demand Zone & Bullish OB H1 Tersentuh
+    - [H4] Tren utama Bullish (BOS skala besar)
+    - [H1] Harga masuk Demand Zone
+    - [H1] Bullish OB di bawah harga
+    - [H1] FVG tervalidasi di bawah harga
+    - [H1] Liquidity Sweep tereksekusi (EQL tersapu)
+    - [M15] MACD Golden Cross & RSI Rebound
+    - Momentum 24j +1.9% | Fear&Greed 29
+📊 Skor: +0.38  (Tek +0.30 · SMC +1.00 · Sent +0.40 · Whale +0.00 · Onch +0.00)
 
 ───
 
@@ -125,12 +136,14 @@ Di `bot._eligible_pair()`:
 🎯 TP1: $0.948520
 🎯 TP2: $0.866040
 💹 24j: -2.31%
-📝 RSI 37 mendekati oversold
-    - MACD bearish (histogram -)
-    - Struktur bearish (CHoCH/lower low)
-    - FVG bearish di atas harga
-    - Fear&Greed 29
-📊 Skor: -0.12  (Tek -0.25 · SMC -0.40 · Sent +0.40 · Whale +0.00 · Onch +0.00)
+📝 Supply Zone & Bearish OB H1 Tersentuh
+    - [H4] Tren utama Bearish (CHoCH skala besar)
+    - [H1] Harga masuk Supply Zone
+    - [H1] Bearish OB di atas harga
+    - [H1] FVG tervalidasi di atas harga
+    - [M15] MACD Death Cross & RSI Melemah
+    - Momentum 24j -2.3% | Fear&Greed 29
+📊 Skor: -0.21  (Tek -0.30 · SMC -0.85 · Sent +0.40 · Whale +0.00 · Onch +0.00)
 
 ───
 
@@ -139,17 +152,17 @@ Di `bot._eligible_pair()`:
 
 Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
 
-## Evaluasi Sinyal Kemarin (Daily Recap)
+## Evaluasi Sinyal Sesi Sebelumnya (Daily Recap)
 
 `evaluation.py` + `data/history.json`:
 
-- **Penyimpanan riwayat**: tiap run menyimpan sinyal terpilih hari itu (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan key tanggal WIB (`YYYY-MM-DD`). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo (step "Commit balik riwayat sinyal").
-- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca hari terakhir sebelum hari ini, mengambil **high/low/current 24j** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**.
-- **Win rate harian** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP2/TP1/SL/Floating).
-- Recap disisipkan tepat sebelum blok `📊 DAILY BRIEFING — SINYAL TRADING v2`:
+- **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
+- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current 24j** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**.
+- **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP2/TP1/SL/Floating).
+- Recap disisipkan tepat sebelum blok `📊 DAY TRADING BRIEFING — MTF SMC + S&D`:
 
 ```
-📊 EVALUASI SINYAL KEMARIN — 06 Agu 2026
+📊 EVALUASI SINYAL SESI SEBELUMNYA — 07 Agu 2026 13:30
 🏆 Win rate: 60% (3/5)  ·  🎯 TP2: 1 · ✅ TP1: 2 · ❌ SL: 0 · ⏳ Floating: 2
 
 #BTC BUY · Entry $104,000 → 🎯 TP2
@@ -157,7 +170,7 @@ Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
 #LIT BUY · Entry $0.74 → ⏳ Floating
 ```
 
-Bila belum ada riwayat (hari pertama) atau semua data harga gagal diambil, recap dilewati tanpa menggagalkan scan.
+Bila belum ada riwayat (sesi pertama) atau semua data harga gagal diambil, recap dilewati tanpa menggagalkan scan.
 
 ## Catatan penting
 
