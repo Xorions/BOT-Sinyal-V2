@@ -47,7 +47,24 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 - **Konvensi RSI/funding = kontrarian**: overbought/euforia = negatif (antisipasi pullback).
 - SL/TP di `engine._levels()`: dari level S&R terdekat; fallback persentase bila tidak ada level.
 
-## 3. Panduan Pengembangan
+## 3. Filter aset (aturan baku — jangan diubah tanpa alasan)
+
+Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskoring. Tiga lapis:
+
+1. **Stablecoin** — set `STABLECOINS` di `bot.py` (USDT, USDC, DAI, USDD, FDUSD, RLUSD, XUSD, EURS/EURC/EUR/EURI/EURIT, FRAX, BFUSD, dll).
+2. **Leveraged token** — `SKIP_SUFFIXES = ("UP", "DOWN", "BULL", "BEAR")` (mis. BTCUP/BTCDOWN).
+3. **Token saham/ETF Binance (Binance Shares)** — `US_STOCK_TICKERS` + `_is_stock_token()`: base = ticker saham/ETF US atau `ticker + "B"` (NVDAB→NVDA, QQQB→QQQ, SPYB→SPY, GOOGLB→GOOGL, TSLAB→TSLA, SPCXB→SPCX, MUUB→MUU; langsung: MUB, BE).
+
+> **Penting:** koin kripto asli yang berakhiran `B` (**BNB, ARB, SHIB, TRB, DGB, CKB, BB**) **tidak boleh** terkena filter — deteksi selalu via lookup ke `US_STOCK_TICKERS`, bukan sekadar cek suffix `B`. Jika ada token saham baru, tambahkan ticker polosnya (tanpa `B`) ke set.
+
+## 4. Format pesan (baca `engine.format_message()`)
+
+- Header seksi: `<b>📈 SINYAL LONG (BUY)</b>`, `<b>📉 SINYAL SHORT (SELL)</b>`, `<b>⚪ WATCHLIST (NEUTRAL)</b>` (seksi kosong di-skip).
+- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝`, sisanya **per-baris** tanpa prefix) → `📊 Skor` (total + breakdown Tek/SMC/Sent/Whale/Onch) → pemisah `───`.
+- Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
+- Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
+
+## 5. Panduan Pengembangan
 
 ### Menambah indikator baru
 1. Fungsi **murni** di `indicators/<nama>.py` (list angka/candle → angka/None), lalu tambah unit test di `tests/`.
@@ -69,7 +86,7 @@ venv\Scripts\python.exe -m pytest tests -v   # 22 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 
-## 4. Keamanan Kredensial
+## 6. Keamanan Kredensial
 - `.env` di-ignore (`gitignore`) — jangan pernah commit token/key.
 - Secrets GitHub Actions: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, opsional `CMC_API_KEY`, `ETHERSCAN_API_KEY`.
 - Jangan print token/secret ke log.

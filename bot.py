@@ -48,8 +48,9 @@ STABLECOINS = {
     "usd0", "usda", "usdt0", "usdy", "usdl", "lusd", "susd", "xsusd",
     "rlusd", "xusd", "frax", "bfusd", "eurit",
 }
-# Binance leveraged token (BTCUP/BTCDOWN/BTCBULL/BTCBEAR) — bukan aset riil
-SKIP_SUFFIXES = ("UP", "DOWN", "BULL", "BEAR")
+# Binance leveraged token (BTCUP/BTCDOWN/BTCBULL/BTCBEAR) — bukan aset riil.
+# Wajib lowercase karena `base` sudah di-lowercase sebelum dicek endswith.
+SKIP_SUFFIXES = ("up", "down", "bull", "bear")
 # Token saham/ETF Binance (Binance Shares) — base = ticker US, atau ticker US + "B"
 # (mis. NVDAB -> NVDA, QQQB -> QQQ, SPYB -> SPY). MUB/BB sudah bertipe langsung.
 US_STOCK_TICKERS = {
@@ -74,6 +75,8 @@ def _is_stock_token(base: str) -> bool:
 def _eligible_pair(pair: str) -> bool:
     base = pair[:-4].lower() if pair.endswith("USDT") else ""
     if not base:
+        return False
+    if not base.isascii():
         return False
     if base in STABLECOINS:
         return False
