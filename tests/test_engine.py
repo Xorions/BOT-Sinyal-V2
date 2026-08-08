@@ -328,6 +328,16 @@ class TestLevelsRRR:
         price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(102, 103)])
         assert _levels_mtf(price, [], h1_map, ACTION_BUY) is None
 
+    def test_buy_swaps_tp_when_target_beyond_tp2_projection(self):
+        # Supply zone di 120 melewati proyeksi TP2 (1:3) -> TP1/TP2 ditukar agar
+        # target terdekat jadi TP1: entry < TP1 < TP2 tetap terjaga.
+        price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(120, 122)])
+        entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_BUY)
+        sl_dist = price - sl
+        assert tp1 == pytest.approx(price + 3 * sl_dist)
+        assert tp2 == pytest.approx(120.0)
+        assert sl < entry < tp1 < tp2
+
     def test_sell_valid_target_uses_nearest_demand_zone(self):
         price, h1_map = 100.0, self._map(demand=[(93, 95)], supply=[(101, 103)])
         entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_SELL)
@@ -353,6 +363,16 @@ class TestLevelsRRR:
     def test_sell_blocked_by_demand_zone_returns_none(self):
         price, h1_map = 100.0, self._map(demand=[(98, 99)], supply=[(101, 103)])
         assert _levels_mtf(price, [], h1_map, ACTION_SELL) is None
+
+    def test_sell_swaps_tp_when_target_beyond_tp2_projection(self):
+        # Demand zone di 82 melewati proyeksi TP2 (1:3) -> TP1/TP2 ditukar agar
+        # target terdekat jadi TP1: entry > TP1 > TP2 tetap terjaga.
+        price, h1_map = 100.0, self._map(demand=[(80, 82)], supply=[(101, 103)])
+        entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_SELL)
+        sl_dist = sl - price
+        assert tp1 == pytest.approx(price - 3 * sl_dist)
+        assert tp2 == pytest.approx(82.0)
+        assert sl > entry > tp1 > tp2
 
     def test_neutral_fallback_fixed_levels(self):
         price = 100.0

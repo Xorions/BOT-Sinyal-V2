@@ -561,6 +561,9 @@ def _rr_targets(price: float, sl: float, targets: List[float], zones: List[Dict]
       Entry +/- (jarak SL x RRR_MIN) HANYA bila tidak terhalang zona kuat.
       Jika tetap tidak valid -> return None (Bad RR, sinyal dibatalkan NEUTRAL).
     - TP2 selalu proyeksi Entry +/- (jarak SL x RRR_TP2).
+    - Urutan dijamin TP1 lebih dekat dari TP2: BUY -> entry < TP1 < TP2,
+      SELL -> entry > TP1 > TP2 (bila target struktur melewati proyeksi TP2,
+      posisi TP1/TP2 ditukar agar target terdekat selalu jadi TP1).
     """
     sl_dist = abs(price - sl)
     if sl_dist <= 0:
@@ -571,25 +574,33 @@ def _rr_targets(price: float, sl: float, targets: List[float], zones: List[Dict]
     if action == ACTION_SELL:
         tp2 = price - rr2_dist
         if not targets:
-            return price - rr1_dist, tp2
-        nearest = targets[0]
-        if price - nearest >= rr1_dist:
-            return nearest, tp2
-        tp1_proj = price - rr1_dist
-        if _blocked_by_zone(tp1_proj, price, zones, "demand"):
-            return None
-        return tp1_proj, tp2
+            tp1 = price - rr1_dist
+        else:
+            nearest = targets[0]
+            if price - nearest >= rr1_dist:
+                tp1 = nearest
+            else:
+                tp1 = price - rr1_dist
+                if _blocked_by_zone(tp1, price, zones, "demand"):
+                    return None
+        if tp1 < tp2:
+            tp1, tp2 = tp2, tp1
+        return tp1, tp2
 
     tp2 = price + rr2_dist
     if not targets:
-        return price + rr1_dist, tp2
-    nearest = targets[0]
-    if nearest - price >= rr1_dist:
-        return nearest, tp2
-    tp1_proj = price + rr1_dist
-    if _blocked_by_zone(price, tp1_proj, zones, "supply"):
-        return None
-    return tp1_proj, tp2
+        tp1 = price + rr1_dist
+    else:
+        nearest = targets[0]
+        if nearest - price >= rr1_dist:
+            tp1 = nearest
+        else:
+            tp1 = price + rr1_dist
+            if _blocked_by_zone(price, tp1, zones, "supply"):
+                return None
+    if tp1 > tp2:
+        tp1, tp2 = tp2, tp1
+    return tp1, tp2
 
 
 def _levels_mtf(
