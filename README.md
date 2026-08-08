@@ -77,7 +77,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (71 kasus)
+tests/                     # pytest (88 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -179,6 +179,8 @@ Di `bot._eligible_pair()`:
 ```
 
 Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
+
+Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blok koin** (`telegram_sender._split_signal_blocks`): setiap chunk berisi koin-koin **utuh** (tidak ada koin terpotong di tengah, mis. judul `#VIRTUAL` terpisah dari detailnya). Footer `⚠️ Disclaimer` selalu menempel di akhir sinyal koin terakhir (chunk terakhir).
 
 ## Evaluasi Sinyal Sesi Sebelumnya (Daily Recap)
 

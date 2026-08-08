@@ -27,7 +27,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (71 kasus)
+tests/                     # pytest (88 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -101,6 +101,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 - **Alasan wajib MTF (kelompok per timeframe)**: baris pertama `📝` = headline zona H1 (mis. "Demand Zone & Bullish OB H1 Tersentuh"). Alasan berikutnya dipakai `engine._group_reason_lines()`: tag `+ [H4]`/`+ [H1]`/`+ [M15]` ditulis **1x** sebagai header grup (indent 4 spasi); sub-alasan berindent **7 spasi + `- `**. Grup dgn 1 item → inline (`+ [H4] Tren utama Bullish`); banyak item → header lalu daftar `- ...`. Baris non-tag (momentum) dicetak ber-prefix `💸` sebagai baris terpisah.
 - Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
 - Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
+- **Pecah pesan >4000 karakter**: `telegram_sender._split_signal_blocks()` memotong **per blok koin** (batas judul `#BASE`) agar tidak ada koin terpotong di tengah; footer Disclaimer tetap di akhir sinyal koin terakhir. Jangan menggantinya dengan pemotongan string asal di tengah baris.
 
 ## 7. Panduan Pengembangan
 
@@ -127,7 +128,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 69 test
+venv\Scripts\python.exe -m pytest tests -v   # 88 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 
