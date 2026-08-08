@@ -1,20 +1,20 @@
 name: Crypto Day Trading Briefing v2
 
 # 2x sehari (Opsi A — Day Trading, MTF SMC + S&D):
-#   - Sesi Siang: 13:30 WIB  = 06:30 UTC  -> cron "30 6 * * *"
-#   - Sesi Malam: 19:00 WIB  = 12:00 UTC  -> cron "0 12 * * *"
+#   - Sesi Siang: 13:30 WIB  = 06:30 UTC
+#   - Sesi Malam: 19:00 WIB  = 12:00 UTC
+# Jadwal dipicu dari luar (Cron-Job.org -> API workflow_dispatch) karena cron
+# schedule internal GitHub tidak presisi (bisa molor berjam-jam). `schedule:`
+# sengaja dihapus agar tidak ada pemicu ganda / briefing dobel.
 # Evaluasi sinyal sesi sebelumnya (history.json) dieksekusi di awal tiap run
 # sebelum briefing baru, via build_recap() di bot.py.
 on:
-  schedule:
-    - cron: "30 6 * * *"
-    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
-# Mencegah tumpang-tindih (cron + manual) agar history.json tidak race
+# Mencegah tumpang-tindih (pemicu terjadwal + manual) agar history.json tidak race
 concurrency:
   group: daily-briefing
   cancel-in-progress: false
