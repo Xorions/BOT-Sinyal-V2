@@ -58,6 +58,14 @@ RRR_TP2: float = _env_float("RRR_TP2", 3.0)
 # Buffer SL di luar zona Demand/Supply terdekat (0.3% = 0.003).
 SL_BUFFER_PCT: float = _env_float("SL_BUFFER_PCT", 0.003)
 
+# Jarak SL MINIMAL dari Entry (dalam % harga) — SL yang terlalu dekat (<1%)
+# rawan tersapu noise pasar (contoh VIRTUAL -0.63%, DASH -0.84%). Bila zona
+# memberi SL lebih dekat dari batas ini, SL dipaksa menjauh ke batas minimum.
+SL_MIN_DIST_PCT: float = _env_float("SL_MIN_DIST_PCT", 0.015)
+# Pengali ATR(H1) untuk jarak SL dinamis: jarak SL = max(SL_MIN_DIST_PCT,
+# SL_ATR_MULT * ATR/price) sehingga koin volatil dapat SL lebih lebar.
+SL_ATR_MULT: float = _env_float("SL_ATR_MULT", 1.0)
+
 # --- Bobot kategori skoring (jumlah harus 1.0) ---
 # Prioritas day trading MTF: SMC + S&D (kompas H4/D1 + zona H1) paling besar.
 WEIGHT_TECHNICAL: float = _env_float("WEIGHT_TECHNICAL", 0.20)
@@ -65,6 +73,13 @@ WEIGHT_SMC: float = _env_float("WEIGHT_SMC", 0.40)
 WEIGHT_SENTIMENT: float = _env_float("WEIGHT_SENTIMENT", 0.15)
 WEIGHT_WHALE: float = _env_float("WEIGHT_WHALE", 0.15)
 WEIGHT_ONCHAIN: float = _env_float("WEIGHT_ONCHAIN", 0.10)
+
+# Batas maksimum skor kategori "sentimen" (Fear&Greed + funding + L/S).
+# Sentimen adalah bias pasar (regime), bukan penentu arah: tanpa cap, kondisi
+# Fear(30)+funding negatif+L/S rendah bisa memberi +0.9 seragam ke SEMUA koin
+# sehingga setup bearish yang jelas pun gagal jadi SELL. Cap membuat arah
+# ditentukan oleh setup SMC/teknikal, sentimen hanya sebagai pelengkap.
+SENTIMENT_MAX: float = _env_float("SENTIMENT_MAX", 0.5)
 
 # --- Ambang data on-chain (whale transfer, dalam USD) ---
 WHALE_MIN_USD: float = _env_float("WHALE_MIN_USD", 5_000_000)

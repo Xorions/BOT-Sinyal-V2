@@ -26,11 +26,25 @@ MTF_LIMITS = {
     INTERVAL_M15: 200,
 }
 
+# Durasi tiap interval (ms) — dipakai evaluasi sinyal: ambil candle mulai sesi sinyal.
+INTERVAL_MS = {
+    INTERVAL_M15: 15 * 60 * 1000,
+    INTERVAL_1H: 60 * 60 * 1000,
+    INTERVAL_4H: 4 * 60 * 60 * 1000,
+    INTERVAL_1D: 24 * 60 * 60 * 1000,
+}
 
-def _klines(symbol: str, interval: str, limit: int) -> List[Dict[str, float]]:
-    """Fetch kline Binance dan ubah menjadi list dict {open, high, low, close, volume}."""
+
+def _klines(symbol: str, interval: str, limit: int, start_time: Optional[int] = None) -> List[Dict[str, float]]:
+    """Fetch kline Binance dan ubah menjadi list dict {open, high, low, close, volume}.
+
+    `start_time` (ms epoch) opsional: kembalikan kline dengan openTime >= start_time
+    (untuk evaluasi presisi: harga hanya dari SETELAH sesi sinyal, bukan 24j rolling).
+    """
     url = f"{BINANCE_BASE_URL}/api/v3/klines"
     params = {"symbol": symbol, "interval": interval, "limit": limit}
+    if start_time is not None:
+        params["startTime"] = int(start_time)
     rows = http_get_json(url, params, source="binance")
     out: List[Dict[str, float]] = []
     for row in rows:
@@ -52,6 +66,18 @@ def _klines(symbol: str, interval: str, limit: int) -> List[Dict[str, float]]:
 def get_klines(symbol: str, interval: str = INTERVAL_1D, limit: int = 60) -> List[Dict[str, float]]:
     """Candle OHLCV untuk satu pair. Default daily (60 bar = ~2 bulan)."""
     return _klines(symbol, interval, limit)
+
+
+def get_klines_since(symbol: str, interval: str, since, limit: int = 1000) -> List[Dict[str, float]]:
+    """Candle OHLCV mulai `since` (datetime WIB/aware) sampai sekarang.
+
+    Dipakai evaluasi sinyal sesi sebelumnya: high/low dihitung HANYA dari candle
+    setelah sesi sinyal, bukan dari ticker 24j rolling (yang bisa mencakup
+    pergerakan harga SEBELUM entry). Mundur satu interval agar candle yang sedang
+    berjalan saat entry ikut dihitung.
+    """
+    start_ms = int(since.timestamp() * 1000) - INTERVAL_MS.get(interval, INTERVAL_MS[INTERVAL_M15])
+    return _klines(symbol, interval, limit, start_time=start_ms)
 
 
 def get_klines_multi(symbol: str, limits: Optional[Dict[str, int]] = None) -> Dict[str, List[Dict[str, float]]]:

@@ -1,11 +1,14 @@
 """Test evaluasi sinyal sesi sebelumnya + penyimpanan riwayat (tanpa network)."""
 
+from datetime import datetime
+
 from engine import Signal
 from evaluation import (
     STATUS_FLOATING,
     STATUS_SL,
     STATUS_TP1,
     STATUS_TP2,
+    WIB,
     add_signals_today,
     build_recap,
     evaluate_signal,
@@ -109,6 +112,28 @@ class TestHistory:
         assert sigs
 
 
+class TestSessionSince:
+    def test_parses_session_key_wib(self):
+        from evaluation import _session_since
+
+        since = _session_since("2026-08-07 13:30")
+        assert since == datetime(2026, 8, 7, 13, 30, tzinfo=WIB)
+        assert since.tzinfo is not None
+
+    def test_parses_old_date_key_to_midnight(self):
+        from evaluation import _session_since
+
+        since = _session_since("2026-08-06")
+        assert since == datetime(2026, 8, 6, 0, 0, tzinfo=WIB)
+
+    def test_unknown_key_returns_none(self):
+        from evaluation import _session_since
+
+        assert _session_since("garbage") is None
+        assert _session_since(None) is None
+        assert _session_since("") is None
+
+
 class TestBuildRecap:
     HISTORY = {
         "2026-08-06 13:30": [
@@ -118,7 +143,8 @@ class TestBuildRecap:
         ]
     }
 
-    def _fetch(self, pair):
+    def _fetch(self, pair, since=None):
+        assert since is not None  # build_recap wajib meneruskan waktu sesi sinyal
         return {
             "BTCUSDT": (121.0, 95.0, 115.0),  # TP2 (high >= tp2)
             "LITUSDT": (54.0, 44.0, 52.0),  # SL (low <= sl)
@@ -155,7 +181,7 @@ class TestBuildRecap:
 
     def test_recap_floating_includes_pnl(self):
         history = {"2026-08-06 13:30": [_sig("BUY", 100.0, 90.0, 110.0, 120.0)]}
-        recap = build_recap(history, lambda pair: (105.0, 95.0, 102.0), now_key="2026-08-07 13:30")
+        recap = build_recap(history, lambda pair, since=None: (105.0, 95.0, 102.0), now_key="2026-08-07 13:30")
         assert recap is not None
         assert "📋 Harga saat ini $102.00 (+2.00%)" in recap
 
@@ -164,4 +190,15 @@ class TestBuildRecap:
 
     def test_recap_none_when_all_fetch_fail(self):
         history = {"2026-08-06 13:30": [_sig()]}
-        assert build_recap(history, lambda pair: None, now_key="2026-08-07 13:30") is None
+        assert build_recap(history, lambda pair, since=None: None, now_key="2026-08-07 13:30") is None
+
+    def test_recap_passes_session_time_to_fetch(self):
+        captured = {}
+
+        def fetch(pair, since=None):
+            captured["since"] = since
+            return (105.0, 95.0, 100.0)
+
+        history = {"2026-08-06 13:30": [_sig()]}
+        build_recap(history, fetch, now_key="2026-08-07 13:30")
+        assert captured["since"] == datetime(2026, 8, 6, 13, 30, tzinfo=WIB)

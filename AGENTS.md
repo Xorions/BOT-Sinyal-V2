@@ -27,7 +27,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (88 kasus)
+tests/                     # pytest (97 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -78,6 +78,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 ## 4. Data: Binance & Sumber Lain
 
 - **MTF**: `get_klines_multi(symbol)` mengembalikan `{interval: [candle, ...]}` untuk `1d`, `4h`, `1h`, `15m` (konstanta `INTERVAL_1D/4H/1H/M15`, limit default `MTF_LIMITS`). Satu interval gagal → interval itu dilewati, analisa tetap jalan (sinyal di-skip).
+- **Evaluasi presisi**: `get_klines_since(symbol, interval, since)` memakai `startTime` API — candle mulai `since` (datetime WIB-aware, mundur 1 interval agar candle yang berjalan ikut dihitung). `INTERVAL_MS` memetakan interval → durasi ms.
 - `get_ticker_24h(symbol)` → `ticker_24h` di `bot.py` (1 panggilan agregat).
 - CMC opsional (free tier): tanpa candle historis; bila kosong → fallback semua pasangan USDT by volume Binance.
 - `get_funding_rate` / `get_long_short_ratio` (futures): diprobe sekali murah; bila gagal → sentiment pakai Fear & Greed saja.
@@ -86,7 +87,8 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 ## 5. Evaluasi Sinyal & Riwayat (`evaluation.py`) — aturan baku
 
 - **`add_signals_today()`** dipanggil di `bot.py` **setelah pesan berhasil dikirim** — menyimpan sinyal terpilih sesi itu ke `data/history.json` (key sesi WIB `YYYY-MM-DD HH:MM`; kunci lama `YYYY-MM-DD` tetap didukung).
-- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (`previous_session_signals`, robust terhadap hari/sesi kosong), mengambil `(high, low, current)` 24j via `fetch_fn` (dari `binance.get_ticker_24h`), lalu menentukan status.
+- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (`previous_session_signals`, robust terhadap hari/sesi kosong), mengambil `(high, low, current)` via `fetch_fn` (dari `binance.get_klines_since` — kline M15 sejak sesi sinyal), lalu menentukan status.
+- **Presisi evaluasi**: `build_recap` meng-parse kunci sesi WIB ke datetime (`_session_since`) dan meneruskannya sebagai `since` ke `fetch_fn(pair, since)`. `bot._range_since()` menghitung high/low HANYA dari candle **setelah sesi sinyal** (bukan ticker 24j rolling yang bisa mencakup pergerakan harga SEBELUM entry). Fallback otomatis ke ticker 24j (`_ticker_range`) bila klines sejak-sesi gagal / kosong.
 - Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari **seluruh** sinyal yang dievaluasi (Floating ikut penyebut). Nilai SL/TP dari `history.json`.
 - **Format recap**: statistik di baris terpisah (`🏆 Win rate` → `💰 TP1` → `🎯 TP2` → `🛡️ SL` → `⏳ Floating`), lalu pemisah `───`, lalu tiap sinyal = `#BASE AKSI` + `🔑 Entry $.. → <emoji> STATUS` + `📋 Hit <STATUS> di $..` (floating: `📋 Harga saat ini $..`). Harga acuan disimpan sebagai `ref` oleh `_evaluate()`; `STATUS_EMOJI`: TP2=🎯, TP1=💰, SL=🛡️, FLOATING=⏳.
@@ -128,7 +130,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 88 test
+venv\Scripts\python.exe -m pytest tests -v   # 97 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 

@@ -120,6 +120,22 @@ def previous_session_signals(history: Dict[str, List[Dict]], now_key: Optional[s
     return date, history[date]
 
 
+def _session_since(key: Optional[str]) -> Optional[datetime]:
+    """Parse kunci sesi WIB (`YYYY-MM-DD HH:MM` atau `YYYY-MM-DD`) -> datetime WIB-aware.
+
+    Dipakai sebagai `since` evaluasi: high/low dihitung HANYA dari candle setelah
+    sesi sinyal, bukan ticker 24j rolling. Kunci tak dikenal -> None (fallback).
+    """
+    if not key:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(key, fmt).replace(tzinfo=WIB)
+        except ValueError:
+            continue
+    return None
+
+
 # ---------------------------------------------------------------- evaluasi
 def _evaluate(sig: Dict, high: float, low: float, current: float):
     """(status, harga acuan) berdasar high/low/current 24j terakhir.
@@ -165,15 +181,17 @@ def _pnl_pct(sig: Dict, ref: Optional[float]) -> str:
     return f"{pct:+.2f}%"
 
 
-def evaluate_signals(signals: List[Dict], fetch_fn) -> List[Dict]:
+def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = None) -> List[Dict]:
     """Isi 'status' + 'ref' (harga acuan) tiap sinyal.
 
-    fetch_fn(pair) -> (high, low, current) atau None.
+    fetch_fn(pair, since) -> (high, low, current) atau None.
+    `since` = waktu sesi sinyal (WIB-aware) bila tersedia; pemanggil data boleh
+    memakainya untuk menghitung high/low hanya dari candle SETELAH sesi sinyal.
     """
     out: List[Dict] = []
     for sig in signals:
         try:
-            high_low_cur = fetch_fn(sig["symbol"])
+            high_low_cur = fetch_fn(sig["symbol"], since)
         except Exception:
             high_low_cur = None
         if not high_low_cur:
@@ -190,11 +208,14 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     """Teks ringkasan evaluasi sinyal sesi sebelumnya; None bila tak ada riwayat / semua gagal.
 
     Win rate = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi.
+    `since` (dari kunci sesi) diteruskan ke `fetch_fn` agar high/low hanya dihitung
+    dari candle SETELAH sesi sinyal — bukan 24j rolling yang bisa mencakup harga pra-entry.
     """
     date, signals = previous_session_signals(history, now_key or today)
     if not signals:
         return None
-    results = evaluate_signals(signals, fetch_fn)
+    since = _session_since(date)
+    results = evaluate_signals(signals, fetch_fn, since=since)
     evaluated = [r for r in results if r["status"]]
     if not evaluated:
         return None

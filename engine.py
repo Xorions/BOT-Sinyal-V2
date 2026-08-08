@@ -25,7 +25,10 @@ from config import (
     RRR_MIN,
     RRR_TP2,
     SELL_THRESHOLD,
+    SENTIMENT_MAX,
+    SL_ATR_MULT,
     SL_BUFFER_PCT,
+    SL_MIN_DIST_PCT,
     TOP_SIGNALS,
     WEIGHT_ONCHAIN,
     WEIGHT_SENTIMENT,
@@ -265,6 +268,30 @@ def _dist_pct(price: float, level: Optional[float]) -> Optional[float]:
     return abs((level - price) / price) * 100.0
 
 
+def _atr(candles: List[Dict[str, float]], period: int = 14) -> Optional[float]:
+    """Average True Range (H1) — ukuran volatilitas untuk SL dinamis.
+
+    Defensif terhadap candle tanpa field close (cukup pakai high/low bila ada).
+    """
+    trs: List[float] = []
+    prev_close: Optional[float] = None
+    for candle in candles:
+        high = candle.get("high")
+        low = candle.get("low")
+        if high is None or low is None:
+            continue
+        if prev_close is None:
+            close = candle.get("close")
+            prev_close = close if close is not None else None
+            continue
+        trs.append(max(high - low, abs(high - prev_close), abs(low - prev_close)))
+        close = candle.get("close")
+        prev_close = close if close is not None else prev_close
+    if len(trs) < period:
+        return None
+    return sum(trs[-period:]) / period
+
+
 def score_smc_mtf(
     h4_candles: List[Dict[str, float]],
     d1_candles: List[Dict[str, float]],
@@ -354,7 +381,12 @@ def score_smc_mtf(
 
 # ---------------------------------------------------------------- sentiment / whale / onchain
 def score_sentiment(fg_value: float, funding_rates: List[float], ls_ratio: Optional[float]) -> tuple:
-    """Fear&Greed (contrarian) + funding rate + long/short ratio -> -1.0..+1.0."""
+    """Fear&Greed (contrarian) + funding rate + long/short ratio -> -1.0..+1.0.
+
+    Hasil di-cap ke ±SENTIMENT_MAX: sentimen adalah bias regime, tidak boleh
+    menenggelamkan arah setup SMC/teknikal (mis. di Fear semua koin diberi bias
+    positif seragam sehingga setup bearish yang jelas pun gagal jadi SELL).
+    """
     reasons: List[str] = []
     score = score_fear_greed(fg_value)
     reasons.append(f"Fear&Greed {fg_value:.0f}")
@@ -377,7 +409,8 @@ def score_sentiment(fg_value: float, funding_rates: List[float], ls_ratio: Optio
             reasons.append(f"L/S ratio {ls_ratio:.2f} = dominan short")
             score += 0.20
 
-    return max(-1.0, min(1.0, score)), reasons
+    score = max(-SENTIMENT_MAX, min(SENTIMENT_MAX, score))
+    return score, reasons
 
 
 def score_whale(flow: Optional[Dict[str, float]]) -> tuple:
@@ -613,7 +646,9 @@ def _levels_mtf(
     """Entry/SL/TP1/TP2 dengan RRR wajib minimal 1:1.5 (TP1) & 1:3 (TP2).
 
     - SL: di bawah Demand/Support H1 terdekat (BUY) / di atas Supply/Resistance
-      H1 terdekat (SELL), buffer SL_BUFFER_PCT (0.3%) di luar zona.
+      H1 terdekat (SELL), buffer SL_BUFFER_PCT (0.3%) di luar zona. Jarak SL
+      dipaksa minimal max(SL_MIN_DIST_PCT, SL_ATR_MULT * ATR/price) agar SL
+      yang terlalu dekat (<1%) tidak tersapu noise pasar.
     - TP1: target struktur H1 terdekat bila jarak TP1 >= RRR_MIN x jarak SL;
       else paksa proyeksi Entry +/- (jarak SL x RRR_MIN) bila tidak terhalang
       zona Supply/Demand kuat. Bila terhalang -> return None (sinyal dibatalkan).
@@ -627,12 +662,19 @@ def _levels_mtf(
     ob_bull = [b for b in h1_map.get("order_blocks", []) if b["type"] == "bullish"]
     ob_bear = [b for b in h1_map.get("order_blocks", []) if b["type"] == "bearish"]
 
+    atr = _atr(h1_candles) if h1_candles else None
+    min_sl_dist = SL_MIN_DIST_PCT * price
+    if atr:
+        min_sl_dist = max(min_sl_dist, SL_ATR_MULT * atr)
+
     if action == ACTION_BUY:
         sl_cands = [z["low"] for z in demand if z["low"] < price]
         sl_cands += [b["low"] for b in ob_bull if b["low"] < price]
         if levels and levels.get("support") is not None and levels["support"] < price:
             sl_cands.append(levels["support"])
         sl = max(sl_cands) * (1 - SL_BUFFER_PCT) if sl_cands else price * 0.96
+        if price - sl < min_sl_dist:
+            sl = price - min_sl_dist
         rr = _rr_targets(price, sl, _above_targets(price, h1_candles, h1_map), supply, ACTION_BUY)
         if rr is None:
             return None
@@ -643,6 +685,8 @@ def _levels_mtf(
         if levels and levels.get("resistance") is not None and levels["resistance"] > price:
             sl_cands.append(levels["resistance"])
         sl = min(sl_cands) * (1 + SL_BUFFER_PCT) if sl_cands else price * 1.04
+        if sl - price < min_sl_dist:
+            sl = price + min_sl_dist
         rr = _rr_targets(price, sl, _below_targets(price, h1_candles, h1_map), demand, ACTION_SELL)
         if rr is None:
             return None

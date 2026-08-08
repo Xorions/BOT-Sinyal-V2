@@ -151,11 +151,33 @@ def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale
 
 
 def _ticker_range(pair: str) -> Optional[tuple]:
-    """(high_24h, low_24h, current) untuk evaluasi sinyal kemarin; None bila gagal."""
+    """Fallback (high_24h, low_24h, current) dari ticker 24j; None bila gagal."""
     ticker = binance.get_ticker_24h(pair)
     if not ticker:
         return None
     return ticker["high_24h"], ticker["low_24h"], ticker["price"]
+
+
+def _range_since(pair: str, since=None) -> Optional[tuple]:
+    """(high, low, current) untuk evaluasi sinyal sesi sebelumnya.
+
+    Bila `since` (datetime WIB-aware) diberikan, high/low dihitung HANYA dari
+    candle M15 SETELAH sesi sinyal (`get_klines_since`) — bukan ticker 24j
+    rolling yang bisa mencakup pergerakan harga SEBELUM entry. Fallback ke
+    `_ticker_range` (24j) bila klines sejak-sesi gagal / tidak tersedia.
+    """
+    if since is not None:
+        try:
+            candles = binance.get_klines_since(pair, binance.INTERVAL_M15, since)
+        except DataSourceError:
+            candles = []
+        if candles:
+            return (
+                max(c["high"] for c in candles),
+                min(c["low"] for c in candles),
+                candles[-1]["close"],
+            )
+    return _ticker_range(pair)
 
 
 def run_scan() -> tuple:
@@ -227,7 +249,7 @@ def run_scan() -> tuple:
         market_note += f" · Whale net ETH ${whale_flow['net_usd'] / 1e6:+.1f}M"
 
     # Evaluasi sinyal sesi sebelumnya → pesan terpisah (History Review).
-    recap = build_recap(load_history(), _ticker_range)
+    recap = build_recap(load_history(), _range_since)
     briefing = format_message(ranked, timestamp, market_note)
     return recap, briefing, ranked, timestamp
 

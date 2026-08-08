@@ -77,7 +77,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (88 kasus)
+tests/                     # pytest (97 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -187,7 +187,7 @@ Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blo
 `evaluation.py` + `data/history.json`:
 
 - **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
-- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current 24j** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**.
+- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**. High/low dihitung dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j bila data sejak-sesi tidak tersedia.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP1/TP2/SL/Floating).
 - Recap dikirim sebagai **pesan Telegram terpisah** (History Review) sebelum blok `📊 DAY TRADING BRIEFING — MTF SMC + S&D`:
 
