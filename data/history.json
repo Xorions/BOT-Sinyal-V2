@@ -186,5 +186,109 @@
       "tp2": 1.7734,
       "timestamp": "Saturday, 08 Aug 2026, 08:51 WIB"
     }
+  ],
+  "2026-08-08 09:50": [
+    {
+      "symbol": "ERNUSDT",
+      "base": "ERN",
+      "action": "BUY",
+      "entry": 2.183,
+      "sl": 2.046841,
+      "tp1": 2.3872384999999996,
+      "tp2": 2.591476999999999,
+      "timestamp": "Saturday, 08 Aug 2026, 09:50 WIB"
+    },
+    {
+      "symbol": "LITUSDT",
+      "base": "LIT",
+      "action": "BUY",
+      "entry": 0.743,
+      "sl": 0.7228249999999999,
+      "tp1": 0.7732625000000001,
+      "tp2": 0.8035250000000002,
+      "timestamp": "Saturday, 08 Aug 2026, 09:50 WIB"
+    },
+    {
+      "symbol": "BICOUSDT",
+      "base": "BICO",
+      "action": "BUY",
+      "entry": 0.05896,
+      "sl": 0.05265157,
+      "tp1": 0.06842264499999999,
+      "tp2": 0.07788529,
+      "timestamp": "Saturday, 08 Aug 2026, 09:50 WIB"
+    },
+    {
+      "symbol": "MMTUSDT",
+      "base": "MMT",
+      "action": "BUY",
+      "entry": 0.1983,
+      "sl": 0.1863393,
+      "tp1": 0.21624105,
+      "tp2": 0.23418209999999998,
+      "timestamp": "Saturday, 08 Aug 2026, 09:50 WIB"
+    },
+    {
+      "symbol": "UTKUSDT",
+      "base": "UTK",
+      "action": "BUY",
+      "entry": 0.00795,
+      "sl": 0.007916179999999998,
+      "tp1": 0.0105,
+      "tp2": 0.008051460000000007,
+      "timestamp": "Saturday, 08 Aug 2026, 09:50 WIB"
+    }
+  ],
+  "2026-08-08 10:41": [
+    {
+      "symbol": "ERNUSDT",
+      "base": "ERN",
+      "action": "BUY",
+      "entry": 2.183,
+      "sl": 2.046841,
+      "tp1": 2.3872384999999996,
+      "tp2": 2.591476999999999,
+      "timestamp": "Saturday, 08 Aug 2026, 10:41 WIB"
+    },
+    {
+      "symbol": "LITUSDT",
+      "base": "LIT",
+      "action": "BUY",
+      "entry": 0.743,
+      "sl": 0.7228249999999999,
+      "tp1": 0.7732625000000001,
+      "tp2": 0.8035250000000002,
+      "timestamp": "Saturday, 08 Aug 2026, 10:41 WIB"
+    },
+    {
+      "symbol": "BICOUSDT",
+      "base": "BICO",
+      "action": "BUY",
+      "entry": 0.05606,
+      "sl": 0.05265157,
+      "tp1": 0.061172645,
+      "tp2": 0.06628529,
+      "timestamp": "Saturday, 08 Aug 2026, 10:41 WIB"
+    },
+    {
+      "symbol": "UTKUSDT",
+      "base": "UTK",
+      "action": "BUY",
+      "entry": 0.00795,
+      "sl": 0.007916179999999998,
+      "tp1": 0.008051460000000007,
+      "tp2": 0.0105,
+      "timestamp": "Saturday, 08 Aug 2026, 10:41 WIB"
+    },
+    {
+      "symbol": "LINKUSDT",
+      "base": "LINK",
+      "action": "BUY",
+      "entry": 8.237,
+      "sl": 8.162439,
+      "tp1": 8.348841500000002,
+      "tp2": 8.460683000000003,
+      "timestamp": "Saturday, 08 Aug 2026, 10:41 WIB"
+    }
   ]
 }
