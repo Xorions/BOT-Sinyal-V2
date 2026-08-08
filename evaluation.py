@@ -15,7 +15,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
-from engine import Signal, _fmt_price
+from engine import Signal, _esc, _fmt_price
 
 HISTORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 HISTORY_PATH = os.path.join(HISTORY_DIR, "history.json")
@@ -208,7 +208,7 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     win_rate = round(won / total * 100) if total else 0
 
     lines = [
-        f"<b>📊 EVALUASI SINYAL SESI SEBELUMNYA — {_display_key(date)}</b>",
+        f"<b>📊 EVALUASI SINYAL SESI SEBELUMNYA — {_esc(_display_key(date))}</b>",
         f"🏆 Win rate: <b>{win_rate}%</b> ({won}/{total})",
         f"💰 TP1: {tp1}",
         f"🎯 TP2: {tp2}",
@@ -220,10 +220,10 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
         status = r["status"]
         label = STATUS_LABEL[status]
         ref = r.get("ref")
-        ref_str = _fmt_price(ref) if ref is not None else "n/a"
-        pnl = _pnl_pct(r, ref)
-        lines.append(f"#{r['base']} {r['action']}")
-        lines.append(f"🔑 Entry {_fmt_price(r['entry'])} → {STATUS_EMOJI[status]} <b>{label}</b>")
+        ref_str = _esc(_fmt_price(ref)) if ref is not None else "n/a"
+        pnl = _esc(_pnl_pct(r, ref))
+        lines.append(f"#{_esc(r['base'])} {r['action']}")
+        lines.append(f"🔑 Entry {_esc(_fmt_price(r['entry']))} → {STATUS_EMOJI[status]} <b>{label}</b>")
         if status == STATUS_FLOATING:
             lines.append(f"📋 Harga saat ini {ref_str} ({pnl})")
         else:

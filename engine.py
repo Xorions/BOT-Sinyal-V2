@@ -15,6 +15,7 @@ Output: Signal (BUY/SELL/NEUTRAL) + confidence + Entry/SL/TP1/TP2 dari zona H1.
 """
 
 from dataclasses import dataclass, field
+from html import escape as _html_escape
 from typing import Dict, List, Optional
 
 from config import (
@@ -667,6 +668,11 @@ def _fmt_price(value: float) -> str:
     return f"${value:.6f}"
 
 
+def _esc(value) -> str:
+    """Escape karakter HTML (< > & ") agar aman untuk parse_mode=HTML Telegram."""
+    return _html_escape(str(value), quote=True)
+
+
 def _level_pct(entry: float, level: float, action: str) -> float:
     """Jarak % dari Entry ke level (SL/TP), positif = menguntungkan aksi."""
     if not entry:
@@ -698,13 +704,13 @@ def _group_reason_lines(reasons: List[str]) -> List[str]:
             standalone.append(reason)
     for tf, items in groups:
         if len(items) == 1:
-            out.append(f"    + [{tf}] {items[0]}")
+            out.append(f"    + [{_esc(tf)}] {_esc(items[0])}")
         else:
-            out.append(f"    + [{tf}] ")
+            out.append(f"    + [{_esc(tf)}] ")
             for item in items:
-                out.append(f"       - {item}")
+                out.append(f"       - {_esc(item)}")
     for line in standalone:
-        out.append(f"💸 {line}")
+        out.append(f"💸 {_esc(line)}")
     return out
 
 
@@ -712,16 +718,16 @@ def _signal_lines(sig: Signal) -> List[str]:
     b = sig.breakdown
     reason_lines = []
     if sig.reasons:
-        reason_lines.append("📝 " + sig.reasons[0])
+        reason_lines.append("📝 " + _esc(sig.reasons[0]))
         reason_lines.extend(_group_reason_lines(sig.reasons[1:]))
     else:
         reason_lines.append("📝 —")
     lines = [
-        f"<b>#{sig.base} ({sig.symbol})</b> — {sig.action} · Confidence {sig.confidence}%",
-        f"🔑 Entry: <b>{_fmt_price(sig.entry)}</b>",
-        f"🛡️ SL: <b>{_fmt_price(sig.sl)}</b> ({_level_pct(sig.entry, sig.sl, sig.action):+.2f}%)",
-        f"🎯 TP1: <b>{_fmt_price(sig.tp1)}</b> ({_level_pct(sig.entry, sig.tp1, sig.action):+.2f}%)",
-        f"🎯 TP2: <b>{_fmt_price(sig.tp2)}</b> ({_level_pct(sig.entry, sig.tp2, sig.action):+.2f}%)",
+        f"<b>#{_esc(sig.base)} ({_esc(sig.symbol)})</b> — {sig.action} · Confidence {sig.confidence}%",
+        f"🔑 Entry: <b>{_esc(_fmt_price(sig.entry))}</b>",
+        f"🛡️ SL: <b>{_esc(_fmt_price(sig.sl))}</b> ({_level_pct(sig.entry, sig.sl, sig.action):+.2f}%)",
+        f"🎯 TP1: <b>{_esc(_fmt_price(sig.tp1))}</b> ({_level_pct(sig.entry, sig.tp1, sig.action):+.2f}%)",
+        f"🎯 TP2: <b>{_esc(_fmt_price(sig.tp2))}</b> ({_level_pct(sig.entry, sig.tp2, sig.action):+.2f}%)",
         f"💹 24j: {sig.pct_change_24h:+.2f}%",
         *reason_lines,
         f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (Tek {b['teknikal']:+.2f} · SMC {b['smc']:+.2f} · Sent {b['sentimen']:+.2f} · Whale {b['whale']:+.2f} · Onch {b['onchain']:+.2f})",
@@ -738,12 +744,12 @@ def format_message(signals: List[Signal], timestamp: str, market_note: str = "")
     neutrals = [s for s in signals if s.action == ACTION_NEUTRAL]
 
     lines = [
-        "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&D</b>",
-        f"🕐 {timestamp}",
+        "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&amp;D</b>",
+        f"🕐 {_esc(timestamp)}",
         "⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15",
     ]
     if market_note:
-        lines.append(f"🌐 {market_note}")
+        lines.append(f"🌐 {_esc(market_note)}")
     lines.append("")
 
     for label, group in (
@@ -758,5 +764,5 @@ def format_message(signals: List[Signal], timestamp: str, market_note: str = "")
         for sig in group:
             lines.extend(_signal_lines(sig))
 
-    lines.append(DISCLAIMER)
+    lines.append(_esc(DISCLAIMER))
     return "\n".join(lines)

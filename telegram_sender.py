@@ -1,5 +1,8 @@
 """Mengirim pesan ke Telegram via Bot API (HTTP langsung, tanpa library besar)."""
 
+import html
+import re
+
 import requests
 
 from config import REQUEST_TIMEOUT, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
@@ -40,6 +43,12 @@ def _chunk_text(text: str, limit: int = 4000) -> list:
     return chunks
 
 
+def _strip_html(text: str) -> str:
+    """Hapus tag HTML & unescape entity untuk fallback plain text."""
+    text = re.sub(r"<[^>]+>", "", text)
+    return html.unescape(text)
+
+
 def send_telegram(text: str, chat_id: str = "") -> None:
     token = TELEGRAM_BOT_TOKEN.strip()
     chat = (chat_id or TELEGRAM_CHAT_ID).strip()
@@ -55,5 +64,12 @@ def send_telegram(text: str, chat_id: str = "") -> None:
             "disable_web_page_preview": True,
         }
         resp = requests.post(url, json=payload, timeout=REQUEST_TIMEOUT)
+        if resp.status_code == 400:
+            plain = {
+                "chat_id": chat,
+                "text": _strip_html(chunk),
+                "disable_web_page_preview": True,
+            }
+            resp = requests.post(url, json=plain, timeout=REQUEST_TIMEOUT)
         if resp.status_code != 200:
             raise TelegramSendError(f"Telegram API error {resp.status_code}: {resp.text[:200]}")
