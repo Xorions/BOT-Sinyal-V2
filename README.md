@@ -107,6 +107,7 @@ Alur perhitungan (`_levels_mtf` → `_rr_targets`):
 3. **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **dengan syarat** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). 
 4. Bila target H1 terdekat **terlalu dekat** (TP1 < `RRR_MIN` x SL): paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) — **hanya bila tidak terhalang zona Supply/Demand kuat** di antara Entry dan proyeksi TP1. Bila terhalang → `_levels_mtf` mengembalikan `None` → **sinyal di-reject menjadi NEUTRAL** (alasan `[RR]` ditambahkan).
 5. **TP2** = Entry ± (jarak SL x `RRR_TP2`).
+6. **Urutan TP dijamin** (`_rr_targets`): TP1 selalu target **terdekat**. Bila target struktur H1 melewati proyeksi TP2 (1:3), posisi TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`.
 
 Contoh BUY: Entry $102, SL $99.70 (Demand $100 − 0.3%), jarak SL 2.30% → TP1 minimal $105.45 (1:1.5), TP2 $108.90 (1:3).
 

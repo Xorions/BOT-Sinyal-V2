@@ -62,6 +62,7 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 - **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **hanya bila** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). Bila target terdekat terlalu dekat (< 1:1.5), paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) **hanya bila tidak terhalang** zona Supply/Demand kuat (`_blocked_by_zone`).
 - **Terhalang → reject**: `_rr_targets` mengembalikan `None` → `_levels_mtf` `None` → `assemble_signal` mengubah sinyal jadi **NEUTRAL** dan menambah alasan `[RR]`. Helper target: `_above_targets` (BUY) / `_below_targets` (SELL).
 - **TP2** = Entry ± (jarak SL x `RRR_TP2`).
+- **Urutan TP1/TP2 dijamin** (di `_rr_targets`): TP1 selalu target terdekat. Bila target struktur melewati proyeksi TP2 (1:3), TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`. Uji: `TestLevelsRRR::test_buy/sell_swaps_tp_when_target_beyond_tp2_projection`.
 - Jangan menghapus cek RRR — ini penjaga minimal risk/reward; bila cek diubah, sesuaikan `tests/test_engine.py::TestLevelsRRR`.
 
 ## 3. Filter aset (aturan baku — jangan diubah tanpa alasan)
