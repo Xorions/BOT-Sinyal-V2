@@ -21,7 +21,10 @@ from config import (
     BUY_THRESHOLD,
     CONFIDENCE_BASE,
     DISCLAIMER,
+    RRR_MIN,
+    RRR_TP2,
     SELL_THRESHOLD,
+    SL_BUFFER_PCT,
     TOP_SIGNALS,
     WEIGHT_ONCHAIN,
     WEIGHT_SENTIMENT,
@@ -47,7 +50,7 @@ from indicators.supply_demand import (
     nearest_demand,
     nearest_supply,
 )
-from indicators.support_resistance import nearest_levels
+from indicators.support_resistance import find_swings, nearest_levels
 
 ACTION_BUY = "BUY"
 ACTION_SELL = "SELL"
@@ -479,7 +482,13 @@ def assemble_signal(
         action = ACTION_NEUTRAL
 
     confidence = max(25, min(95, CONFIDENCE_BASE + int(abs(total) * 40)))
-    entry, sl, tp1, tp2 = _levels_mtf(price, h1_candles, h1_map, action)
+    rr_rejected = False
+    levels = _levels_mtf(price, h1_candles, h1_map, action)
+    if levels is None:
+        rr_rejected = True
+        action = ACTION_NEUTRAL
+        levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL)
+    entry, sl, tp1, tp2 = levels
     breakdown = {
         "teknikal": round(tech, 2),
         "smc": round(smc, 2),
@@ -488,6 +497,8 @@ def assemble_signal(
         "onchain": round(onchain, 2),
     }
     reasons = _build_reasons(action, h1_map, pct_change_24h, fg_value, smc_reasons, tech_reasons)
+    if rr_rejected:
+        reasons.append("[RR] Ditolak: Risk:Reward < 1:1.5 — target H1 terlalu dekat dengan Entry")
 
     return Signal(
         symbol=symbol,
@@ -506,16 +517,95 @@ def assemble_signal(
     )
 
 
+def _above_targets(price: float, h1_candles: List[Dict[str, float]], h1_map: Dict) -> List[float]:
+    """Kandidat target resistance di atas harga (BUY), urut menaik (terdekat dulu)."""
+    cands: List[float] = []
+    if h1_candles:
+        swings = find_swings([c["high"] for c in h1_candles], [c["low"] for c in h1_candles])
+        cands += [s["value"] for s in swings["highs"] if s["value"] > price]
+    cands += [z["low"] for z in h1_map.get("supply_zones", []) if z["low"] > price]
+    return sorted({round(c, 8) for c in cands})
+
+
+def _below_targets(price: float, h1_candles: List[Dict[str, float]], h1_map: Dict) -> List[float]:
+    """Kandidat target support di bawah harga (SELL), urut menurun (terdekat dulu)."""
+    cands: List[float] = []
+    if h1_candles:
+        swings = find_swings([c["high"] for c in h1_candles], [c["low"] for c in h1_candles])
+        cands += [s["value"] for s in swings["lows"] if s["value"] < price]
+    cands += [z["high"] for z in h1_map.get("demand_zones", []) if z["high"] < price]
+    return sorted({round(c, 8) for c in cands}, reverse=True)
+
+
+def _blocked_by_zone(lo: float, hi: float, zones: List[Dict], zone_type: str) -> bool:
+    """True bila zona kuat (supply/demand) memotong jalur harga [lo, hi].
+
+    - supply: zona di antara Entry dan proyeksi TP1 -> harga tertahan di zona.
+    - demand: zona di antara proyeksi TP1 dan Entry (arah SELL).
+    """
+    for z in zones:
+        if z.get("type") != zone_type:
+            continue
+        if zone_type == "supply" and lo < z["low"] < hi:
+            return True
+        if zone_type == "demand" and lo < z["high"] < hi:
+            return True
+    return False
+
+
+def _rr_targets(price: float, sl: float, targets: List[float], zones: List[Dict], action: str):
+    """TP1/TP2 dengan RRR wajib: TP1 >= RRR_MIN x SL, TP2 = RRR_TP2 x SL.
+
+    - TP1 di target struktur H1 terdekat bila jarak TP1 (%) >= RRR_MIN x jarak SL.
+    - Bila target terdekat terlalu dekat (< RRR_MIN x SL): paksa TP1 =
+      Entry +/- (jarak SL x RRR_MIN) HANYA bila tidak terhalang zona kuat.
+      Jika tetap tidak valid -> return None (Bad RR, sinyal dibatalkan NEUTRAL).
+    - TP2 selalu proyeksi Entry +/- (jarak SL x RRR_TP2).
+    """
+    sl_dist = abs(price - sl)
+    if sl_dist <= 0:
+        sl_dist = price * 0.001
+    rr1_dist = RRR_MIN * sl_dist
+    rr2_dist = RRR_TP2 * sl_dist
+
+    if action == ACTION_SELL:
+        tp2 = price - rr2_dist
+        if not targets:
+            return price - rr1_dist, tp2
+        nearest = targets[0]
+        if price - nearest >= rr1_dist:
+            return nearest, tp2
+        tp1_proj = price - rr1_dist
+        if _blocked_by_zone(tp1_proj, price, zones, "demand"):
+            return None
+        return tp1_proj, tp2
+
+    tp2 = price + rr2_dist
+    if not targets:
+        return price + rr1_dist, tp2
+    nearest = targets[0]
+    if nearest - price >= rr1_dist:
+        return nearest, tp2
+    tp1_proj = price + rr1_dist
+    if _blocked_by_zone(price, tp1_proj, zones, "supply"):
+        return None
+    return tp1_proj, tp2
+
+
 def _levels_mtf(
     price: float,
     h1_candles: List[Dict[str, float]],
     h1_map: Dict,
     action: str,
-) -> tuple:
-    """Entry/SL/TP1/TP2 dipetakan dari zona SMC/S&D H1 (fallback persentase).
+):
+    """Entry/SL/TP1/TP2 dengan RRR wajib minimal 1:1.5 (TP1) & 1:3 (TP2).
 
-    - BUY : SL di bawah Demand Zone / Bullish OB; TP dari resistance H1.
-    - SELL: SL di atas Supply Zone / Bearish OB; TP dari support H1.
+    - SL: di bawah Demand/Support H1 terdekat (BUY) / di atas Supply/Resistance
+      H1 terdekat (SELL), buffer SL_BUFFER_PCT (0.3%) di luar zona.
+    - TP1: target struktur H1 terdekat bila jarak TP1 >= RRR_MIN x jarak SL;
+      else paksa proyeksi Entry +/- (jarak SL x RRR_MIN) bila tidak terhalang
+      zona Supply/Demand kuat. Bila terhalang -> return None (sinyal dibatalkan).
+    - TP2: proyeksi Entry +/- (jarak SL x RRR_TP2).
     """
     highs = [c["high"] for c in h1_candles] if h1_candles else []
     lows = [c["low"] for c in h1_candles] if h1_candles else []
@@ -528,30 +618,27 @@ def _levels_mtf(
     if action == ACTION_BUY:
         sl_cands = [z["low"] for z in demand if z["low"] < price]
         sl_cands += [b["low"] for b in ob_bull if b["low"] < price]
-        sl = max(sl_cands) * 0.995 if sl_cands else price * 0.96
-        resistance = levels.get("resistance") if levels else None
-        dist_r = _dist_pct(price, resistance)
-        # TP day-trading: pakai resistance H1 bila dekat (<=4%), else target scalp 3%.
-        if resistance and resistance > price and dist_r is not None and dist_r <= 4.0:
-            tp1 = resistance
-        else:
-            tp1 = price * 1.03
-        tp2 = price + 2 * (tp1 - price)
+        if levels and levels.get("support") is not None and levels["support"] < price:
+            sl_cands.append(levels["support"])
+        sl = max(sl_cands) * (1 - SL_BUFFER_PCT) if sl_cands else price * 0.96
+        rr = _rr_targets(price, sl, _above_targets(price, h1_candles, h1_map), supply, ACTION_BUY)
+        if rr is None:
+            return None
+        tp1, tp2 = rr
     elif action == ACTION_SELL:
         sl_cands = [z["high"] for z in supply if z["high"] > price]
         sl_cands += [b["high"] for b in ob_bear if b["high"] > price]
-        sl = min(sl_cands) * 1.005 if sl_cands else price * 1.04
-        support = levels.get("support") if levels else None
-        dist_s = _dist_pct(support, price)
-        if support and support < price and dist_s is not None and dist_s <= 4.0:
-            tp1 = support
-        else:
-            tp1 = price * 0.97
-        tp2 = price - 2 * (price - tp1)
+        if levels and levels.get("resistance") is not None and levels["resistance"] > price:
+            sl_cands.append(levels["resistance"])
+        sl = min(sl_cands) * (1 + SL_BUFFER_PCT) if sl_cands else price * 1.04
+        rr = _rr_targets(price, sl, _below_targets(price, h1_candles, h1_map), demand, ACTION_SELL)
+        if rr is None:
+            return None
+        tp1, tp2 = rr
     else:
         sl = price * 0.97
-        tp1 = price * 1.03
-        tp2 = price * 1.06
+        tp1 = price * (1 + RRR_MIN * 0.03)
+        tp2 = price * (1 + RRR_TP2 * 0.03)
     return price, sl, tp1, tp2
 
 

@@ -2,11 +2,14 @@
 
 from typing import List
 
+import pytest
+
 from engine import (
     ACTION_BUY,
     ACTION_NEUTRAL,
     ACTION_SELL,
     Signal,
+    _levels_mtf,
     analyze_compass,
     analyze_trigger,
     assemble_signal,
@@ -57,50 +60,54 @@ def _neutral_series():
 
 
 def _demand_h1():
-    """H1 dengan Demand Zone [~100, ~104.4]; harga pullback masuk zona (~102)."""
+    """H1 dengan Demand Zone [~100, ~104]; Supply Zone [~106.2, ~110.2]; harga pullback di ~102."""
     candles = []
-    prev_close = 120.0
-    for i in range(10):
-        close = 112.0 - i * 0.5
+    prev_close = 112.0
+    for i in range(8):
+        close = 110.0 - i * 0.7
         o = prev_close
-        candles.append({"open": o, "high": max(o, close), "low": min(o, close) - 0.4, "close": close})
+        candles.append({"open": o, "high": max(o, close) + 0.2, "low": min(o, close) - 0.3, "close": close})
         prev_close = close
-    candles.append({"open": prev_close, "high": prev_close, "low": 100.0, "close": 104.0})
-    for c in (103.0, 103.5, 103.0):
-        o = c + 0.4
-        candles.append({"open": o, "high": c + 0.9, "low": c - 0.4, "close": c})
-    c = 104.0
-    for _ in range(7):
-        nxt = c + 3.5
-        candles.append({"open": c, "high": nxt + 1.0, "low": c - 0.5, "close": nxt})
-        c = nxt
-    for c in (126.0, 110.0, 105.0, 104.0, 103.0, 102.0):
-        o = c + 0.8
-        candles.append({"open": o, "high": o, "low": c - 0.4, "close": c})
+    candles.append({"open": prev_close, "high": prev_close + 0.1, "low": 100.0, "close": 101.0})
+    candles.append({"open": 101.0, "high": 101.4, "low": 100.2, "close": 101.2})
+    candles.append({"open": 101.2, "high": 101.6, "low": 100.8, "close": 101.4})
+    candles.append({"open": 101.4, "high": 104.0, "low": 101.4, "close": 103.5})
+    candles.append({"open": 103.5, "high": 106.0, "low": 103.5, "close": 105.5})
+    candles.append({"open": 105.5, "high": 110.0, "low": 105.5, "close": 109.0})
+    candles.append({"open": 109.0, "high": 110.2, "low": 108.6, "close": 109.2})
+    candles.append({"open": 109.2, "high": 109.4, "low": 108.0, "close": 108.4})
+    candles.append({"open": 108.4, "high": 108.6, "low": 106.4, "close": 107.0})
+    candles.append({"open": 107.0, "high": 107.2, "low": 106.2, "close": 106.4})
+    candles.append({"open": 106.4, "high": 106.6, "low": 106.0, "close": 106.2})
+    candles.append({"open": 106.2, "high": 106.4, "low": 104.0, "close": 104.4})
+    candles.append({"open": 104.4, "high": 104.6, "low": 102.0, "close": 102.4})
+    candles.append({"open": 102.4, "high": 102.6, "low": 101.6, "close": 102.0})
     return candles
 
 
 def _supply_h1():
-    """H1 dengan Supply Zone [~145.7, 150]; harga rally masuk zona (~148)."""
+    """H1 dengan Supply Zone [~146, 150]; Demand Zone [~141.6, 144]; harga rally masuk zona (~148)."""
     candles = []
-    prev_close = 100.0
-    for i in range(10):
-        close = 108.0 + i * 0.5
+    prev_close = 140.0
+    for i in range(8):
+        close = 142.0 + i * 0.7
         o = prev_close
-        candles.append({"open": o, "high": max(o, close), "low": min(o, close) - 0.4, "close": close})
+        candles.append({"open": o, "high": max(o, close) + 0.3, "low": min(o, close) - 0.2, "close": close})
         prev_close = close
-    candles.append({"open": prev_close, "high": 150.0, "low": prev_close, "close": 146.0})
-    for c in (147.0, 146.5, 147.0):
-        o = c - 0.4
-        candles.append({"open": o, "high": c + 0.5, "low": c - 0.8, "close": c})
-    c = 146.0
-    for _ in range(7):
-        nxt = c - 3.5
-        candles.append({"open": c, "high": c + 0.5, "low": nxt - 1.0, "close": nxt})
-        c = nxt
-    for c in (124.0, 140.0, 145.0, 146.0, 147.0, 148.0):
-        o = c - 0.8
-        candles.append({"open": o, "high": c + 0.4, "low": o, "close": c})
+    candles.append({"open": prev_close, "high": 150.0, "low": prev_close - 0.1, "close": 149.0})
+    candles.append({"open": 149.0, "high": 149.4, "low": 148.6, "close": 149.0})
+    candles.append({"open": 149.0, "high": 149.2, "low": 148.4, "close": 148.8})
+    candles.append({"open": 148.8, "high": 148.8, "low": 146.0, "close": 146.5})
+    candles.append({"open": 146.5, "high": 146.5, "low": 144.0, "close": 144.5})
+    candles.append({"open": 144.5, "high": 144.5, "low": 142.0, "close": 143.0})
+    candles.append({"open": 143.0, "high": 143.2, "low": 141.8, "close": 142.2})
+    candles.append({"open": 142.2, "high": 142.4, "low": 141.6, "close": 142.0})
+    candles.append({"open": 142.0, "high": 142.2, "low": 141.6, "close": 142.0})
+    candles.append({"open": 142.0, "high": 142.2, "low": 141.8, "close": 142.2})
+    candles.append({"open": 142.2, "high": 144.0, "low": 141.8, "close": 143.6})
+    candles.append({"open": 143.6, "high": 146.0, "low": 143.6, "close": 145.6})
+    candles.append({"open": 145.6, "high": 148.0, "low": 145.6, "close": 147.6})
+    candles.append({"open": 147.6, "high": 148.2, "low": 147.4, "close": 148.0})
     return candles
 
 
@@ -277,6 +284,115 @@ class TestLevels:
 
     def test_structure_detected(self):
         assert detect_structure(_candles_from_closes(_bullish_series()))["bos"] == "bullish"
+
+
+class TestLevelsRRR:
+    """Aturan RRR di `_levels_mtf`: SL zona + buffer, TP1 >= 1.5x SL, TP2 = 3x SL."""
+
+    @staticmethod
+    def _map(demand=(), supply=(), levels=None):
+        demand = [{"type": "demand", "low": lo, "high": hi} for lo, hi in demand]
+        supply = [{"type": "supply", "low": lo, "high": hi} for lo, hi in supply]
+        return {
+            "zones": demand + supply,
+            "demand_zones": demand,
+            "supply_zones": supply,
+            "order_blocks": [],
+            "levels": levels or {"support": None, "resistance": None},
+        }
+
+    def test_buy_valid_target_uses_nearest_supply_zone(self):
+        price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(105, 107)])
+        entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_BUY)
+        assert sl == pytest.approx(97 * (1 - 0.003))
+        assert tp1 == pytest.approx(105.0)
+        assert tp2 == pytest.approx(100 + 3 * (100 - sl))
+        assert sl < entry < tp1 < tp2
+
+    def test_buy_forced_projection_when_nearest_target_too_close(self):
+        # Swing high 102 terlalu dekat (< 1.5x SL) tapi tidak terhalang zona -> TP1 = proyeksi 1.5x SL.
+        candles = [
+            {"high": 99, "low": 98}, {"high": 100, "low": 99}, {"high": 101, "low": 100},
+            {"high": 102, "low": 100}, {"high": 101, "low": 99}, {"high": 100, "low": 98},
+            {"high": 99, "low": 97},
+        ]
+        price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[])
+        entry, sl, tp1, tp2 = _levels_mtf(price, candles, h1_map, ACTION_BUY)
+        sl_dist = price - sl
+        assert tp1 == pytest.approx(price + 1.5 * sl_dist)
+        assert tp2 == pytest.approx(price + 3 * (price - sl))
+        assert sl < entry < tp1 < tp2
+
+    def test_buy_blocked_by_supply_zone_returns_none(self):
+        # Supply zone di 102 terlalu dekat DAN terhalang -> sinyal dibatalkan.
+        price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(102, 103)])
+        assert _levels_mtf(price, [], h1_map, ACTION_BUY) is None
+
+    def test_sell_valid_target_uses_nearest_demand_zone(self):
+        price, h1_map = 100.0, self._map(demand=[(93, 95)], supply=[(101, 103)])
+        entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_SELL)
+        assert sl == pytest.approx(103 * (1 + 0.003))
+        assert tp1 == pytest.approx(95.0)
+        assert tp2 == pytest.approx(100 - 3 * (sl - price))
+        assert sl > entry > tp1 > tp2
+
+    def test_sell_forced_projection_when_nearest_target_too_close(self):
+        # Swing low 98 terlalu dekat tapi tidak terhalang zona -> TP1 = proyeksi 1.5x SL.
+        candles = [
+            {"high": 102, "low": 101}, {"high": 101, "low": 100}, {"high": 100, "low": 99},
+            {"high": 99, "low": 98}, {"high": 100, "low": 99}, {"high": 101, "low": 100},
+            {"high": 102, "low": 101},
+        ]
+        price, h1_map = 100.0, self._map(demand=[], supply=[(101, 103)])
+        entry, sl, tp1, tp2 = _levels_mtf(price, candles, h1_map, ACTION_SELL)
+        sl_dist = sl - price
+        assert tp1 == pytest.approx(price - 1.5 * sl_dist)
+        assert tp2 == pytest.approx(price - 3 * (sl - price))
+        assert sl > entry > tp1 > tp2
+
+    def test_sell_blocked_by_demand_zone_returns_none(self):
+        price, h1_map = 100.0, self._map(demand=[(98, 99)], supply=[(101, 103)])
+        assert _levels_mtf(price, [], h1_map, ACTION_SELL) is None
+
+    def test_neutral_fallback_fixed_levels(self):
+        price = 100.0
+        entry, sl, tp1, tp2 = _levels_mtf(price, [], {}, ACTION_NEUTRAL)
+        assert entry == price
+        assert sl == pytest.approx(price * 0.97)
+        assert tp1 == pytest.approx(price * (1 + 1.5 * 0.03))
+        assert tp2 == pytest.approx(price * (1 + 3.0 * 0.03))
+
+    def test_bad_rr_signal_rejected_to_neutral(self):
+        """Nearest supply terlalu dekat & terhalang -> `_levels_mtf` None -> assemble_signal NEUTRAL."""
+        candles = []
+        prev = 120.0
+        for i in range(10):
+            close = 112.0 - i * 0.5
+            o = prev
+            candles.append({"open": o, "high": max(o, close), "low": min(o, close) - 0.4, "close": close})
+            prev = close
+        candles.append({"open": prev, "high": prev, "low": 100.0, "close": 104.0})
+        for c in (103.0, 103.5, 103.0):
+            candles.append({"open": c + 0.4, "high": c + 0.9, "low": c - 0.4, "close": c})
+        c = 104.0
+        for _ in range(7):
+            nxt = c + 3.5
+            candles.append({"open": c, "high": nxt + 1.0, "low": c - 0.5, "close": nxt})
+            c = nxt
+        for c2 in (126.0, 110.0, 105.0, 104.0, 103.0, 102.0):
+            candles.append({"open": c2 + 0.8, "high": c2 + 0.8, "low": c2 - 0.4, "close": c2})
+
+        sig = assemble_signal(
+            symbol="BTCUSDT", base="BTC", price=102.0, pct_change_24h=5.2,
+            h4_candles=_candles_from_closes(_bullish_series()),
+            d1_candles=_candles_from_closes(_bullish_series()),
+            h1_candles=candles,
+            m15_candles=_candles_from_closes(_bullish_series()),
+            fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
+            whale_flow=None, btc_stats=None,
+        )
+        assert sig.action == ACTION_NEUTRAL
+        assert any("[RR]" in r for r in sig.reasons)
 
 
 class TestFormat:

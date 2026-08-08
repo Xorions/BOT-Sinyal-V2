@@ -51,6 +51,13 @@ BUY_THRESHOLD: float = _env_float("BUY_THRESHOLD", 0.10)
 SELL_THRESHOLD: float = _env_float("SELL_THRESHOLD", -0.10)
 CONFIDENCE_BASE: int = _env_int("CONFIDENCE_BASE", 55)
 
+# --- Risk-to-Reward Ratio (RRR) level SL/TP ---
+# TP1 minimal RRR_MIN x jarak SL (default 1:1.5); TP2 proyeksi RRR_TP2 x jarak SL.
+RRR_MIN: float = _env_float("RRR_MIN", 1.5)
+RRR_TP2: float = _env_float("RRR_TP2", 3.0)
+# Buffer SL di luar zona Demand/Supply terdekat (0.3% = 0.003).
+SL_BUFFER_PCT: float = _env_float("SL_BUFFER_PCT", 0.003)
+
 # --- Bobot kategori skoring (jumlah harus 1.0) ---
 # Prioritas day trading MTF: SMC + S&D (kompas H4/D1 + zona H1) paling besar.
 WEIGHT_TECHNICAL: float = _env_float("WEIGHT_TECHNICAL", 0.20)
