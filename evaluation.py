@@ -151,6 +151,20 @@ def evaluate_signal(sig: Dict, high: float, low: float, current: float) -> str:
     return status
 
 
+def _pnl_pct(sig: Dict, ref: Optional[float]) -> str:
+    """Persentase PnL dari Entry ke harga acuan, ber-tanda +/-."""
+    if ref is None:
+        return "n/a"
+    entry = sig.get("entry")
+    if not entry:
+        return "n/a"
+    if sig.get("action") == "SELL":
+        pct = (entry - ref) / entry * 100.0
+    else:
+        pct = (ref - entry) / entry * 100.0
+    return f"{pct:+.2f}%"
+
+
 def evaluate_signals(signals: List[Dict], fetch_fn) -> List[Dict]:
     """Isi 'status' + 'ref' (harga acuan) tiap sinyal.
 
@@ -200,20 +214,21 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
         f"🎯 TP2: {tp2}",
         f"🛡️ SL: {sl}",
         f"⏳ Floating: {floating}",
-        "───",
-        "",
+        "━━━━━━━━━━━━",
     ]
-    for r in evaluated:
+    for i, r in enumerate(evaluated):
         status = r["status"]
         label = STATUS_LABEL[status]
         ref = r.get("ref")
         ref_str = _fmt_price(ref) if ref is not None else "n/a"
+        pnl = _pnl_pct(r, ref)
         lines.append(f"#{r['base']} {r['action']}")
         lines.append(f"🔑 Entry {_fmt_price(r['entry'])} → {STATUS_EMOJI[status]} <b>{label}</b>")
         if status == STATUS_FLOATING:
-            lines.append(f"📋 Harga saat ini {ref_str}")
+            lines.append(f"📋 Harga saat ini {ref_str} ({pnl})")
         else:
-            lines.append(f"📋 Hit {label} di {ref_str}")
-        lines.append("")
-    lines.append("───")
+            lines.append(f"📋 Hit {label} di {ref_str} ({pnl})")
+        if i != len(evaluated) - 1:
+            lines.append("───")
+    lines.append("━━━━━━━━━━━━")
     return "\n".join(lines)

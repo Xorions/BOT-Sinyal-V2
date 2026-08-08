@@ -6,6 +6,7 @@ from engine import (
     ACTION_BUY,
     ACTION_NEUTRAL,
     ACTION_SELL,
+    Signal,
     analyze_compass,
     analyze_trigger,
     assemble_signal,
@@ -305,3 +306,24 @@ class TestFormat:
         assert "+ [H1]" in message
         assert "+ [M15]" in message
         assert "💸 Momentum 24j" in message
+
+    def test_signal_lines_include_level_pct_buy(self):
+        sig = Signal(
+            "BTCUSDT", "BTC", 102.0, 5.2, 0.5, "BUY", 70, 100.0, 96.0, 106.0, 112.0,
+            breakdown={"teknikal": 0.5, "smc": 0.5, "sentimen": 0.5, "whale": 0.5, "onchain": 0.5},
+        )
+        message = format_message(rank_signals([sig]), "Jumat, 07 Agu 2026, 13:30 WIB")
+        assert "🛡️ SL: <b>$96.00</b> (-4.00%)" in message
+        assert "🎯 TP1: <b>$106.00</b> (+6.00%)" in message
+        assert "🎯 TP2: <b>$112.00</b> (+12.00%)" in message
+        assert "━━━━━━━━━━━━" in message
+
+    def test_signal_lines_include_level_pct_sell(self):
+        sig = Signal(
+            "ETHUSDT", "ETH", 100.0, -5.2, -0.5, "SELL", 70, 100.0, 104.0, 96.0, 92.0,
+            breakdown={"teknikal": -0.5, "smc": -0.5, "sentimen": -0.5, "whale": -0.5, "onchain": -0.5},
+        )
+        message = format_message(rank_signals([sig]), "Jumat, 07 Agu 2026, 13:30 WIB")
+        assert "🛡️ SL: <b>$104.00</b> (-4.00%)" in message
+        assert "🎯 TP1: <b>$96.00</b> (+4.00%)" in message
+        assert "🎯 TP2: <b>$92.00</b> (+8.00%)" in message

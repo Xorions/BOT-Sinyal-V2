@@ -569,6 +569,15 @@ def _fmt_price(value: float) -> str:
     return f"${value:.6f}"
 
 
+def _level_pct(entry: float, level: float, action: str) -> float:
+    """Jarak % dari Entry ke level (SL/TP), positif = menguntungkan aksi."""
+    if not entry:
+        return 0.0
+    if action == ACTION_SELL:
+        return (entry - level) / entry * 100.0
+    return (level - entry) / entry * 100.0
+
+
 def _group_reason_lines(reasons: List[str]) -> List[str]:
     """Kelompokkan alasan per timeframe untuk format pesan baru.
 
@@ -612,14 +621,14 @@ def _signal_lines(sig: Signal) -> List[str]:
     lines = [
         f"<b>#{sig.base} ({sig.symbol})</b> — {sig.action} · Confidence {sig.confidence}%",
         f"🔑 Entry: <b>{_fmt_price(sig.entry)}</b>",
-        f"🛡️ SL: <b>{_fmt_price(sig.sl)}</b>",
-        f"🎯 TP1: <b>{_fmt_price(sig.tp1)}</b>",
-        f"🎯 TP2: <b>{_fmt_price(sig.tp2)}</b>",
+        f"🛡️ SL: <b>{_fmt_price(sig.sl)}</b> ({_level_pct(sig.entry, sig.sl, sig.action):+.2f}%)",
+        f"🎯 TP1: <b>{_fmt_price(sig.tp1)}</b> ({_level_pct(sig.entry, sig.tp1, sig.action):+.2f}%)",
+        f"🎯 TP2: <b>{_fmt_price(sig.tp2)}</b> ({_level_pct(sig.entry, sig.tp2, sig.action):+.2f}%)",
         f"💹 24j: {sig.pct_change_24h:+.2f}%",
         *reason_lines,
         f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (Tek {b['teknikal']:+.2f} · SMC {b['smc']:+.2f} · Sent {b['sentimen']:+.2f} · Whale {b['whale']:+.2f} · Onch {b['onchain']:+.2f})",
         "",
-        "───",
+        "━━━━━━━━━━━━",
         "",
     ]
     return lines

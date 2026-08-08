@@ -141,6 +141,24 @@ class TestBuildRecap:
         assert "#LIT" in recap and "SL" in recap
         assert "#XRP" in recap and "TP1" in recap
 
+    def test_recap_pnl_pct_and_separators(self):
+        recap = build_recap(self.HISTORY, self._fetch, now_key="2026-08-07 13:30")
+        assert recap is not None
+        assert recap.count("━━━━━━━━━━━━") == 2
+        assert "📋 Hit TP2 di $120.00 (+20.00%)" in recap
+        assert "📋 Hit SL di $45.00 (-10.00%)" in recap
+        assert "📋 Hit TP1 di $0.900000 (+10.00%)" in recap
+        lines = recap.splitlines()
+        assert lines[6] == "━━━━━━━━━━━━"
+        assert lines[10] == "───"
+        assert lines[-1] == "━━━━━━━━━━━━"
+
+    def test_recap_floating_includes_pnl(self):
+        history = {"2026-08-06 13:30": [_sig("BUY", 100.0, 90.0, 110.0, 120.0)]}
+        recap = build_recap(history, lambda pair: (105.0, 95.0, 102.0), now_key="2026-08-07 13:30")
+        assert recap is not None
+        assert "📋 Harga saat ini $102.00 (+2.00%)" in recap
+
     def test_recap_none_when_no_previous(self):
         assert build_recap({}, self._fetch, now_key="2026-08-07 13:30") is None
 
