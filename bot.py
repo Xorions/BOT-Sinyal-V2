@@ -10,6 +10,7 @@ Uji lokal tanpa Telegram:  python bot.py
 
 import logging
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
@@ -159,7 +160,12 @@ def _ticker_range(pair: str) -> Optional[tuple]:
 
 def run_scan() -> tuple:
     log.info("Mengambil ticker 24j Binance...")
-    tickers = binance.get_all_tickers_24h()
+    try:
+        tickers = binance.get_all_tickers_24h()
+    except DataSourceError:
+        log.warning("Gagal pertama mengambil ticker Binance — coba ulang sekali...")
+        time.sleep(5)
+        tickers = binance.get_all_tickers_24h()
     log.info("Tersedia %d pasangan USDT di Binance.", len(tickers))
 
     pairs = _pick_pairs(tickers)
@@ -167,7 +173,11 @@ def run_scan() -> tuple:
     if not pairs:
         raise DataSourceError("Tidak ada pasangan kandidat — periksa MIN_VOLUME_USD / koneksi.")
 
-    fg_value = get_fear_greed_current()
+    try:
+        fg_value = get_fear_greed_current()
+    except DataSourceError:
+        fg_value = None
+        log.warning("Fear & Greed error, pakai default 50.")
     if fg_value is None:
         fg_value = 50.0
         log.warning("Fear & Greed gagal diambil, pakai default 50.")
