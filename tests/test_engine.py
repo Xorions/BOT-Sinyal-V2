@@ -321,7 +321,7 @@ class TestAssembleSignal:
             fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
             whale_flow=whale_inflow, btc_stats=btc_stats,
         )
-        assert sig_eth.breakdown["whale"] == -1.0  # inflow exchange = bearish
+        assert sig_eth.breakdown["whale"] == -0.5  # inflow exchange = bearish (proxy, ±0.5)
 
         sig_btc = assemble_signal(
             symbol="BTCUSDT", base="BTC", price=price, pct_change_24h=0.0,
@@ -330,6 +330,21 @@ class TestAssembleSignal:
             whale_flow=whale_inflow, btc_stats=btc_stats,
         )
         assert sig_btc.breakdown["onchain"] == 0.5
+
+    def test_missing_optional_data_does_not_dilute_score(self):
+        # Fix #2: data opsional yang tidak tersedia (whale/on-chain) = kategori
+        # DILEWATI sepenuhnya -> skor ETH/altcoin dengan setup sama harus SAMA
+        # (data yang hilang tidak boleh memperkecil skor via penyebut).
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        kwargs = dict(
+            price=price, pct_change_24h=0.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
+            whale_flow=None, btc_stats=None,
+        )
+        sig_eth = assemble_signal(symbol="ETHUSDT", base="ETH", **kwargs)
+        sig_doge = assemble_signal(symbol="DOGEUSDT", base="DOGE", **kwargs)
+        assert sig_eth.total_score == pytest.approx(sig_doge.total_score)
 
 
 class TestLevels:

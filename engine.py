@@ -434,17 +434,21 @@ def score_sentiment(fg_value: float, funding_rates: List[float], ls_ratio: Optio
 
 
 def score_whale(flow: Optional[Dict[str, float]]) -> tuple:
-    """Netflow exchange ETH (proxy whale). Net positif (masuk exchange) = bearish."""
+    """Netflow exchange ETH (proxy whale). Net positif (masuk exchange) = bearish.
+
+    Terbatas ke ±0.5 (sama seperti on-chain): data proxy ini tidak boleh
+    sendirian meloloskan ETH jadi BUY/SELL tanpa konfirmasi setup teknikal.
+    """
     reasons: List[str] = []
     if not flow:
         return 0.0, reasons
     net = flow.get("net_usd", 0.0)
     if net > 0:
         reasons.append(f"Whale inflow exchange (net ${net/1e6:.1f}M)")
-        return -1.0, reasons
+        return -0.5, reasons
     if net < 0:
         reasons.append(f"Whale outflow exchange (net ${-net/1e6:.1f}M)")
-        return 1.0, reasons
+        return 0.5, reasons
     return 0.0, reasons
 
 
@@ -518,10 +522,13 @@ def assemble_signal(
     # global untuk SEMUA koin — hanya diterapkan ke koin sumbernya (ETH / BTC).
     # Sebelumnya netflow ETH ikut menggeser skor DOGE/SOL/dst sebesar +-0.20
     # (lebih besar dari BUY_THRESHOLD), membuat setup netral bisa jadi BUY.
-    apply_whale = base == "ETH"
-    apply_onchain = base == "BTC"
-    whale, whale_reasons = score_whale(whale_flow) if apply_whale else (0.0, [])
-    onchain, onchain_reasons = score_onchain(btc_stats) if apply_onchain else (0.0, [])
+    # Data opsional yang tidak tersedia (whale_flow/btc_stats = None) = kategori
+    # DILEWATI sepenuhnya, tidak ikut dihitung bobotnya — sesuai prinsip graceful
+    # degradation (AGENTS.md: "gagal -> dilewati tanpa mempengaruhi kategori lain").
+    use_whale = base == "ETH" and whale_flow is not None
+    use_onchain = base == "BTC" and btc_stats is not None
+    whale, whale_reasons = score_whale(whale_flow) if use_whale else (0.0, [])
+    onchain, onchain_reasons = score_onchain(btc_stats) if use_onchain else (0.0, [])
 
     total = (
         tech * WEIGHT_TECHNICAL
@@ -531,14 +538,15 @@ def assemble_signal(
         + onchain * WEIGHT_ONCHAIN
     )
     # Renormalisasi: total dibagi jumlah bobot yang BENAR-BENAR dipakai agar koin
-    # tanpa kategori whale/on-chain tidak mendapat skor lebih kecil sistematis
-    # (dan skor tetap sebanding lintas koin, bukan rata-rata parsial).
+    # tanpa kategori whale/on-chain (atau datanya sedang tidak tersedia) tidak
+    # mendapat skor lebih kecil sistematis (dan skor sebanding lintas koin,
+    # bukan rata-rata parsial).
     weight_sum = (
         WEIGHT_TECHNICAL
         + WEIGHT_SMC
         + WEIGHT_SENTIMENT
-        + (WEIGHT_WHALE if apply_whale else 0.0)
-        + (WEIGHT_ONCHAIN if apply_onchain else 0.0)
+        + (WEIGHT_WHALE if use_whale else 0.0)
+        + (WEIGHT_ONCHAIN if use_onchain else 0.0)
     )
     total = max(-1.0, min(1.0, total / weight_sum)) if weight_sum else 0.0
 

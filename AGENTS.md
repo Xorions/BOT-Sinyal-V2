@@ -44,7 +44,7 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 | SMC & S&D (MTF) | 0.40 | **Kompas H4/D1** (BOS:+0.45 / CHoCH:-0.45, fallback D1 ±0.30) + **Zona H1**: Demand/Supply ter-sentuh (±0.30/dekat ±0.15), OB (±0.20), FVG (±0.15), Liquidity Sweep (±0.25), Support/Resistance dekat (±0.15) |
 | Teknikal (M15) | 0.20 | RSI (<30:+0.20, >70:-0.20), MACD cross (±0.25) / histogram (±0.15) — cross berbobot LEBIH BESAR dari histogram (Fix #1), BOS/CHoCH M15 (±0.20), momentum 24j kontrarian (≤-3%:+0.20, ≥3%:-0.20) (Fix #6) |
 | Sentiment | 0.15 | `score_fear_greed` (contrarian), funding (≥0.03%:-0.30, ≤-0.03%:+0.30), L/S ratio (≥1.5:-0.20, ≤0.7:+0.20) |
-| Whale | 0.15 | netflow ETH: masuk exchange:-1.0, keluar:+1.0 — HANYA untuk koin ETH (Fix #2) |
+| Whale | 0.15 | netflow ETH: masuk exchange:-0.5, keluar:+0.5 (proxy, dibatasi agar tak sendirian meloloskan sinyal) — HANYA untuk koin ETH (Fix #2) |
 | On-chain | 0.10 | BTC `n_tx_24h` ada:+0.5 — HANYA untuk koin BTC (Fix #2) |
 
 - **Aturan kompas (baku):** H4 bullish → **HANYA** izinkan sinyal BUY; H4 bearish → **HANYA** SELL (D1 fallback bila H4 netral).
@@ -52,7 +52,7 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 - Aksi: skor ≥ `BUY_THRESHOLD` (0.10) = BUY, ≤ `SELL_THRESHOLD` (-0.10) = SELL, else NEUTRAL.
 - Confidence: `clamp(25, 95, CONFIDENCE_BASE + |skor|*40)`.
 - **Konvensi RSI/funding/momentum = kontrarian**: overbought/euforia = negatif (antisipasi pullback). Momentum 24j mengikuti konvensi ini (Fix #6).
-- **Renormalisasi (Fix #2)**: total skor dibagi jumlah bobot kategori yang **berlaku** untuk koin itu. Koin non-ETH/BTC tidak dihitung bobot Whale/On-chain, sehingga skornya sebanding lintas koin (bukan rata-rata parsial).
+- **Renormalisasi (Fix #2)**: total skor dibagi jumlah bobot kategori yang **benar-benar dipakai** untuk koin itu — koin non-ETH/BTC TIDAK dihitung bobot Whale/On-chain; ETH/BTC juga tidak dihitung bila datanya tidak tersedia (`None` = kategori dilewati, sesuai prinsip graceful degradation). Skor tetap sebanding lintas koin (bukan rata-rata parsial).
 - Entry/SL/TP di `engine._levels_mtf()`: dari zona H1 (Demand/Supply zone atau OB; SL di luar zona, TP di level S&R H1); fallback persentase bila tidak ada zona.
 
 ### Risk-to-Reward Ratio (RRR) — aturan baku level SL/TP
