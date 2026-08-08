@@ -5,7 +5,7 @@ Panduan untuk AI agent / developer yang bekerja di **BOT-Sinyal-Trading-V2**.
 ## 1. Overview Arsitektur & Tech Stack
 
 Bot Telegram sinyal trading crypto versi lanjutan (**Day Trading MTF — SMC + Supply & Demand**).
-Dijalankan **2x sehari (13:30 & 19:00 WIB)** via GitHub Actions (cron `30 6 * * *` & `0 12 * * *`).
+Dijalankan **2x sehari (13:30 & 19:00 WIB)** — jadwal dipicu dari luar oleh **Cron-Job.org** (cron `30 6 * * *` & `0 12 * * *` UTC) via API `workflow_dispatch` GitHub Actions. Cron internal GitHub dihapus agar tidak ada pemicu ganda.
 Alur: kumpulkan data multi-sumber gratis → analisa **Multi-Timeframe** (Kompas H4/D1 → Zona H1 → Pelatuk M15) → skoring berbobot → evaluasi sinyal sesi sebelumnya → kirim Top-5 Day Trading Briefing ke Telegram.
 
 ```
@@ -27,7 +27,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (69 kasus)
+tests/                     # pytest (71 kasus)
 .github/workflows/daily.yml
 ```
 

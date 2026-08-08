@@ -11,8 +11,10 @@ Support & Resistance, whale proxy, on-chain, dan sentiment pasar (Fear & Greed)*
 
 ## Cara Kerja
 
-Dijalankan otomatis oleh GitHub Actions **2x sehari** (cron `30 6 * * *` = **13:30 WIB**
-dan `0 12 * * *` = **19:00 WIB**):
+Dijalankan otomatis **2x sehari** — jadwal dipicu dari luar oleh **Cron-Job.org**
+(cron `30 6 * * *` UTC = **13:30 WIB** dan `0 12 * * *` UTC = **19:00 WIB**)
+melalui API `workflow_dispatch` GitHub Actions (cron internal GitHub dihapus agar
+tidak ada pemicu ganda):
 
 1. Satu panggilan ticker 24j Binance (`data-api.binance.vision` — tidak geo-block, aman untuk runner AS).
 2. Pilih top coin: daftar CoinMarketCap bila `CMC_API_KEY` diisi, else **semua pasangan USDT Binance**. Filter aset non-koin (stablecoin, leveraged token, token saham Binance) + likuiditas (`MIN_VOLUME_USD`), urut volume, ambil `TOP_COINS` (maks 250).
@@ -23,8 +25,8 @@ dan `0 12 * * *` = **19:00 WIB**):
    - Funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
 4. Data agregat: Fear & Greed Index, whale netflow ETH (Etherscan), statistik jaringan BTC (blockchain.info).
 5. Skoring **berbobot** (prioritas SMC + S&D) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1. **Aturan RRR:** level Entry/SL/TP wajib memenuhi Risk-to-Reward minimal (lihat [Risk-to-Reward Ratio](#risk-to-reward-ratio-rrr)).
-6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate → disisipkan sebelum briefing.
-7. Kirim Day Trading Briefing (Top 5) ke Telegram (HTML parse mode), lalu simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions).
+6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate → dikirim sebagai **pesan Telegram terpisah (History Review)**.
+7. Kirim **2 pesan Telegram** (HTML parse mode): pesan evaluasi (History Review) lalu Day Trading Briefing (Top 5) yang berakhir dengan disclaimer. Setelah terkirim, simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions).
 
 ## Sumber Data
 
@@ -52,6 +54,7 @@ Semua data via `data/_client.py` (retry + backoff + handling HTTP 429). Satu sum
    - `ETHERSCAN_API_KEY` — whale transfer proxy.
 4. Uji lokal: `venv\Scripts\python.exe bot.py` (tanpa kredensial → hasil dicetak ke konsol).
 5. Push ke GitHub + tambahkan secrets Actions: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (opsional: `CMC_API_KEY`, `ETHERSCAN_API_KEY`).
+6. (Jadwal harian) Buat 2 cron job di [Cron-Job.org](https://cron-job.org) yang men-trigger workflow `daily.yml` via API `workflow_dispatch` (URL, header & body lihat komentar di `.github/workflows/daily.yml`): `30 6 * * *` UTC (13:30 WIB) dan `0 12 * * *` UTC (19:00 WIB).
 
 ## Struktur
 
@@ -74,7 +77,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (69 kasus)
+tests/                     # pytest (71 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -184,7 +187,7 @@ Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
 - **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
 - **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current 24j** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP1/TP2/SL/Floating).
-- Recap disisipkan tepat sebelum blok `📊 DAY TRADING BRIEFING — MTF SMC + S&D`:
+- Recap dikirim sebagai **pesan Telegram terpisah** (History Review) sebelum blok `📊 DAY TRADING BRIEFING — MTF SMC + S&D`:
 
 ```
 📊 EVALUASI SINYAL SESI SEBELUMNYA — 07 Aug 2026 13:30
