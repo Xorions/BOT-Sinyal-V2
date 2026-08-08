@@ -138,6 +138,41 @@ class TestSMC:
         structure = detect_structure(candles, left=1, right=1)
         assert structure["bos"] == "bullish"
 
+    def _mk_candles(self, closes):
+        out = []
+        prev = closes[0]
+        for c in closes:
+            out.append(
+                {"open": prev, "high": max(prev, c) + 0.5, "low": min(prev, c) - 0.5, "close": c}
+            )
+            prev = c
+        return out
+
+    def test_structure_lower_high_higher_low_neutral(self):
+        # Konflik: swing high turun (110 -> 105) tapi swing low naik (99 -> 101).
+        # Kriteria seimbang: tidak bullish (bukan HH+HL) dan tidak bearish (bukan LH+LL).
+        closes = [102, 106, 109, 110, 108, 104, 100, 102, 104, 105, 102, 103, 102, 104]
+        structure = detect_structure(self._mk_candles(closes), left=2, right=2)
+        assert structure["trend"] is None
+
+    def test_structure_higher_high_higher_low_bullish(self):
+        # HH (105 -> 110) + HL (100 -> 103) -> bullish.
+        closes = [100, 103, 105, 103, 101, 100, 102, 104, 103, 100, 98, 103, 105, 108, 110, 107, 105, 103, 104, 106]
+        structure = detect_structure(self._mk_candles(closes), left=2, right=2)
+        assert structure["trend"] == "bullish"
+
+    def test_structure_lower_high_lower_low_bearish(self):
+        # LH (110 -> 105) + LL (104 -> 99) -> bearish.
+        closes = [123, 120, 111, 110, 112, 115, 106, 105, 107, 110, 101, 100, 102, 105, 104, 100]
+        structure = detect_structure(self._mk_candles(closes), left=2, right=2)
+        assert structure["trend"] == "bearish"
+
+    def test_structure_higher_high_lower_low_neutral(self):
+        # Konflik kebalikan: swing high naik (105 -> 110) tapi swing low turun (102 -> 98).
+        closes = [100, 102, 104, 105, 104, 103, 104, 107, 108, 110, 107, 105, 103, 101, 99, 100, 102, 104, 106]
+        structure = detect_structure(self._mk_candles(closes), left=2, right=2)
+        assert structure["trend"] is None
+
     def test_equal_highs_detected(self):
         candles = [
             {"open": 100, "high": 101, "low": 99, "close": 100},

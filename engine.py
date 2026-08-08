@@ -163,13 +163,28 @@ def analyze_trigger(m15_candles: List[Dict[str, float]]) -> Dict:
     }
 
 
+def _ob_near(price: float, ob: Optional[Dict], pct: float = 2.0) -> bool:
+    """True bila harga berada DI DALAM Order Block atau berjarak <= pct% dari OB."""
+    if not ob:
+        return False
+    lo, hi = ob.get("low"), ob.get("high")
+    if lo is None or hi is None:
+        return False
+    if in_zone(price, ob):
+        return True
+    if not price:
+        return False
+    dist = min(abs(price - lo), abs(price - hi))
+    return dist / price * 100.0 <= pct
+
+
 def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> bool:
     """Validasi: harga menyentuh zona SMC/S&D H1 DAN M15 searah kompas."""
     price = h1_map["price"]
     if compass_dir == ACTION_BUY:
         zone_ok = bool(
             [z for z in h1_map["demand_zones"] if in_zone(price, z)]
-            or h1_map["bullish_ob"]
+            or _ob_near(price, h1_map.get("bullish_ob"))
             or [s for s in h1_map["sweeps"] if s["type"] == "sell_sweep"]
         )
         trig_ok = bool(
@@ -181,7 +196,7 @@ def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> boo
     if compass_dir == ACTION_SELL:
         zone_ok = bool(
             [z for z in h1_map["supply_zones"] if in_zone(price, z)]
-            or h1_map["bearish_ob"]
+            or _ob_near(price, h1_map.get("bearish_ob"))
             or [s for s in h1_map["sweeps"] if s["type"] == "buy_sweep"]
         )
         trig_ok = bool(
@@ -355,10 +370,10 @@ def score_smc_mtf(
 
     fvgs = h1_map.get("fvgs", [])
     if [g for g in fvgs if g["type"] == "bullish" and g["bottom"] < price]:
-        reasons.append("[H1] FVG tervalidasi di bawah harga")
+        reasons.append("[H1] FVG bullish tervalidasi di bawah harga")
         score += 0.15
-    elif [g for g in fvgs if g["type"] == "bearish" and g["top"] > price]:
-        reasons.append("[H1] FVG tervalidasi di atas harga")
+    if [g for g in fvgs if g["type"] == "bearish" and g["top"] > price]:
+        reasons.append("[H1] FVG bearish tervalidasi di atas harga")
         score -= 0.15
 
     if [s for s in sweeps if s["type"] == "sell_sweep"]:
@@ -520,8 +535,9 @@ def assemble_signal(
     levels = _levels_mtf(price, h1_candles, h1_map, action)
     if levels is None:
         rr_rejected = True
+        intended = action
         action = ACTION_NEUTRAL
-        levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL)
+        levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=intended)
     entry, sl, tp1, tp2 = levels
     breakdown = {
         "teknikal": round(tech, 2),
@@ -572,17 +588,21 @@ def _below_targets(price: float, h1_candles: List[Dict[str, float]], h1_map: Dic
 
 
 def _blocked_by_zone(lo: float, hi: float, zones: List[Dict], zone_type: str) -> bool:
-    """True bila zona kuat (supply/demand) memotong jalur harga [lo, hi].
+    """True bila zona kuat (supply/demand) memotong ATAU mencakup jalur [lo, hi].
 
-    - supply: zona di antara Entry dan proyeksi TP1 -> harga tertahan di zona.
-    - demand: zona di antara proyeksi TP1 dan Entry (arah SELL).
+    - supply: zona di antara Entry dan proyeksi TP1, ATAU Entry sudah berada di
+      dalam zona Supply -> harga tertahan di zona.
+    - demand: zona di antara proyeksi TP1 dan Entry (arah SELL), ATAU Entry
+      sudah berada di dalam zona Demand.
     """
     for z in zones:
         if z.get("type") != zone_type:
             continue
-        if zone_type == "supply" and lo < z["low"] < hi:
-            return True
-        if zone_type == "demand" and lo < z["high"] < hi:
+        z_lo = z.get("low")
+        z_hi = z.get("high")
+        if z_lo is None or z_hi is None:
+            continue
+        if z_lo < hi and z_hi > lo:
             return True
     return False
 
@@ -618,6 +638,10 @@ def _rr_targets(price: float, sl: float, targets: List[float], zones: List[Dict]
                 if _blocked_by_zone(tp1, price, zones, "demand"):
                     return None
         if tp1 < tp2:
+            # Target melewati proyeksi TP2 -> TP1 jadi proyeksi (price - rr2_dist);
+            # pastikan jalur ke proyeksi itu tidak terhalang zona Demand.
+            if _blocked_by_zone(tp2, price, zones, "demand"):
+                return None
             tp1, tp2 = tp2, tp1
         return tp1, tp2
 
@@ -633,6 +657,10 @@ def _rr_targets(price: float, sl: float, targets: List[float], zones: List[Dict]
             if _blocked_by_zone(price, tp1, zones, "supply"):
                 return None
     if tp1 > tp2:
+        # Target melewati proyeksi TP2 -> TP1 jadi proyeksi (price + rr2_dist);
+        # pastikan jalur ke proyeksi itu tidak terhalang zona Supply.
+        if _blocked_by_zone(price, tp2, zones, "supply"):
+            return None
         tp1, tp2 = tp2, tp1
     return tp1, tp2
 
@@ -642,6 +670,7 @@ def _levels_mtf(
     h1_candles: List[Dict[str, float]],
     h1_map: Dict,
     action: str,
+    intended: Optional[str] = None,
 ):
     """Entry/SL/TP1/TP2 dengan RRR wajib minimal 1:1.5 (TP1) & 1:3 (TP2).
 
@@ -653,6 +682,8 @@ def _levels_mtf(
       else paksa proyeksi Entry +/- (jarak SL x RRR_MIN) bila tidak terhalang
       zona Supply/Demand kuat. Bila terhalang -> return None (sinyal dibatalkan).
     - TP2: proyeksi Entry +/- (jarak SL x RRR_TP2).
+    - NEUTRAL: placeholder kosmetik; arah SL/TP mengikuti `intended` (BUY/SELL
+      yang ditolak RR) agar tampilan pesan konsisten, default orientasi BUY.
     """
     highs = [c["high"] for c in h1_candles] if h1_candles else []
     lows = [c["low"] for c in h1_candles] if h1_candles else []
@@ -692,9 +723,14 @@ def _levels_mtf(
             return None
         tp1, tp2 = rr
     else:
-        sl = price * 0.97
-        tp1 = price * (1 + RRR_MIN * 0.03)
-        tp2 = price * (1 + RRR_TP2 * 0.03)
+        if intended == ACTION_SELL:
+            sl = price * 1.03
+            tp1 = price * (1 - RRR_MIN * 0.03)
+            tp2 = price * (1 - RRR_TP2 * 0.03)
+        else:
+            sl = price * 0.97
+            tp1 = price * (1 + RRR_MIN * 0.03)
+            tp2 = price * (1 + RRR_TP2 * 0.03)
     return price, sl, tp1, tp2
 
 

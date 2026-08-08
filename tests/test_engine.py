@@ -9,12 +9,16 @@ from engine import (
     ACTION_NEUTRAL,
     ACTION_SELL,
     Signal,
+    _blocked_by_zone,
     _levels_mtf,
+    _ob_near,
+    _setup_valid,
     analyze_compass,
     analyze_trigger,
     assemble_signal,
     format_message,
     rank_signals,
+    score_smc_mtf,
     score_trigger,
 )
 from indicators.smc import detect_order_blocks, detect_structure
@@ -413,6 +417,142 @@ class TestLevelsRRR:
         )
         assert sig.action == ACTION_NEUTRAL
         assert any("[RR]" in r for r in sig.reasons)
+
+
+class TestBlockedByZone:
+    """Fix #2: `_blocked_by_zone` harus mendeteksi harga yang sudah di dalam zona."""
+
+    def test_price_inside_supply_blocks_buy(self):
+        # Harga 100 sudah DI DALAM supply zone (99..102) -> jalur ke TP1 terblokir.
+        zones = [{"type": "supply", "low": 99.0, "high": 102.0}]
+        assert _blocked_by_zone(100.0, 110.0, zones, "supply") is True
+
+    def test_price_inside_demand_blocks_sell(self):
+        # Harga 100 sudah DI DALAM demand zone (98..101) -> jalur SELL terblokir.
+        zones = [{"type": "demand", "low": 98.0, "high": 101.0}]
+        assert _blocked_by_zone(90.0, 100.0, zones, "demand") is True
+
+    def test_zone_below_entry_not_blocking(self):
+        # Supply zone di bawah Entry (BUY): harga bergerak naik, tidak terblokir.
+        zones = [{"type": "supply", "low": 90.0, "high": 95.0}]
+        assert _blocked_by_zone(100.0, 110.0, zones, "supply") is False
+
+    def test_zone_above_target_not_blocking(self):
+        # Supply zone jauh di atas TP1: tidak memotong jalur.
+        zones = [{"type": "supply", "low": 112.0, "high": 115.0}]
+        assert _blocked_by_zone(100.0, 110.0, zones, "supply") is False
+
+    def test_wrong_zone_type_ignored(self):
+        zones = [{"type": "demand", "low": 105.0, "high": 108.0}]
+        assert _blocked_by_zone(100.0, 110.0, zones, "supply") is False
+
+
+class TestSwapBlocked:
+    """Fix #1: swap TP1/TP2 saat target melewati proyeksi TP2 wajib cek zona."""
+
+    def test_buy_swap_blocked_by_supply_inside_path(self):
+        # Target jauh (120) melewati proyeksi TP2 (swap), tapi supply zone
+        # (98..108) mencakup harga & jalur proyeksi -> swap dibatalkan (None).
+        price, h1_map = 100.0, TestLevelsRRR._map(demand=[(97, 99)], supply=[(98, 108), (120, 122)])
+        assert _levels_mtf(price, [], h1_map, ACTION_BUY) is None
+
+    def test_sell_swap_blocked_by_demand_inside_path(self):
+        # Target jauh (80) melewati proyeksi TP2, tapi ada demand zone (96..98)
+        # yang memotong jalur SELL -> swap harus dibatalkan (None).
+        price, h1_map = 100.0, TestLevelsRRR._map(demand=[(80, 82), (96, 98)], supply=[(101, 103)])
+        assert _levels_mtf(price, [], h1_map, ACTION_SELL) is None
+
+
+class TestObNear:
+    """Fix #4: OB hanya valid bila harga di dalam zona atau berjarak <= 2%."""
+
+    def test_none_ob_invalid(self):
+        assert _ob_near(100.0, None) is False
+
+    def test_far_ob_invalid(self):
+        ob = {"type": "bullish", "low": 90.0, "high": 95.0}
+        assert _ob_near(100.0, ob) is False
+
+    def test_near_ob_valid(self):
+        ob = {"type": "bullish", "low": 98.0, "high": 99.0}
+        assert _ob_near(100.0, ob) is True
+
+    def test_price_inside_ob_valid(self):
+        ob = {"type": "bullish", "low": 98.0, "high": 101.0}
+        assert _ob_near(100.0, ob) is True
+
+    def test_setup_valid_rejects_far_bullish_ob(self):
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "sweeps": [],
+            "bullish_ob": {"type": "bullish", "low": 90.0, "high": 95.0},
+        }
+        trigger = {"histogram": 0.5, "cross": None, "bos": "bullish", "choch": None}
+        assert _setup_valid(ACTION_BUY, h1_map, trigger) is False
+
+    def test_setup_valid_accepts_near_bullish_ob(self):
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "sweeps": [],
+            "bullish_ob": {"type": "bullish", "low": 98.0, "high": 99.0},
+        }
+        trigger = {"histogram": 0.5, "cross": None, "bos": "bullish", "choch": None}
+        assert _setup_valid(ACTION_BUY, h1_map, trigger) is True
+
+    def test_setup_valid_rejects_far_bearish_ob(self):
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "sweeps": [],
+            "bearish_ob": {"type": "bearish", "low": 105.0, "high": 110.0},
+        }
+        trigger = {"histogram": -0.5, "cross": None, "bos": None, "choch": "bearish"}
+        assert _setup_valid(ACTION_SELL, h1_map, trigger) is False
+
+    def test_setup_valid_accepts_near_bearish_ob(self):
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "sweeps": [],
+            "bearish_ob": {"type": "bearish", "low": 100.5, "high": 102.0},
+        }
+        trigger = {"histogram": -0.5, "cross": None, "bos": None, "choch": "bearish"}
+        assert _setup_valid(ACTION_SELL, h1_map, trigger) is True
+
+
+class TestFvgIndependent:
+    """Fix #6: FVG bullish & bearish dievaluasi independen (bukan if/elif)."""
+
+    def test_both_fvg_directions_scored(self):
+        h4 = _candles_from_closes(_bullish_series())
+        d1 = _candles_from_closes(_bullish_series())
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "zones": [],
+            "order_blocks": [],
+            "fvgs": [
+                {"type": "bullish", "bottom": 95.0, "top": 97.0, "index": 1},
+                {"type": "bearish", "bottom": 103.0, "top": 105.0, "index": 2},
+            ],
+            "sweeps": [],
+            "levels": {"support_dist_pct": None, "resistance_dist_pct": None},
+            "bullish_ob": None,
+            "bearish_ob": None,
+        }
+        score, reasons = score_smc_mtf(h4, d1, h1_map, 100.0)
+        bull = [r for r in reasons if "FVG bullish" in r]
+        bear = [r for r in reasons if "FVG bearish" in r]
+        assert bull and bear
+        assert score >= 0.15 + 0.45 - 0.15  # H4 bullish + FVG bull + FVG bear
+        assert score < 0.45 + 0.15 + 0.15
 
 
 class TestFormat:

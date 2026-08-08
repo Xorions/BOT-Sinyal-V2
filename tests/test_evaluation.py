@@ -56,6 +56,21 @@ class TestEvaluateSignal:
     def test_sell_floating(self):
         assert evaluate_signal(_sig("SELL", 100, 110, 90, 80), high=105, low=95, current=97) == STATUS_FLOATING
 
+    def test_buy_both_tp_and_sl_touched_conservative_sl(self):
+        # high >= TP1 DAN low <= SL di jendela sama -> tidak tahu urutannya -> SL (konservatif).
+        assert evaluate_signal(_sig(), high=112, low=88, current=100) == STATUS_SL
+
+    def test_sell_both_tp_and_sl_touched_conservative_sl(self):
+        # SELL: low <= TP1 DAN high >= SL di jendela sama -> SL (konservatif).
+        assert evaluate_signal(_sig("SELL", 100, 110, 90, 80), high=112, low=88, current=100) == STATUS_SL
+
+    def test_buy_tp2_with_sl_touched_still_sl(self):
+        # TP2 tersentuh tapi SL juga -> tetap konservatif SL.
+        assert evaluate_signal(_sig(), high=122, low=88, current=100) == STATUS_SL
+
+    def test_buy_tp2_no_sl(self):
+        assert evaluate_signal(_sig(), high=122, low=95, current=100) == STATUS_TP2
+
 
 class TestHistory:
     def test_save_load_roundtrip(self, tmp_path):
@@ -110,6 +125,17 @@ class TestHistory:
         date, sigs = previous_session_signals(history, now_key="2026-08-07 19:00")
         assert date == "2026-08-07 13:30"
         assert sigs
+
+    def test_add_signals_today_skips_neutral(self, tmp_path):
+        path = str(tmp_path / "history.json")
+        buy = Signal("BTCUSDT", "BTC", 100.0, 1.0, 0.5, "BUY", 70, 100.0, 90.0, 110.0, 120.0)
+        neutral = Signal("XRPUSDT", "XRP", 1.0, 0.0, 0.0, "NEUTRAL", 40, 1.0, 0.97, 1.03, 1.06)
+        add_signals_today([buy, neutral], "today", path, session_key="2026-08-08 13:30")
+        history = load_history(path)
+        stored = history["2026-08-08 13:30"]
+        assert len(stored) == 1
+        assert stored[0]["symbol"] == "BTCUSDT"
+        assert all(s["action"] != "NEUTRAL" for s in stored)
 
 
 class TestSessionSince:

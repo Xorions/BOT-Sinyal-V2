@@ -15,7 +15,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
-from engine import Signal, _esc, _fmt_price
+from engine import ACTION_BUY, ACTION_SELL, Signal, _esc, _fmt_price
 
 HISTORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 HISTORY_PATH = os.path.join(HISTORY_DIR, "history.json")
@@ -87,7 +87,12 @@ def save_history(history: Dict[str, List[Dict]], path: str = HISTORY_PATH) -> No
 
 
 def add_signals_today(signals: List[Signal], timestamp: str, path: str = HISTORY_PATH, session_key: Optional[str] = None) -> None:
-    """Simpan sinyal terpilih sesi ini (menimpa entri sesi yang sama)."""
+    """Simpan sinyal terpilih sesi ini (menimpa entri sesi yang sama).
+
+    Hanya sinyal berarah (BUY/SELL) yang dicatat — NEUTRAL tidak disimpan agar
+    tidak mencemari evaluasi win rate sesi berikutnya (NEUTRAL tak pernah jadi
+    win, hanya menambah denominator Floating).
+    """
     key = session_key or session_now_str()
     history = load_history(path)
     history[key] = [
@@ -102,6 +107,7 @@ def add_signals_today(signals: List[Signal], timestamp: str, path: str = HISTORY
             "timestamp": timestamp,
         }
         for s in signals
+        if s.action in (ACTION_BUY, ACTION_SELL)
     ]
     save_history(history, path)
 
@@ -140,23 +146,32 @@ def _session_since(key: Optional[str]) -> Optional[datetime]:
 def _evaluate(sig: Dict, high: float, low: float, current: float):
     """(status, harga acuan) berdasar high/low/current 24j terakhir.
 
-    Urutan cek: TP2 → TP1 → SL → Floating (TP diperiksa lebih dulu).
+    Urutan cek: TP2 → TP1 → SL → Floating. Bila SL DAN TP tersentuh di jendela
+    yang sama (high >= TP1 dan low <= SL sekaligus), urutannya tidak bisa
+    dipastikan dari data agregat — dicatat konservatif sebagai SL agar win rate
+    tidak melebih-lebihkan (SL bisa saja terjadi sebelum TP).
     current dipakai untuk sinyal yang masih berjalan (floating).
     """
     action = sig.get("action")
-    if action == "BUY":
+    if action == ACTION_BUY:
+        sl_touched = low <= sig["sl"]
+        if sl_touched and high >= sig["tp1"]:
+            return STATUS_SL, sig["sl"]
         if high >= sig["tp2"]:
             return STATUS_TP2, sig["tp2"]
         if high >= sig["tp1"]:
             return STATUS_TP1, sig["tp1"]
-        if low <= sig["sl"]:
+        if sl_touched:
             return STATUS_SL, sig["sl"]
-    elif action == "SELL":
+    elif action == ACTION_SELL:
+        sl_touched = high >= sig["sl"]
+        if sl_touched and low <= sig["tp1"]:
+            return STATUS_SL, sig["sl"]
         if low <= sig["tp2"]:
             return STATUS_TP2, sig["tp2"]
         if low <= sig["tp1"]:
             return STATUS_TP1, sig["tp1"]
-        if high >= sig["sl"]:
+        if sl_touched:
             return STATUS_SL, sig["sl"]
     return STATUS_FLOATING, current
 
@@ -190,6 +205,9 @@ def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = 
     """
     out: List[Dict] = []
     for sig in signals:
+        if sig.get("action") not in (ACTION_BUY, ACTION_SELL):
+            out.append({**sig, "status": None})
+            continue
         try:
             high_low_cur = fetch_fn(sig["symbol"], since)
         except Exception:

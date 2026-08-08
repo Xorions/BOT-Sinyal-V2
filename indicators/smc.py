@@ -92,9 +92,18 @@ def detect_structure(
     else:
         hi_higher = len(sw_highs) >= 2 and sw_highs[-1]["value"] > sw_highs[-2]["value"]
         lo_higher = len(sw_lows) >= 2 and sw_lows[-1]["value"] > sw_lows[-2]["value"]
-        if hi_higher and lo_higher:
+        hi_lower = len(sw_highs) >= 2 and sw_highs[-1]["value"] < sw_highs[-2]["value"]
+        lo_lower = len(sw_lows) >= 2 and sw_lows[-1]["value"] < sw_lows[-2]["value"]
+        # Kriteria simetris: bullish butuh HH+HL, bearish butuh LH+LL (bila kedua
+        # sisi tersedia); bila hanya satu sisi yang ada, sinyal sisi itu dipakai.
+        if sw_highs and sw_lows:
+            if hi_higher and lo_higher:
+                structure["trend"] = "bullish"
+            elif hi_lower and lo_lower:
+                structure["trend"] = "bearish"
+        elif hi_higher or lo_higher:
             structure["trend"] = "bullish"
-        elif len(sw_highs) >= 2 and sw_highs[-1]["value"] < sw_highs[-2]["value"]:
+        elif hi_lower or lo_lower:
             structure["trend"] = "bearish"
     if last_high is not None:
         structure["last_swing_high"] = last_high
