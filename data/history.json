@@ -550,5 +550,57 @@
       "tp2": 0.5844453,
       "timestamp": "Saturday, 08 Aug 2026, 22:29 WIB"
     }
+  ],
+  "2026-08-09 01:27": [
+    {
+      "symbol": "CATIUSDT",
+      "base": "CATI",
+      "action": "BUY",
+      "entry": 0.04591,
+      "sl": 0.04078727,
+      "tp1": 0.053594094999999994,
+      "tp2": 0.061278189999999996,
+      "timestamp": "Sunday, 09 Aug 2026, 01:27 WIB"
+    },
+    {
+      "symbol": "HMSTRUSDT",
+      "base": "HMSTR",
+      "action": "BUY",
+      "entry": 0.0002118,
+      "sl": 0.0001991009,
+      "tp1": 0.00023084865,
+      "tp2": 0.0002498973,
+      "timestamp": "Sunday, 09 Aug 2026, 01:27 WIB"
+    },
+    {
+      "symbol": "ERNUSDT",
+      "base": "ERN",
+      "action": "BUY",
+      "entry": 2.183,
+      "sl": 2.046841,
+      "tp1": 2.3872384999999996,
+      "tp2": 2.591476999999999,
+      "timestamp": "Sunday, 09 Aug 2026, 01:27 WIB"
+    },
+    {
+      "symbol": "TLMUSDT",
+      "base": "TLM",
+      "action": "BUY",
+      "entry": 0.00167,
+      "sl": 0.001650035,
+      "tp1": 0.0016999475,
+      "tp2": 0.0017298950000000002,
+      "timestamp": "Sunday, 09 Aug 2026, 01:27 WIB"
+    },
+    {
+      "symbol": "GIGGLEUSDT",
+      "base": "GIGGLE",
+      "action": "BUY",
+      "entry": 35.55,
+      "sl": 34.08743,
+      "tp1": 37.743854999999996,
+      "tp2": 39.937709999999996,
+      "timestamp": "Sunday, 09 Aug 2026, 01:27 WIB"
+    }
   ]
 }
