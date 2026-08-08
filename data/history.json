@@ -446,5 +446,57 @@
       "tp2": 647.6317299999997,
       "timestamp": "Saturday, 08 Aug 2026, 21:59 WIB"
     }
+  ],
+  "2026-08-08 22:19": [
+    {
+      "symbol": "APTUSDT",
+      "base": "APT",
+      "action": "BUY",
+      "entry": 0.609,
+      "sl": 0.5972029999999999,
+      "tp1": 0.6266955000000001,
+      "tp2": 0.6443910000000002,
+      "timestamp": "Saturday, 08 Aug 2026, 22:19 WIB"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "base": "BNB",
+      "action": "BUY",
+      "entry": 605.22,
+      "sl": 596.17609,
+      "tp1": 618.7858650000001,
+      "tp2": 632.35173,
+      "timestamp": "Saturday, 08 Aug 2026, 22:19 WIB"
+    },
+    {
+      "symbol": "DASHUSDT",
+      "base": "DASH",
+      "action": "BUY",
+      "entry": 31.47,
+      "sl": 31.146279999999997,
+      "tp1": 31.95558,
+      "tp2": 32.44116,
+      "timestamp": "Saturday, 08 Aug 2026, 22:19 WIB"
+    },
+    {
+      "symbol": "VIRTUALUSDT",
+      "base": "VIRTUAL",
+      "action": "BUY",
+      "entry": 0.5737,
+      "sl": 0.5699849,
+      "tp1": 0.57927265,
+      "tp2": 0.5848452999999999,
+      "timestamp": "Saturday, 08 Aug 2026, 22:19 WIB"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "base": "SUI",
+      "action": "BUY",
+      "entry": 0.7021,
+      "sl": 0.6874315,
+      "tp1": 0.7241027499999999,
+      "tp2": 0.7461054999999999,
+      "timestamp": "Saturday, 08 Aug 2026, 22:19 WIB"
+    }
   ]
 }
