@@ -7,7 +7,7 @@
   riwayat sesi sebelumnya (termasuk sesi pagi yang sama), mengambil harga 24j
   terakhir tiap pair (high/low/current) dari Binance, menentukan status tiap
   sinyal (TP2 / TP1 / SL / Floating), menghitung win rate, lalu menyusun teks
-  ringkasan yang disisipkan tepat sebelum blok DAILY BRIEFING.
+  ringkasan evaluasi yang dikirim sebagai pesan Telegram terpisah (History Review).
 """
 
 import json

@@ -226,29 +226,31 @@ def run_scan() -> tuple:
     if whale_flow is not None:
         market_note += f" · Whale net ETH ${whale_flow['net_usd'] / 1e6:+.1f}M"
 
-    # Evaluasi sinyal kemarin → disisipkan tepat sebelum blok DAILY BRIEFING.
+    # Evaluasi sinyal sesi sebelumnya → pesan terpisah (History Review).
     recap = build_recap(load_history(), _ticker_range)
     briefing = format_message(ranked, timestamp, market_note)
-    message = (recap + "\n" + briefing) if recap else briefing
-    return message, ranked, timestamp
+    return recap, briefing, ranked, timestamp
 
 
 def main() -> int:
     try:
-        message, ranked, timestamp = run_scan()
+        recap, briefing, ranked, timestamp = run_scan()
     except Exception as exc:  # noqa: BLE001 - tampilkan error apa pun agar terlihat di CI
         log.error("Gagal menjalankan scan: %s", exc)
         return 1
 
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         log.warning("Kredensial belum diisi di .env - hasil hanya ditampilkan di konsol.")
-        print("\n" + message + "\n")
+        print("\n" + ((recap + "\n" + briefing) if recap else briefing) + "\n")
         add_signals_today(ranked, timestamp)
         return 0
 
     try:
-        send_telegram(message)
-        log.info("Pesan terkirim ke Telegram.")
+        if recap:
+            send_telegram(recap)
+            log.info("Pesan evaluasi sesi sebelumnya terkirim ke Telegram.")
+        send_telegram(briefing)
+        log.info("Pesan briefing terkirim ke Telegram.")
         add_signals_today(ranked, timestamp)
         return 0
     except TelegramSendError as exc:
