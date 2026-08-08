@@ -27,7 +27,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (97 kasus)
+tests/                     # pytest (128 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -42,16 +42,17 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 | Kategori | Bobot | Komponen |
 |---|---|---|
 | SMC & S&D (MTF) | 0.40 | **Kompas H4/D1** (BOS:+0.45 / CHoCH:-0.45, fallback D1 ±0.30) + **Zona H1**: Demand/Supply ter-sentuh (±0.30/dekat ±0.15), OB (±0.20), FVG (±0.15), Liquidity Sweep (±0.25), Support/Resistance dekat (±0.15) |
-| Teknikal (M15) | 0.20 | RSI (<30:+0.20, >70:-0.20), MACD cross/histogram (±0.15–0.25), BOS/CHoCH M15 (±0.20), momentum 24j (≥3%:+0.20, ≤-3%:-0.20) |
+| Teknikal (M15) | 0.20 | RSI (<30:+0.20, >70:-0.20), MACD cross (±0.25) / histogram (±0.15) — cross berbobot LEBIH BESAR dari histogram (Fix #1), BOS/CHoCH M15 (±0.20), momentum 24j kontrarian (≤-3%:+0.20, ≥3%:-0.20) (Fix #6) |
 | Sentiment | 0.15 | `score_fear_greed` (contrarian), funding (≥0.03%:-0.30, ≤-0.03%:+0.30), L/S ratio (≥1.5:-0.20, ≤0.7:+0.20) |
-| Whale | 0.15 | netflow ETH: masuk exchange:-1.0, keluar:+1.0 |
-| On-chain | 0.10 | BTC `n_tx_24h` ada:+0.5 |
+| Whale | 0.15 | netflow ETH: masuk exchange:-1.0, keluar:+1.0 — HANYA untuk koin ETH (Fix #2) |
+| On-chain | 0.10 | BTC `n_tx_24h` ada:+0.5 — HANYA untuk koin BTC (Fix #2) |
 
 - **Aturan kompas (baku):** H4 bullish → **HANYA** izinkan sinyal BUY; H4 bearish → **HANYA** SELL (D1 fallback bila H4 netral).
 - **Validasi setup:** sinyal hanya BUY/SELL bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1 (`engine._setup_valid`). Di luar itu → NEUTRAL.
 - Aksi: skor ≥ `BUY_THRESHOLD` (0.10) = BUY, ≤ `SELL_THRESHOLD` (-0.10) = SELL, else NEUTRAL.
 - Confidence: `clamp(25, 95, CONFIDENCE_BASE + |skor|*40)`.
-- **Konvensi RSI/funding = kontrarian**: overbought/euforia = negatif (antisipasi pullback).
+- **Konvensi RSI/funding/momentum = kontrarian**: overbought/euforia = negatif (antisipasi pullback). Momentum 24j mengikuti konvensi ini (Fix #6).
+- **Renormalisasi (Fix #2)**: total skor dibagi jumlah bobot kategori yang **berlaku** untuk koin itu. Koin non-ETH/BTC tidak dihitung bobot Whale/On-chain, sehingga skornya sebanding lintas koin (bukan rata-rata parsial).
 - Entry/SL/TP di `engine._levels_mtf()`: dari zona H1 (Demand/Supply zone atau OB; SL di luar zona, TP di level S&R H1); fallback persentase bila tidak ada zona.
 
 ### Risk-to-Reward Ratio (RRR) — aturan baku level SL/TP
@@ -78,7 +79,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 ## 4. Data: Binance & Sumber Lain
 
 - **MTF**: `get_klines_multi(symbol)` mengembalikan `{interval: [candle, ...]}` untuk `1d`, `4h`, `1h`, `15m` (konstanta `INTERVAL_1D/4H/1H/M15`, limit default `MTF_LIMITS`). Satu interval gagal → interval itu dilewati, analisa tetap jalan (sinyal di-skip).
-- **Evaluasi presisi**: `get_klines_since(symbol, interval, since)` memakai `startTime` API — candle mulai `since` (datetime WIB-aware, mundur 1 interval agar candle yang berjalan ikut dihitung). `INTERVAL_MS` memetakan interval → durasi ms.
+- **Evaluasi presisi**: `get_klines_since(symbol, interval, since)` memakai `startTime` API — Binance mengembalikan candle pertama dengan `openTime >= since`, sehingga candle yang memuat waktu entry ikut dihitung tanpa mengikutsertakan aksi harga pra-entry dari candle sebelumnya (Fix #4: TIDAK mundur 1 interval).
 - `get_ticker_24h(symbol)` → `ticker_24h` di `bot.py` (1 panggilan agregat).
 - CMC opsional (free tier): tanpa candle historis; bila kosong → fallback semua pasangan USDT by volume Binance.
 - `get_funding_rate` / `get_long_short_ratio` (futures): diprobe sekali murah; bila gagal → sentiment pakai Fear & Greed saja.
@@ -87,12 +88,12 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 ## 5. Evaluasi Sinyal & Riwayat (`evaluation.py`) — aturan baku
 
 - **`add_signals_today()`** dipanggil di `bot.py` **setelah pesan berhasil dikirim** — menyimpan sinyal terpilih sesi itu ke `data/history.json` (key sesi WIB `YYYY-MM-DD HH:MM`; kunci lama `YYYY-MM-DD` tetap didukung).
-- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (`previous_session_signals`, robust terhadap hari/sesi kosong), mengambil `(high, low, current)` via `fetch_fn` (dari `binance.get_klines_since` — kline M15 sejak sesi sinyal), lalu menentukan status.
+- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (robust terhadap hari/sesi kosong), mengambil `(high, low, current)` via `fetch_fn` (dari `binance.get_klines_since` — kline M15 sejak sesi sinyal), lalu menentukan status. Bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch harga gagal), recap **mundur ke sesi lebih lama yang valid** (Fix #5).
 - **Presisi evaluasi**: `build_recap` meng-parse kunci sesi WIB ke datetime (`_session_since`) dan meneruskannya sebagai `since` ke `fetch_fn(pair, since)`. `bot._range_since()` menghitung high/low HANYA dari candle **setelah sesi sinyal** (bukan ticker 24j rolling yang bisa mencakup pergerakan harga SEBELUM entry). Fallback otomatis ke ticker 24j (`_ticker_range`) bila klines sejak-sesi gagal / kosong.
 - Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari **seluruh** sinyal yang dievaluasi (Floating ikut penyebut). Nilai SL/TP dari `history.json`.
 - **Format recap**: statistik di baris terpisah (`🏆 Win rate` → `💰 TP1` → `🎯 TP2` → `🛡️ SL` → `⏳ Floating`), lalu pemisah `───`, lalu tiap sinyal = `#BASE AKSI` + `🔑 Entry $.. → <emoji> STATUS` + `📋 Hit <STATUS> di $..` (floating: `📋 Harga saat ini $..`). Harga acuan disimpan sebagai `ref` oleh `_evaluate()`; `STATUS_EMOJI`: TP2=🎯, TP1=💰, SL=🛡️, FLOATING=⏳.
-- Recap **jangan menggagalkan scan**: fetch gagal → status `None` → sinyal itu dilewati; tak ada riwayat/semua gagal → `build_recap` mengembalikan `None`.
+- Recap **jangan menggagalkan scan**: fetch gagal → status `None` → sinyal itu dilewati; tak ada riwayat/semua sesi gagal → `build_recap` mengembalikan `None`.
 - **CI commit-back**: runner di-reset tiap run, jadi workflow wajib men-*commit balik* `data/history.json` (step "Commit balik riwayat sinyal", `permissions: contents: write` + `concurrency` agar tidak race). Jangan pernah menambahkan `data/history.json` ke `.gitignore`.
 
 ## 6. Format pesan (baca `engine.format_message()`)
@@ -103,7 +104,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 - **Alasan wajib MTF (kelompok per timeframe)**: baris pertama `📝` = headline zona H1 (mis. "Demand Zone & Bullish OB H1 Tersentuh"). Alasan berikutnya dipakai `engine._group_reason_lines()`: tag `+ [H4]`/`+ [H1]`/`+ [M15]` ditulis **1x** sebagai header grup (indent 4 spasi); sub-alasan berindent **7 spasi + `- `**. Grup dgn 1 item → inline (`+ [H4] Tren utama Bullish`); banyak item → header lalu daftar `- ...`. Baris non-tag (momentum) dicetak ber-prefix `💸` sebagai baris terpisah.
 - Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
 - Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
-- **Pecah pesan >4000 karakter**: `telegram_sender._split_signal_blocks()` memotong **per blok koin** (batas judul `#BASE`) agar tidak ada koin terpotong di tengah; footer Disclaimer tetap di akhir sinyal koin terakhir. Jangan menggantinya dengan pemotongan string asal di tengah baris.
+- **Pecah pesan >4000 karakter**: `telegram_sender._split_signal_blocks()` memotong **per blok koin** (batas judul `#BASE`) PLUS header seksi (📈/📉/⚪, Fix #3) agar tidak ada koin terpotong di tengah dan header WATCHLIST tidak terpisah dari koin NEUTRAL-nya; footer Disclaimer tetap di akhir sinyal koin terakhir. Jangan menggantinya dengan pemotongan string asal di tengah baris.
 
 ## 7. Panduan Pengembangan
 
@@ -130,7 +131,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 97 test
+venv\Scripts\python.exe -m pytest tests -v   # 128 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 

@@ -218,6 +218,33 @@ class TestBuildRecap:
         history = {"2026-08-06 13:30": [_sig()]}
         assert build_recap(history, lambda pair, since=None: None, now_key="2026-08-07 13:30") is None
 
+    def test_recap_falls_back_to_older_session_when_recent_fetch_fails(self):
+        # Fix #5: sesi terbaru gagal dievaluasi -> recap dari sesi lebih lama.
+        history = {
+            "2026-08-05 13:30": [_sig("BUY", 100.0, 90.0, 110.0, 120.0)],
+            "2026-08-06 13:30": [_sig("BUY", 50.0, 45.0, 55.0, 60.0, symbol="LITUSDT", base="LIT")],
+        }
+
+        def fetch(pair, since=None):
+            if since == datetime(2026, 8, 6, 13, 30, tzinfo=WIB):
+                return None  # sesi terbaru gagal (harga tak terambil)
+            return {"BTCUSDT": (121.0, 95.0, 115.0), "LITUSDT": (54.0, 44.0, 52.0)}[pair]
+
+        recap = build_recap(history, fetch, now_key="2026-08-07 13:30")
+        assert recap is not None
+        assert "05 Aug 2026 13:30" in recap
+        assert "#BTC" in recap
+
+    def test_recap_falls_back_to_older_session_when_recent_empty(self):
+        # Fix #5: sesi terbaru tanpa sinyal -> recap dari sesi lebih lama.
+        history = {
+            "2026-08-05 13:30": [_sig("BUY", 100.0, 90.0, 110.0, 120.0)],
+            "2026-08-06 19:00": [],
+        }
+        recap = build_recap(history, self._fetch, now_key="2026-08-07 13:30")
+        assert recap is not None
+        assert "05 Aug 2026 13:30" in recap
+
     def test_recap_passes_session_time_to_fetch(self):
         captured = {}
 

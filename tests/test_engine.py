@@ -155,10 +155,42 @@ class TestCompass:
 
 class TestTrigger:
     def test_bullish_input_positive(self):
-        score, reasons = score_trigger(_candles_from_closes(_bullish_series()), pct_change_24h=9.2)
+        # pct_change_24h netral (0.0) agar momentum kontrarian tidak menambahi.
+        score, reasons = score_trigger(_candles_from_closes(_bullish_series()), pct_change_24h=0.0)
         assert score > 0
         assert reasons
         assert any(r.startswith("[M15]") for r in reasons)
+
+    def test_golden_cross_scores_higher_than_plain_bullish_histogram(self, monkeypatch):
+        # Fix #1: cross MACD (konfirmasi kuat) berbobot > histogram biasa.
+        import engine as engine_mod
+
+        candles = _candles_from_closes([100.0] * 40)
+        monkeypatch.setattr(engine_mod, "rsi", lambda *a, **k: 50.0)
+        monkeypatch.setattr(engine_mod, "detect_structure", lambda *a, **k: {"bos": None, "choch": None})
+        # Histogram >0 tanpa cross -> +0.15.
+        monkeypatch.setattr(
+            engine_mod, "macd_histogram_series",
+            lambda *a, **k: [float("nan")] * 39 + [0.5],
+        )
+        s_hist, r_hist = engine_mod.score_trigger(candles, 0.0)
+        assert any("MACD Bullish" in r for r in r_hist)
+        # Golden cross (hist[-2] <= 0 < hist[-1]) -> +0.25.
+        monkeypatch.setattr(
+            engine_mod, "macd_histogram_series",
+            lambda *a, **k: [float("nan")] * 38 + [-0.1, 0.5],
+        )
+        s_cross, r_cross = engine_mod.score_trigger(candles, 0.0)
+        assert any("Golden Cross" in r for r in r_cross)
+        assert s_cross > s_hist
+
+    def test_momentum_contrarian_aligned_with_rsi(self):
+        # Fix #6: momentum 24j kontrarian — overbought (>=3%) bearish, oversold (<=-3%) bullish.
+        closes = [100.0 + (i % 3 - 1) * 0.1 for i in range(60)]
+        candles = _candles_from_closes(closes)
+        s_pumped, _ = score_trigger(candles, pct_change_24h=5.0)
+        s_dumped, _ = score_trigger(candles, pct_change_24h=-5.0)
+        assert s_dumped > s_pumped
 
     def test_neutral_input(self):
         score, _ = score_trigger(_candles_from_closes(_neutral_series()), pct_change_24h=0.0)
@@ -266,6 +298,38 @@ class TestAssembleSignal:
         )
         assert sig.action in (ACTION_BUY, ACTION_SELL, ACTION_NEUTRAL)
         assert sig.entry > 0
+
+    def test_whale_onchain_applied_only_to_source_coin(self):
+        # Fix #2: netflow ETH & statistik BTC hanya untuk koin sumbernya.
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        whale_inflow = {"net_usd": 50_000_000.0}  # inflow = bearish
+        btc_stats = {"n_tx_24h": 300_000}
+
+        # DOGE (bukan sumber) tidak boleh terpengaruh netflow ETH / statistik BTC.
+        sig_doge = assemble_signal(
+            symbol="DOGEUSDT", base="DOGE", price=price, pct_change_24h=0.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
+            whale_flow=whale_inflow, btc_stats=btc_stats,
+        )
+        assert sig_doge.breakdown["whale"] == 0.0
+        assert sig_doge.breakdown["onchain"] == 0.0
+
+        sig_eth = assemble_signal(
+            symbol="ETHUSDT", base="ETH", price=price, pct_change_24h=0.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
+            whale_flow=whale_inflow, btc_stats=btc_stats,
+        )
+        assert sig_eth.breakdown["whale"] == -1.0  # inflow exchange = bearish
+
+        sig_btc = assemble_signal(
+            symbol="BTCUSDT", base="BTC", price=price, pct_change_24h=0.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
+            whale_flow=whale_inflow, btc_stats=btc_stats,
+        )
+        assert sig_btc.breakdown["onchain"] == 0.5
 
 
 class TestLevels:

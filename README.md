@@ -77,7 +77,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (97 kasus)
+tests/                     # pytest (128 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -86,10 +86,10 @@ tests/                     # pytest (97 kasus)
 | Kategori | Bobot | Isi |
 |---|---|---|
 | SMC & S&D (MTF) | 40% | Kompas H4/D1 (BOS/CHoCH) + zona H1 (S&D, OB, FVG, EQH/EQL, Liquidity Sweep, S&R) |
-| Teknikal (M15) | 20% | RSI, MACD (cross/histogram), BOS M15, momentum 24j |
+| Teknikal (M15) | 20% | RSI (contrarian), MACD (cross berbobot > histogram), BOS M15, momentum 24j (contrarian) |
 | Sentiment | 15% | Fear & Greed (contrarian), funding rate, long/short ratio |
-| Whale | 15% | Netflow exchange ETH (proxy) |
-| On-chain | 10% | Aktivitas jaringan BTC (jumlah tx) |
+| Whale | 15% | Netflow exchange ETH (proxy) — hanya untuk koin ETH |
+| On-chain | 10% | Aktivitas jaringan BTC (jumlah tx) — hanya untuk koin BTC |
 
 Skor tiap kategori -1.0..+1.0. **BUY** ≥ `BUY_THRESHOLD` (0.10), **SELL** ≤ `SELL_THRESHOLD` (-0.10). **Aturan kompas MTF:** H4 bullish → HANYA BUY, H4 bearish → HANYA SELL (D1 sebagai fallback). Sinyal tervalidasi bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1. Confidence `clamp(25, 95, 55 + |skor|*40)`. Entry/SL/TP dipetakan dari zona H1 (SL di luar Demand/Supply zone/OB; TP di level S&R H1), fallback persentase statis bila tak ada zona.
 
@@ -180,14 +180,14 @@ Di `bot._eligible_pair()`:
 
 Sinyal NEUTRAL (bila ada) dikelompokkan di header `⚪ WATCHLIST (NEUTRAL)`.
 
-Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blok koin** (`telegram_sender._split_signal_blocks`): setiap chunk berisi koin-koin **utuh** (tidak ada koin terpotong di tengah, mis. judul `#VIRTUAL` terpisah dari detailnya). Footer `⚠️ Disclaimer` selalu menempel di akhir sinyal koin terakhir (chunk terakhir).
+Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blok koin** PLUS header seksi (`telegram_sender._split_signal_blocks`): setiap chunk berisi koin-koin **utuh** (tidak ada koin terpotong di tengah, mis. judul `#VIRTUAL` terpisah dari detailnya), dan header `⚪ WATCHLIST` tidak terpisah dari koin NEUTRAL-nya. Footer `⚠️ Disclaimer` selalu menempel di akhir sinyal koin terakhir (chunk terakhir).
 
 ## Evaluasi Sinyal Sesi Sebelumnya (Daily Recap)
 
 `evaluation.py` + `data/history.json`:
 
 - **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
-- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**. High/low dihitung dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j bila data sejak-sesi tidak tersedia.
+- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**. High/low dihitung dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j bila data sejak-sesi tidak tersedia. Bila sesi terakhir gagal dievaluasi (tanpa sinyal / fetch gagal), recap **mundur ke sesi lebih lama yang valid**.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP1/TP2/SL/Floating).
 - Recap dikirim sebagai **pesan Telegram terpisah** (History Review) sebelum blok `📊 DAY TRADING BRIEFING — MTF SMC + S&D`:
 
@@ -214,7 +214,7 @@ Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blo
 ───
 ```
 
-Bila belum ada riwayat (sesi pertama) atau semua data harga gagal diambil, recap dilewati tanpa menggagalkan scan.
+Bila belum ada riwayat (sesi pertama) atau semua sesi gagal diambil datanya, recap dilewati tanpa menggagalkan scan.
 
 ## Catatan penting
 

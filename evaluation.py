@@ -222,22 +222,8 @@ def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = 
 
 
 # ---------------------------------------------------------------- recap
-def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] = None, now_key: Optional[str] = None) -> Optional[str]:
-    """Teks ringkasan evaluasi sinyal sesi sebelumnya; None bila tak ada riwayat / semua gagal.
-
-    Win rate = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi.
-    `since` (dari kunci sesi) diteruskan ke `fetch_fn` agar high/low hanya dihitung
-    dari candle SETELAH sesi sinyal — bukan 24j rolling yang bisa mencakup harga pra-entry.
-    """
-    date, signals = previous_session_signals(history, now_key or today)
-    if not signals:
-        return None
-    since = _session_since(date)
-    results = evaluate_signals(signals, fetch_fn, since=since)
-    evaluated = [r for r in results if r["status"]]
-    if not evaluated:
-        return None
-
+def _format_recap(date: str, evaluated: List[Dict]) -> str:
+    """Susun teks recap dari daftar sinyal yang sudah dievaluasi."""
     tp2 = sum(1 for r in evaluated if r["status"] == STATUS_TP2)
     tp1 = sum(1 for r in evaluated if r["status"] == STATUS_TP1)
     sl = sum(1 for r in evaluated if r["status"] == STATUS_SL)
@@ -271,3 +257,29 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
             lines.append("───")
     lines.append("━━━━━━━━━━━━")
     return "\n".join(lines)
+
+
+def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] = None, now_key: Optional[str] = None) -> Optional[str]:
+    """Teks ringkasan evaluasi sinyal sesi sebelumnya; None bila tak ada riwayat / semua gagal.
+
+    Win rate = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi.
+    `since` (dari kunci sesi) diteruskan ke `fetch_fn` agar high/low hanya dihitung
+    dari candle SETELAH sesi sinyal — bukan 24j rolling yang bisa mencakup harga pra-entry.
+
+    Fix #5: bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch
+    harga gagal), evaluasi MUNDUR ke sesi lebih lama yang masih valid — bukan
+    menghentikan recap di sesi yang gagal.
+    """
+    now_key = now_key or today or session_now_str()
+    older_keys = sorted((k for k in history if k < now_key), reverse=True)
+    for date in older_keys:
+        signals = history[date]
+        if not signals:
+            continue
+        since = _session_since(date)
+        results = evaluate_signals(signals, fetch_fn, since=since)
+        evaluated = [r for r in results if r["status"]]
+        if not evaluated:
+            continue
+        return _format_recap(date, evaluated)
+    return None

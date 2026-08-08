@@ -230,19 +230,21 @@ def score_trigger(m15_candles: List[Dict[str, float]], pct_change_24h: float) ->
             cross = "death"
 
     m15_parts: List[str] = []
+    # Fix #1: cross MACD (konfirmasi lebih kuat) diberi bobot LEBIH BESAR dari
+    # sekadar arah histogram. Sebelumnya terbalik (cross +-0.15, histogram +-0.25).
     if cross == "golden":
         m15_parts.append("MACD Golden Cross")
-        score += 0.15
+        score += 0.25
     elif cross == "death":
         m15_parts.append("MACD Death Cross")
-        score -= 0.15
+        score -= 0.25
     elif hist_now is not None:
         if hist_now > 0:
             m15_parts.append("MACD Bullish")
-            score += 0.25
+            score += 0.15
         else:
             m15_parts.append("MACD Bearish")
-            score -= 0.25
+            score -= 0.15
 
     if rsi_val is not None:
         if rsi_val < 30:
@@ -263,14 +265,17 @@ def score_trigger(m15_candles: List[Dict[str, float]], pct_change_24h: float) ->
     if m15_parts:
         reasons.append("[M15] " + " & ".join(m15_parts))
 
+    # Fix #6: momentum 24j selaras konvensi kontrarian (sama seperti RSI/funding):
+    # kenaikan ekstrem = overbought -> bias bearish; penurunan ekstrem = oversold
+    # -> bias bullish. Sebelumnya momentum trend-following melawan RSI/SMC.
     if pct_change_24h is not None:
-        if pct_change_24h >= 3:
+        if pct_change_24h <= -3:
             score += 0.20
-        elif pct_change_24h <= -3:
+        elif pct_change_24h >= 3:
             score -= 0.20
-        elif pct_change_24h >= 0.5:
-            score += 0.05
         elif pct_change_24h <= -0.5:
+            score += 0.05
+        elif pct_change_24h >= 0.5:
             score -= 0.05
 
     return max(-1.0, min(1.0, score)), reasons
@@ -509,8 +514,14 @@ def assemble_signal(
     tech, tech_reasons = score_trigger(m15_candles, pct_change_24h)
     smc, smc_reasons = score_smc_mtf(h4_candles, d1_candles, h1_map, price)
     senti, senti_reasons = score_sentiment(fg_value, funding_rates, ls_ratio)
-    whale, whale_reasons = score_whale(whale_flow)
-    onchain, onchain_reasons = score_onchain(btc_stats)
+    # Fix #2: whale (netflow ETH) & on-chain (statistik BTC) bukan konstanta
+    # global untuk SEMUA koin — hanya diterapkan ke koin sumbernya (ETH / BTC).
+    # Sebelumnya netflow ETH ikut menggeser skor DOGE/SOL/dst sebesar +-0.20
+    # (lebih besar dari BUY_THRESHOLD), membuat setup netral bisa jadi BUY.
+    apply_whale = base == "ETH"
+    apply_onchain = base == "BTC"
+    whale, whale_reasons = score_whale(whale_flow) if apply_whale else (0.0, [])
+    onchain, onchain_reasons = score_onchain(btc_stats) if apply_onchain else (0.0, [])
 
     total = (
         tech * WEIGHT_TECHNICAL
@@ -519,7 +530,17 @@ def assemble_signal(
         + whale * WEIGHT_WHALE
         + onchain * WEIGHT_ONCHAIN
     )
-    total = max(-1.0, min(1.0, total))
+    # Renormalisasi: total dibagi jumlah bobot yang BENAR-BENAR dipakai agar koin
+    # tanpa kategori whale/on-chain tidak mendapat skor lebih kecil sistematis
+    # (dan skor tetap sebanding lintas koin, bukan rata-rata parsial).
+    weight_sum = (
+        WEIGHT_TECHNICAL
+        + WEIGHT_SMC
+        + WEIGHT_SENTIMENT
+        + (WEIGHT_WHALE if apply_whale else 0.0)
+        + (WEIGHT_ONCHAIN if apply_onchain else 0.0)
+    )
+    total = max(-1.0, min(1.0, total / weight_sum)) if weight_sum else 0.0
 
     compass_dir = compass["direction"]
     valid = _setup_valid(compass_dir, h1_map, trigger)

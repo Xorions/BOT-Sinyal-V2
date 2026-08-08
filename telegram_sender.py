@@ -18,10 +18,21 @@ class TelegramSendError(Exception):
 # hanya judul koin yang dikenali sebagai awal blok sinyal.
 _SIGNAL_BLOCK_RE = re.compile(r"^\s*(?:<b>)?#\w")
 
+# Header seksi briefing (`📈 SINYAL LONG (BUY)`, `📉 SINYAL SHORT (SELL)`,
+# `⚪ WATCHLIST (NEUTRAL)`) ikut dijadikan batas blok — Fix #3: tanpa ini,
+# header WATCHLIST menempel di akhir chunk seksi sebelumnya dan koin NEUTRAL-nya
+# muncul di chunk berikutnya tanpa header.
+_SECTION_HEADER_RE = re.compile(r"^\s*(?:<b>)?[📈📉⚪]")
+
 
 def _is_signal_block_start(line: str) -> bool:
     """True bila baris ini memulai blok sinyal sebuah koin (judul `#BASE`)."""
     return bool(_SIGNAL_BLOCK_RE.match(line))
+
+
+def _is_section_header_start(line: str) -> bool:
+    """True bila baris ini header seksi (LONG / SHORT / WATCHLIST)."""
+    return bool(_SECTION_HEADER_RE.match(line))
 
 
 def _chunk_text(text: str, limit: int = 4000) -> list:
@@ -59,14 +70,16 @@ def _split_signal_blocks(text: str, limit: int = 4000) -> list:
     """Pecah pesan per BLOK KOIN (batas antar sinyal `#BASE`), bukan asal baris.
 
     Satu blok koin = dari baris judul `#BASE` sampai sebelum judul koin
-    berikutnya. Header/meta menempel di awal chunk pertama; footer Disclaimer
-    berada setelah pemisah koin terakhir, sehingga selalu ikut di akhir sinyal
-    koin terakhir. Konsekuensinya setiap chunk berisi koin-koin UTUH — tidak ada
-    koin yang terpotong di tengah (mis. judul `#VIRTUAL` di satu pesan dan
-    detailnya di pesan lain). Tanpa blok koin -> fallback `_chunk_text`.
+    berikutnya. Header seksi (📈/📉/⚪) juga dijadikan batas blok (Fix #3) agar
+    header WATCHLIST tidak terpisah dari koin NEUTRAL-nya saat pesan dipecah.
+    Header/meta menempel di awal chunk pertama; footer Disclaimer berada setelah
+    pemisah koin terakhir, sehingga selalu ikut di akhir sinyal koin terakhir.
+    Konsekuensinya setiap chunk berisi koin-koin UTUH — tidak ada koin yang
+    terpotong di tengah (mis. judul `#VIRTUAL` di satu pesan dan detailnya di
+    pesan lain). Tanpa blok koin -> fallback `_chunk_text`.
     """
     lines = text.splitlines()
-    starts = [i for i, line in enumerate(lines) if _is_signal_block_start(line)]
+    starts = [i for i, line in enumerate(lines) if _is_signal_block_start(line) or _is_section_header_start(line)]
     if not starts:
         return _chunk_text(text, limit)
 

@@ -26,15 +26,6 @@ MTF_LIMITS = {
     INTERVAL_M15: 200,
 }
 
-# Durasi tiap interval (ms) — dipakai evaluasi sinyal: ambil candle mulai sesi sinyal.
-INTERVAL_MS = {
-    INTERVAL_M15: 15 * 60 * 1000,
-    INTERVAL_1H: 60 * 60 * 1000,
-    INTERVAL_4H: 4 * 60 * 60 * 1000,
-    INTERVAL_1D: 24 * 60 * 60 * 1000,
-}
-
-
 def _klines(symbol: str, interval: str, limit: int, start_time: Optional[int] = None) -> List[Dict[str, float]]:
     """Fetch kline Binance dan ubah menjadi list dict {open, high, low, close, volume}.
 
@@ -72,11 +63,15 @@ def get_klines_since(symbol: str, interval: str, since, limit: int = 1000) -> Li
     """Candle OHLCV mulai `since` (datetime WIB/aware) sampai sekarang.
 
     Dipakai evaluasi sinyal sesi sebelumnya: high/low dihitung HANYA dari candle
-    setelah sesi sinyal, bukan dari ticker 24j rolling (yang bisa mencakup
-    pergerakan harga SEBELUM entry). Mundur satu interval agar candle yang sedang
-    berjalan saat entry ikut dihitung.
+    dengan openTime >= waktu sesi sinyal, bukan dari ticker 24j rolling (yang
+    bisa mencakup pergerakan harga SEBELUM entry).
+
+    Fix #4: TIDAK mundur satu interval. Binance mengembalikan candle pertama
+    dengan openTime >= startTime, sehingga candle yang memuat waktu entry ikut
+    dihitung bila `since` tepat di batas interval (entry terjadi di awal candle
+    itu) — tanpa mengikutsertakan aksi harga pra-entry dari candle sebelumnya.
     """
-    start_ms = int(since.timestamp() * 1000) - INTERVAL_MS.get(interval, INTERVAL_MS[INTERVAL_M15])
+    start_ms = int(since.timestamp() * 1000)
     return _klines(symbol, interval, limit, start_time=start_ms)
 
 

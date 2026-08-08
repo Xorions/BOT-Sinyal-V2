@@ -112,6 +112,30 @@ class TestSplitSignalBlocks:
         chunks = _split_signal_blocks(text)
         assert "⚠️ Disclaimer" in chunks[-1]
 
+    def test_watchlist_header_stays_with_neutral_coins(self):
+        # Fix #3: header seksi ⚪ WATCHLIST dijadikan batas blok, sehingga tidak
+        # terpisah dari koin NEUTRAL-nya saat pesan dipecah antar chunk.
+        lines = [
+            "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&amp;D</b>",
+            "<b>📈 SINYAL LONG (BUY)</b>",
+            "",
+        ]
+        for i in range(8):
+            lines.extend(_coin_block(f"LONG{i}", f"LONG{i}USDT"))
+        lines.append("<b>⚪ WATCHLIST (NEUTRAL)</b>")
+        lines.append("")
+        for i in range(4):
+            lines.extend(_coin_block(f"NEU{i}", f"NEU{i}USDT"))
+        text = "\n".join(lines)
+
+        chunks = _split_signal_blocks(text)
+        assert len(chunks) > 1
+        header = "<b>⚪ WATCHLIST (NEUTRAL)</b>"
+        first_neutral = "<b>#NEU0 (NEU0USDT)</b>"
+        for chunk in chunks:
+            if header in chunk:
+                assert first_neutral in chunk
+
 
 class TestChunkTextFallback:
     def test_no_signal_blocks_falls_back_to_line_chunking(self):
