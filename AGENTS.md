@@ -27,7 +27,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (57 kasus)
+tests/                     # pytest (69 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -53,6 +53,16 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 - Confidence: `clamp(25, 95, CONFIDENCE_BASE + |skor|*40)`.
 - **Konvensi RSI/funding = kontrarian**: overbought/euforia = negatif (antisipasi pullback).
 - Entry/SL/TP di `engine._levels_mtf()`: dari zona H1 (Demand/Supply zone atau OB; SL di luar zona, TP di level S&R H1); fallback persentase bila tidak ada zona.
+
+### Risk-to-Reward Ratio (RRR) — aturan baku level SL/TP
+
+`engine._levels_mtf()` (via `engine._rr_targets()`) wajib menghasilkan **RRR minimal** sebelum sinyal diterima. Parameter di `config.py` (bisa via `.env`): `RRR_MIN` (1.5), `RRR_TP2` (3.0), `SL_BUFFER_PCT` (0.003).
+
+- **SL** = zona Demand/Supply H1 terdekat + buffer `SL_BUFFER_PCT` (0.3%) di luar zona (BUY: Demand/Support di bawah; SELL: Supply/Resistance di atas). Tanpa zona → fallback statis.
+- **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **hanya bila** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). Bila target terdekat terlalu dekat (< 1:1.5), paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) **hanya bila tidak terhalang** zona Supply/Demand kuat (`_blocked_by_zone`).
+- **Terhalang → reject**: `_rr_targets` mengembalikan `None` → `_levels_mtf` `None` → `assemble_signal` mengubah sinyal jadi **NEUTRAL** dan menambah alasan `[RR]`. Helper target: `_above_targets` (BUY) / `_below_targets` (SELL).
+- **TP2** = Entry ± (jarak SL x `RRR_TP2`).
+- Jangan menghapus cek RRR — ini penjaga minimal risk/reward; bila cek diubah, sesuaikan `tests/test_engine.py::TestLevelsRRR`.
 
 ## 3. Filter aset (aturan baku — jangan diubah tanpa alasan)
 
@@ -116,7 +126,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 57 test
+venv\Scripts\python.exe -m pytest tests -v   # 69 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 

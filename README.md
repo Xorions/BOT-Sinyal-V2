@@ -22,7 +22,7 @@ dan `0 12 * * *` = **19:00 WIB**):
    - **M15** → *pelatuk* konfirmasi eksekusi (RSI / MACD cross / momentum / BOS M15).
    - Funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
 4. Data agregat: Fear & Greed Index, whale netflow ETH (Etherscan), statistik jaringan BTC (blockchain.info).
-5. Skoring **berbobot** (prioritas SMC + S&D) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1.
+5. Skoring **berbobot** (prioritas SMC + S&D) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1. **Aturan RRR:** level Entry/SL/TP wajib memenuhi Risk-to-Reward minimal (lihat [Risk-to-Reward Ratio](#risk-to-reward-ratio-rrr)).
 6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate → disisipkan sebelum briefing.
 7. Kirim Day Trading Briefing (Top 5) ke Telegram (HTML parse mode), lalu simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions).
 
@@ -74,7 +74,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (57 kasus)
+tests/                     # pytest (69 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -89,6 +89,26 @@ tests/                     # pytest (57 kasus)
 | On-chain | 10% | Aktivitas jaringan BTC (jumlah tx) |
 
 Skor tiap kategori -1.0..+1.0. **BUY** ≥ `BUY_THRESHOLD` (0.10), **SELL** ≤ `SELL_THRESHOLD` (-0.10). **Aturan kompas MTF:** H4 bullish → HANYA BUY, H4 bearish → HANYA SELL (D1 sebagai fallback). Sinyal tervalidasi bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1. Confidence `clamp(25, 95, 55 + |skor|*40)`. Entry/SL/TP dipetakan dari zona H1 (SL di luar Demand/Supply zone/OB; TP di level S&R H1), fallback persentase statis bila tak ada zona.
+
+## Risk-to-Reward Ratio (RRR)
+
+Level Entry/SL/TP di `engine._levels_mtf()` dihitung dengan **RRR wajib minimal** (parameter di `config.py`, bisa via `.env`):
+
+| Parameter | Default | Arti |
+|---|---|---|
+| `RRR_MIN` | 1.5 | TP1 minimal = `RRR_MIN` x jarak SL (1:1.5) |
+| `RRR_TP2` | 3.0 | TP2 proyeksi = `RRR_TP2` x jarak SL (1:3) |
+| `SL_BUFFER_PCT` | 0.003 | Buffer 0.3% SL di luar zona Demand/Supply terdekat |
+
+Alur perhitungan (`_levels_mtf` → `_rr_targets`):
+
+1. **SL** = zona Demand/Supply H1 terdekat **+ buffer 0.3%** di luar zona (BUY: Demand/Support di bawah harga; SELL: Supply/Resistance di atas harga). Bila tak ada zona → fallback persentase statis.
+2. **Jarak SL (%)** dihitung dari Entry.
+3. **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **dengan syarat** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). 
+4. Bila target H1 terdekat **terlalu dekat** (TP1 < `RRR_MIN` x SL): paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) — **hanya bila tidak terhalang zona Supply/Demand kuat** di antara Entry dan proyeksi TP1. Bila terhalang → `_levels_mtf` mengembalikan `None` → **sinyal di-reject menjadi NEUTRAL** (alasan `[RR]` ditambahkan).
+5. **TP2** = Entry ± (jarak SL x `RRR_TP2`).
+
+Contoh BUY: Entry $102, SL $99.70 (Demand $100 − 0.3%), jarak SL 2.30% → TP1 minimal $105.45 (1:1.5), TP2 $108.90 (1:3).
 
 ## Filter aset (bukan koin kripto yang valid)
 
