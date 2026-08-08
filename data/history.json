@@ -394,5 +394,57 @@
       "tp2": 1.7604354999999992,
       "timestamp": "Saturday, 08 Aug 2026, 20:05 WIB"
     }
+  ],
+  "2026-08-08 21:59": [
+    {
+      "symbol": "PENGUUSDT",
+      "base": "PENGU",
+      "action": "BUY",
+      "entry": 0.006293,
+      "sl": 0.006177412,
+      "tp1": 0.006466382,
+      "tp2": 0.006639763999999999,
+      "timestamp": "Saturday, 08 Aug 2026, 21:59 WIB"
+    },
+    {
+      "symbol": "BROCCOLI714USDT",
+      "base": "BROCCOLI714",
+      "action": "BUY",
+      "entry": 0.01643,
+      "sl": 0.01539368,
+      "tp1": 0.01798448,
+      "tp2": 0.01953896,
+      "timestamp": "Saturday, 08 Aug 2026, 21:59 WIB"
+    },
+    {
+      "symbol": "CAKEUSDT",
+      "base": "CAKE",
+      "action": "BUY",
+      "entry": 1.449,
+      "sl": 1.426707,
+      "tp1": 1.4824395000000004,
+      "tp2": 1.5158790000000004,
+      "timestamp": "Saturday, 08 Aug 2026, 21:59 WIB"
+    },
+    {
+      "symbol": "DASHUSDT",
+      "base": "DASH",
+      "action": "BUY",
+      "entry": 31.52,
+      "sl": 31.146279999999997,
+      "tp1": 32.080580000000005,
+      "tp2": 32.641160000000006,
+      "timestamp": "Saturday, 08 Aug 2026, 21:59 WIB"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "base": "BNB",
+      "action": "BUY",
+      "entry": 609.04,
+      "sl": 596.17609,
+      "tp1": 628.3358649999998,
+      "tp2": 647.6317299999997,
+      "timestamp": "Saturday, 08 Aug 2026, 21:59 WIB"
+    }
   ]
 }
