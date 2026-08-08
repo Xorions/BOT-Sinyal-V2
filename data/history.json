@@ -602,5 +602,57 @@
       "tp2": 39.937709999999996,
       "timestamp": "Sunday, 09 Aug 2026, 01:27 WIB"
     }
+  ],
+  "2026-08-09 02:35": [
+    {
+      "symbol": "ERNUSDT",
+      "base": "ERN",
+      "action": "BUY",
+      "entry": 2.183,
+      "sl": 2.046841,
+      "tp1": 2.3872384999999996,
+      "tp2": 2.591476999999999,
+      "timestamp": "Sunday, 09 Aug 2026, 02:35 WIB"
+    },
+    {
+      "symbol": "CUSDT",
+      "base": "C",
+      "action": "BUY",
+      "entry": 0.0606,
+      "sl": 0.05885,
+      "tp1": 0.0638,
+      "tp2": 0.06585,
+      "timestamp": "Sunday, 09 Aug 2026, 02:35 WIB"
+    },
+    {
+      "symbol": "LITUSDT",
+      "base": "LIT",
+      "action": "BUY",
+      "entry": 0.743,
+      "sl": 0.7030714285714286,
+      "tp1": 0.8028928571428571,
+      "tp2": 0.8627857142857143,
+      "timestamp": "Sunday, 09 Aug 2026, 02:35 WIB"
+    },
+    {
+      "symbol": "UTKUSDT",
+      "base": "UTK",
+      "action": "NEUTRAL",
+      "entry": 0.00795,
+      "sl": 0.0077115000000000005,
+      "tp1": 0.00830775,
+      "tp2": 0.008665500000000001,
+      "timestamp": "Sunday, 09 Aug 2026, 02:35 WIB"
+    },
+    {
+      "symbol": "COCOSUSDT",
+      "base": "COCOS",
+      "action": "BUY",
+      "entry": 1.7546,
+      "sl": 1.7174857142857143,
+      "tp1": 1.8102714285714283,
+      "tp2": 1.865942857142857,
+      "timestamp": "Sunday, 09 Aug 2026, 02:35 WIB"
+    }
   ]
 }
