@@ -2,6 +2,8 @@
 
 import pytest
 
+from indicators.ema import analyze_ema, ema as ema_series
+from indicators.fibonacci import analyze_fibonacci, fib_levels, swing_extremes
 from indicators.macd import macd, macd_histogram_series
 from indicators.rsi import rsi
 from indicators.smc import (
@@ -245,3 +247,99 @@ class TestSupplyDemand:
         ]
         zones = detect_supply_demand(candles, left=1, right=1, pause=2)
         assert any(z["type"] == "supply" for z in zones)
+
+
+def _closes_candles(closes):
+    """Candle {open/high/low/close} dari deret close (untuk indikator murni)."""
+    return [{"open": c, "high": c * 1.001, "low": c * 0.999, "close": c} for c in closes]
+
+
+class TestEMA:
+    """EMA 20/50 — dynamic S/R + deteksi pullback (bobot 0.15)."""
+
+    def test_ema_series_warmup_and_constant(self):
+        series = ema_series([10.0] * 30, 20)
+        assert len(series) == 30
+        assert all(v != v for v in series[:19])  # NaN sebelum data cukup
+        assert series[-1] == pytest.approx(10.0)
+
+    def test_ema_uptrend_price_above_ema20_above_ema50(self):
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        price = ema_series(closes, 20)[-1] * 1.01  # 1% di atas EMA20
+        info = analyze_ema(_closes_candles(closes), price)
+        assert info["uptrend"] is True
+        assert info["trend"] == "bullish"
+        assert info["ema_fast"] > info["ema_slow"]
+
+    def test_ema_uptrend_pullback_buy_near_ema20(self):
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        price = ema_series(closes, 20)[-1] * 1.001  # <= 0.5% dari EMA20
+        info = analyze_ema(_closes_candles(closes), price)
+        assert info["pullback_buy"] is True
+        assert info["pullback_sell"] is False
+        assert info["dist_fast_pct"] <= 0.5
+
+    def test_ema_uptrend_no_pullback_when_far(self):
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        price = ema_series(closes, 20)[-1] * 1.02  # 2% -> di luar 0.5%
+        info = analyze_ema(_closes_candles(closes), price)
+        assert info["uptrend"] is True
+        assert info["pullback_buy"] is False
+
+    def test_ema_downtrend_pullback_sell_near_ema20(self):
+        closes = [200.0 - i * 0.5 for i in range(80)]
+        price = ema_series(closes, 20)[-1] * 0.999
+        info = analyze_ema(_closes_candles(closes), price)
+        assert info["downtrend"] is True
+        assert info["trend"] == "bearish"
+        assert info["pullback_sell"] is True
+        assert info["pullback_buy"] is False
+
+    def test_ema_insufficient_data(self):
+        info = analyze_ema(_closes_candles([100.0] * 10), 100.0)
+        assert info["ema_fast"] is None
+        assert info["trend"] is None
+        assert info["pullback_buy"] is False
+
+
+def _fib_candles():
+    """Swing low 90 (idx 4) -> swing high 110 (idx 10) -> pullback."""
+    closes = [95, 94, 93, 92, 90, 93, 97, 101, 105, 108, 110, 109, 107, 105]
+    return [{"open": c, "high": c, "low": c, "close": c} for c in closes]
+
+
+class TestFibonacci:
+    """Fibonacci Retracement — Golden Zone 0.5/0.618/0.786 (bobot 0.15)."""
+
+    def test_fib_levels_math(self):
+        levels = fib_levels(110.0, 100.0)
+        assert levels[0.5] == pytest.approx(105.0)
+        assert levels[0.618] == pytest.approx(110.0 - 10.0 * 0.618)
+        assert levels[0.786] == pytest.approx(110.0 - 10.0 * 0.786)
+
+    def test_swing_extremes_latest(self):
+        ex = swing_extremes(_fib_candles())
+        assert ex["swing_low"]["value"] == 90.0
+        assert ex["swing_high"]["value"] == 110.0
+        assert ex["trend"] == "bullish"  # low sebelum high -> leg naik
+
+    def test_price_in_golden_zone(self):
+        # Golden zone = [level 0.786, level 0.50] = [94.28, 100] untuk 90..110.
+        fibo = analyze_fibonacci(_fib_candles(), 97.0)
+        assert fibo["ok"] is True
+        assert fibo["in_golden_zone"] is True
+        assert fibo["golden_zone_low"] <= 97.0 <= fibo["golden_zone_high"]
+
+    def test_price_outside_golden_zone_has_distance(self):
+        fibo = analyze_fibonacci(_fib_candles(), 104.0)
+        assert fibo["in_golden_zone"] is False
+        assert fibo["golden_zone_dist_pct"] > 0
+        assert fibo["nearest_level_dist_pct"] > 0
+
+    def test_nearest_golden_level(self):
+        fibo = analyze_fibonacci(_fib_candles(), 101.0)
+        assert fibo["nearest_level"] in (0.5, 0.618, 0.786)
+
+    def test_insufficient_swings_ok_false(self):
+        fibo = analyze_fibonacci([{"open": 100, "high": 101, "low": 99, "close": 100}] * 3, 100.0)
+        assert fibo["ok"] is False

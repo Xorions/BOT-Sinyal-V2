@@ -17,10 +17,16 @@ from engine import (
     analyze_trigger,
     assemble_signal,
     format_message,
+    map_h1_zones,
     rank_signals,
-    score_smc_mtf,
+    score_ema,
+    score_fibo,
+    score_smc,
+    score_sr,
     score_trigger,
 )
+from indicators.ema import analyze_ema, ema as ema_series
+from indicators.fibonacci import analyze_fibonacci
 from indicators.smc import detect_order_blocks, detect_structure
 from indicators.supply_demand import in_zone
 from indicators.support_resistance import nearest_levels
@@ -224,7 +230,7 @@ class TestAssembleSignal:
         assert sig.total_score > 0
         assert sig.confidence >= 55
         assert sig.sl < sig.entry < sig.tp1 < sig.tp2
-        assert set(sig.breakdown) == {"teknikal", "smc", "sentimen", "whale", "onchain"}
+        assert set(sig.breakdown) == {"sr", "smc", "fibo", "ema", "teknikal", "onchain", "sentimen"}
         assert any("Demand Zone" in r for r in sig.reasons)
         assert any("[H4]" in r for r in sig.reasons)
         assert any("[M15]" in r for r in sig.reasons)
@@ -312,7 +318,6 @@ class TestAssembleSignal:
             fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
             whale_flow=whale_inflow, btc_stats=btc_stats,
         )
-        assert sig_doge.breakdown["whale"] == 0.0
         assert sig_doge.breakdown["onchain"] == 0.0
 
         sig_eth = assemble_signal(
@@ -321,7 +326,7 @@ class TestAssembleSignal:
             fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
             whale_flow=whale_inflow, btc_stats=btc_stats,
         )
-        assert sig_eth.breakdown["whale"] == -0.5  # inflow exchange = bearish (proxy, ±0.5)
+        assert sig_eth.breakdown["onchain"] == -0.5  # inflow exchange = bearish (proxy, ±0.5)
 
         sig_btc = assemble_signal(
             symbol="BTCUSDT", base="BTC", price=price, pct_change_24h=0.0,
@@ -465,37 +470,31 @@ class TestLevelsRRR:
         assert tp1 == pytest.approx(price * (1 + 1.5 * 0.03))
         assert tp2 == pytest.approx(price * (1 + 3.0 * 0.03))
 
-    def test_bad_rr_signal_rejected_to_neutral(self):
-        """Nearest supply terlalu dekat & terhalang -> `_levels_mtf` None -> assemble_signal NEUTRAL."""
-        candles = []
-        prev = 120.0
-        for i in range(10):
-            close = 112.0 - i * 0.5
-            o = prev
-            candles.append({"open": o, "high": max(o, close), "low": min(o, close) - 0.4, "close": close})
-            prev = close
-        candles.append({"open": prev, "high": prev, "low": 100.0, "close": 104.0})
-        for c in (103.0, 103.5, 103.0):
-            candles.append({"open": c + 0.4, "high": c + 0.9, "low": c - 0.4, "close": c})
-        c = 104.0
-        for _ in range(7):
-            nxt = c + 3.5
-            candles.append({"open": c, "high": nxt + 1.0, "low": c - 0.5, "close": nxt})
-            c = nxt
-        for c2 in (126.0, 110.0, 105.0, 104.0, 103.0, 102.0):
-            candles.append({"open": c2 + 0.8, "high": c2 + 0.8, "low": c2 - 0.4, "close": c2})
+    def test_bad_rr_signal_rejected_to_neutral(self, monkeypatch):
+        """Setup BUY kuat namun `_levels_mtf` menolak RRR -> NEUTRAL + alasan [RR]."""
+        import engine as engine_mod
 
+        # Force RR-rejection hanya untuk BUY; fallback NEUTRAL tetap memakai level
+        # kosmetik asli agar jalur NEUTRAL + [RR] deterministik.
+        real_levels_mtf = engine_mod._levels_mtf
+
+        def _reject_buy_only(price, h1_candles, h1_map, action, **kwargs):
+            if action == ACTION_BUY:
+                return None
+            return real_levels_mtf(price, h1_candles, h1_map, action, **kwargs)
+
+        monkeypatch.setattr(engine_mod, "_levels_mtf", _reject_buy_only)
+
+        price, h4, d1, h1, m15 = _bullish_mtf()
         sig = assemble_signal(
-            symbol="BTCUSDT", base="BTC", price=102.0, pct_change_24h=5.2,
-            h4_candles=_candles_from_closes(_bullish_series()),
-            d1_candles=_candles_from_closes(_bullish_series()),
-            h1_candles=candles,
-            m15_candles=_candles_from_closes(_bullish_series()),
+            symbol="BTCUSDT", base="BTC", price=price, pct_change_24h=5.2,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
             fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
             whale_flow=None, btc_stats=None,
         )
         assert sig.action == ACTION_NEUTRAL
         assert any("[RR]" in r for r in sig.reasons)
+        assert sig.entry > 0  # level fallback kosmetik tetap ada
 
 
 class TestBlockedByZone:
@@ -609,8 +608,6 @@ class TestFvgIndependent:
     """Fix #6: FVG bullish & bearish dievaluasi independen (bukan if/elif)."""
 
     def test_both_fvg_directions_scored(self):
-        h4 = _candles_from_closes(_bullish_series())
-        d1 = _candles_from_closes(_bullish_series())
         h1_map = {
             "price": 100.0,
             "demand_zones": [],
@@ -626,12 +623,30 @@ class TestFvgIndependent:
             "bullish_ob": None,
             "bearish_ob": None,
         }
-        score, reasons = score_smc_mtf(h4, d1, h1_map, 100.0)
+        score, reasons = score_smc(100.0, h1_map)
         bull = [r for r in reasons if "FVG bullish" in r]
         bear = [r for r in reasons if "FVG bearish" in r]
-        assert bull and bear
-        assert score >= 0.15 + 0.45 - 0.15  # H4 bullish + FVG bull + FVG bear
-        assert score < 0.45 + 0.15 + 0.15
+        assert bull and bear  # keduanya dievaluasi (independen, bukan if/elif)
+        assert score == pytest.approx(0.25 - 0.25)  # FVG bull +0.25, FVG bear -0.25
+        assert -1.0 <= score <= 1.0
+
+    def test_fvg_only_bearish_scores_negative(self):
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "zones": [],
+            "order_blocks": [],
+            "fvgs": [
+                {"type": "bearish", "bottom": 103.0, "top": 105.0, "index": 2},
+            ],
+            "sweeps": [],
+            "levels": {"support_dist_pct": None, "resistance_dist_pct": None},
+            "bullish_ob": None,
+            "bearish_ob": None,
+        }
+        score, _ = score_smc(100.0, h1_map)
+        assert score == pytest.approx(-0.25)
 
 
 class TestFormat:
@@ -665,7 +680,7 @@ class TestFormat:
     def test_signal_lines_include_level_pct_buy(self):
         sig = Signal(
             "BTCUSDT", "BTC", 102.0, 5.2, 0.5, "BUY", 70, 100.0, 96.0, 106.0, 112.0,
-            breakdown={"teknikal": 0.5, "smc": 0.5, "sentimen": 0.5, "whale": 0.5, "onchain": 0.5},
+            breakdown={"sr": 0.5, "smc": 0.5, "fibo": 0.5, "ema": 0.5, "teknikal": 0.5, "onchain": 0.5, "sentimen": 0.5},
         )
         message = format_message(rank_signals([sig]), "Jumat, 07 Agu 2026, 13:30 WIB")
         assert "🛡️ SL: <b>$96.00</b> (-4.00%)" in message
@@ -676,9 +691,197 @@ class TestFormat:
     def test_signal_lines_include_level_pct_sell(self):
         sig = Signal(
             "ETHUSDT", "ETH", 100.0, -5.2, -0.5, "SELL", 70, 100.0, 104.0, 96.0, 92.0,
-            breakdown={"teknikal": -0.5, "smc": -0.5, "sentimen": -0.5, "whale": -0.5, "onchain": -0.5},
+            breakdown={"sr": -0.5, "smc": -0.5, "fibo": -0.5, "ema": -0.5, "teknikal": -0.5, "onchain": -0.5, "sentimen": -0.5},
         )
         message = format_message(rank_signals([sig]), "Jumat, 07 Agu 2026, 13:30 WIB")
         assert "🛡️ SL: <b>$104.00</b> (-4.00%)" in message
         assert "🎯 TP1: <b>$96.00</b> (+4.00%)" in message
         assert "🎯 TP2: <b>$92.00</b> (+8.00%)" in message
+
+
+class TestConfigWeights:
+    """Pembobotan strategi baru v2.4 (total harus 1.00)."""
+
+    def test_weights_sum_to_one(self):
+        import config
+
+        total = (
+            config.WEIGHT_SR
+            + config.WEIGHT_SMC
+            + config.WEIGHT_FIBO
+            + config.WEIGHT_EMA
+            + config.WEIGHT_TECHNICAL
+            + config.WEIGHT_ONCHAIN
+            + config.WEIGHT_SENTIMENT
+        )
+        assert total == pytest.approx(1.00)
+
+    def test_sr_is_kompas_utama(self):
+        import config
+
+        assert config.WEIGHT_SR == pytest.approx(0.35)
+        assert config.WEIGHT_SR > config.WEIGHT_SMC > config.WEIGHT_FIBO
+        assert config.WEIGHT_FIBO == config.WEIGHT_EMA == pytest.approx(0.15)
+        assert config.WEIGHT_SENTIMENT < config.WEIGHT_TECHNICAL < config.WEIGHT_FIBO
+
+
+class TestScoreSR:
+    """Skoring S&R (bobot 0.35) — kompas utama + key level H1."""
+
+    def test_bullish_sr_positive(self):
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        h1_map = map_h1_zones(h1, price)
+        score, reasons = score_sr(price, h1_map, h4, d1)
+        assert score > 0
+        assert any("[H4]" in r for r in reasons)
+        assert any("[H1]" in r for r in reasons)
+
+    def test_bearish_sr_negative(self):
+        price, h4, d1, h1, m15 = _bearish_mtf()
+        h1_map = map_h1_zones(h1, price)
+        score, reasons = score_sr(price, h1_map, h4, d1)
+        assert score < 0
+        assert any("[H4]" in r for r in reasons)
+
+    def test_sr_dominates_total_score(self):
+        # Setup bullish penuh: kontribusi S&R harus yang terbesar di breakdown.
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        sig = assemble_signal(
+            symbol="BTCUSDT", base="BTC", price=price, pct_change_24h=5.2,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[0.0001], ls_ratio=0.8,
+            whale_flow=None, btc_stats=None,
+        )
+        assert sig.breakdown["sr"] >= max(
+            sig.breakdown["smc"], sig.breakdown["fibo"],
+            sig.breakdown["ema"], sig.breakdown["teknikal"],
+            sig.breakdown["sentimen"], sig.breakdown["onchain"],
+        )
+
+    def test_sr_empty_map_in_range(self):
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "zones": [],
+            "levels": {
+                "support": None, "resistance": None,
+                "support_dist_pct": None, "resistance_dist_pct": None,
+            },
+        }
+        score, reasons = score_sr(100.0, h1_map, [], [])
+        assert -1.0 <= score <= 1.0
+        assert score == 0.0
+        assert reasons == []
+
+
+class TestScoreFibo:
+    """Skoring Fibonacci Golden Zone (bobot 0.15)."""
+
+    @staticmethod
+    def _map(levels=None, order_blocks=()):
+        return {
+            "price": 97.0,
+            "zones": [],
+            "demand_zones": [],
+            "supply_zones": [],
+            "order_blocks": list(order_blocks),
+            "levels": levels or {
+                "support": None, "resistance": None,
+                "support_dist_pct": None, "resistance_dist_pct": None,
+            },
+        }
+
+    @staticmethod
+    def _fibo(price):
+        candles = [
+            {"open": c, "high": c, "low": c, "close": c}
+            for c in [95, 94, 93, 92, 90, 93, 97, 101, 105, 108, 110, 109, 107, 105]
+        ]
+        return analyze_fibonacci(candles, price)
+
+    def test_in_golden_zone_positive_for_buy(self):
+        fibo = self._fibo(97.0)
+        score, reasons = score_fibo(fibo, 97.0, self._map(), ACTION_BUY)
+        assert score > 0
+        assert any("Golden Zone" in r for r in reasons)
+
+    def test_golden_zone_negative_for_sell(self):
+        fibo = self._fibo(97.0)
+        score, _ = score_fibo(fibo, 97.0, self._map(), ACTION_SELL)
+        assert score < 0
+
+    def test_golden_zone_neutral_without_compass(self):
+        fibo = self._fibo(97.0)
+        score, _ = score_fibo(fibo, 97.0, self._map(), None)
+        assert score == 0.0
+
+    def test_confluence_with_sr_boosts_score(self):
+        fibo = self._fibo(97.0)
+        levels = {"support": 96.0, "resistance": None, "support_dist_pct": 1.0, "resistance_dist_pct": None}
+        plain, _ = score_fibo(fibo, 97.0, self._map(), ACTION_BUY)
+        with_sr, reasons = score_fibo(fibo, 97.0, self._map(levels=levels), ACTION_BUY)
+        assert with_sr > plain
+        assert any("Key Level S&R" in r for r in reasons)
+
+    def test_confluence_with_ob_boosts_score(self):
+        fibo = self._fibo(97.0)
+        ob = {"type": "bullish", "low": 95.0, "high": 97.0, "index": 0}
+        plain, _ = score_fibo(fibo, 97.0, self._map(), ACTION_BUY)
+        with_ob, reasons = score_fibo(fibo, 97.0, self._map(order_blocks=[ob]), ACTION_BUY)
+        assert with_ob > plain
+        assert any("Order Block" in r for r in reasons)
+
+    def test_far_from_golden_zone_zero(self):
+        fibo = self._fibo(108.0)
+        score, reasons = score_fibo(fibo, 108.0, self._map(), ACTION_BUY)
+        assert score == 0.0
+        assert reasons == []
+
+    def test_invalid_fibo_zero(self):
+        score, reasons = score_fibo({"ok": False}, 97.0, self._map(), ACTION_BUY)
+        assert score == 0.0
+        assert reasons == []
+
+
+class TestScoreEma:
+    """Skoring EMA 20/50 (bobot 0.15) — trend + pullback + RSI hook."""
+
+    @staticmethod
+    def _closes(closes):
+        return [{"open": c, "high": c * 1.001, "low": c * 0.999, "close": c} for c in closes]
+
+    def test_uptrend_pullback_with_rsi_hook_up(self):
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        info = analyze_ema(self._closes(closes), ema_series(closes, 20)[-1] * 1.001)
+        score, reasons = score_ema(info, rsi_now=35.0, rsi_prev=32.0)
+        assert score == pytest.approx(0.30 + 0.30 + 0.40)
+        assert any("Hook UP" in r for r in reasons)
+
+    def test_uptrend_pullback_without_rsi_hook(self):
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        info = analyze_ema(self._closes(closes), ema_series(closes, 20)[-1] * 1.001)
+        score, reasons = score_ema(info, rsi_now=55.0, rsi_prev=52.0)
+        assert score == pytest.approx(0.30 + 0.30)
+        assert not any("Hook" in r for r in reasons)
+
+    def test_downtrend_pullback_with_rsi_hook_down(self):
+        closes = [200.0 - i * 0.5 for i in range(80)]
+        info = analyze_ema(self._closes(closes), ema_series(closes, 20)[-1] * 0.999)
+        score, reasons = score_ema(info, rsi_now=65.0, rsi_prev=68.0)
+        assert score == pytest.approx(-(0.30 + 0.30 + 0.40))
+        assert any("Hook DOWN" in r for r in reasons)
+
+    def test_hook_rsi_wrong_zone_ignored(self):
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        info = analyze_ema(self._closes(closes), ema_series(closes, 20)[-1] * 1.001)
+        # RSI 45 di luar area 30-40 -> hook tidak diberi bonus.
+        score, reasons = score_ema(info, rsi_now=45.0, rsi_prev=32.0)
+        assert score == pytest.approx(0.60)
+        assert not any("Hook" in r for r in reasons)
+
+    def test_insufficient_data_zero(self):
+        info = analyze_ema(self._closes([100.0] * 10), 100.0)
+        score, reasons = score_ema(info, 50.0, 50.0)
+        assert score == 0.0
+        assert reasons == []

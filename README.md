@@ -1,9 +1,10 @@
 # BOT-Sinyal-Trading-V2
 
 Bot Telegram **Day Trading Briefing sinyal trading crypto** (versi lanjutan) dengan
-analisa **Multi-Timeframe (MTF) berbasis Smart Money Concept (SMC) + Supply & Demand**:
+analisa **Multi-Timeframe (MTF) berbasis S&R Kompas + Smart Money Concept (SMC) + Supply & Demand**:
 **RSI, MACD, Order Block, FVG, BOS/CHoCH, Supply/Demand Zone, EQH/EQL, Liquidity Sweep,
-Support & Resistance, whale proxy, on-chain, dan sentiment pasar (Fear & Greed)**.
+Support & Resistance, Fibonacci Golden Zone (0.5/0.618/0.786), EMA 20/50 dynamic S/R,
+whale proxy, on-chain, dan sentiment pasar (Fear & Greed)**.
 
 > Dibangun dari pengalaman BOT-Sinyal-Trading v1 (CoinGecko only). v2 memakai
 > Binance (candle/ticker) sebagai sumber utama teknikal + CoinMarketCap (ranking) +
@@ -24,7 +25,7 @@ tidak ada pemicu ganda):
    - **M15** → *pelatuk* konfirmasi eksekusi (RSI / MACD cross / momentum / BOS M15).
    - Funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
 4. Data agregat: Fear & Greed Index, whale netflow ETH (Etherscan), statistik jaringan BTC (blockchain.info).
-5. Skoring **berbobot** (prioritas SMC + S&D) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1. **Aturan RRR:** level Entry/SL/TP wajib memenuhi Risk-to-Reward minimal (lihat [Risk-to-Reward Ratio](#risk-to-reward-ratio-rrr)).
+5. Skoring **berbobot** (prioritas S&R kompas + konfluensi SMC/Fibo/EMA) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1. **Aturan RRR:** level Entry/SL/TP wajib memenuhi Risk-to-Reward minimal (lihat [Risk-to-Reward Ratio](#risk-to-reward-ratio-rrr)).
 6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate → dikirim sebagai **pesan Telegram terpisah (History Review)**.
 7. Kirim **2 pesan Telegram** (HTML parse mode): pesan evaluasi (History Review) lalu Day Trading Briefing (Top 5) yang berakhir dengan disclaimer. Setelah terkirim, simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions).
 
@@ -74,10 +75,12 @@ data/
 indicators/
   rsi.py                   # RSI Wilder
   macd.py                  # EMA 12/26 + signal 9 + histogram + histogram series (cross)
+  ema.py                   # EMA 20/50 dynamic S/R + deteksi pullback (analyze_ema)
+  fibonacci.py             # Fib level 0.5/0.618/0.786 + Golden Zone (analyze_fibonacci)
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (128 kasus)
+tests/                     # pytest (160 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -85,13 +88,15 @@ tests/                     # pytest (128 kasus)
 
 | Kategori | Bobot | Isi |
 |---|---|---|
-| SMC & S&D (MTF) | 40% | Kompas H4/D1 (BOS/CHoCH) + zona H1 (S&D, OB, FVG, EQH/EQL, Liquidity Sweep, S&R) |
-| Teknikal (M15) | 20% | RSI (contrarian), MACD (cross berbobot > histogram), BOS M15, momentum 24j (contrarian) |
-| Sentiment | 15% | Fear & Greed (contrarian), funding rate, long/short ratio |
-| Whale | 15% | Netflow exchange ETH (proxy) — hanya untuk koin ETH |
-| On-chain | 10% | Aktivitas jaringan BTC (jumlah tx) — hanya untuk koin BTC |
+| S&R (kompas utama) | 35% | Tren struktur H4/D1 (BOS/CHoCH skala besar ±0.35, fallback D1 ±0.25) + harga di/dekat Demand-Supply zone H1 (±0.25/±0.15) + Support/Resistance dekat (±0.20) + breakout key level (±0.20) |
+| SMC (konfluensi) | 20% | Order Block (±0.35), FVG (±0.25), Liquidity Sweep (±0.40) — hanya komponen **searah kompas** (setup campuran tidak dinilai) |
+| Fibonacci | 15% | Golden Zone 0.5/0.618/0.786 (±0.45, dekat ≤1%: ±0.20) + konfluensi Key Level S&R (+0.25) / Order Block (+0.20); arah ikut kompas |
+| EMA 20/50 | 15% | Dynamic S/R: trend (±0.30) + pullback ke EMA 20 ≤0.5% (±0.30) + RSI hook 30-40 naik / 60-70 turun (±0.40) |
+| Teknikal (M15) | 8% | RSI (contrarian), MACD (cross > histogram), BOS M15, momentum 24j (contrarian) |
+| On-chain / Whale | 5% | Netflow ETH (proxy, ETH) & aktivitas BTC (BTC) — kategori opsional (None = dilewati) |
+| Sentimen | 2% | Fear & Greed (contrarian), funding rate, long/short ratio |
 
-Skor tiap kategori -1.0..+1.0. **BUY** ≥ `BUY_THRESHOLD` (0.10), **SELL** ≤ `SELL_THRESHOLD` (-0.10). **Aturan kompas MTF:** H4 bullish → HANYA BUY, H4 bearish → HANYA SELL (D1 sebagai fallback). Sinyal tervalidasi bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1. Confidence `clamp(25, 95, 55 + |skor|*40)`. Entry/SL/TP dipetakan dari zona H1 (SL di luar Demand/Supply zone/OB; TP di level S&R H1), fallback persentase statis bila tak ada zona.
+Skor tiap kategori -1.0..+1.0. **BUY** ≥ `BUY_THRESHOLD` (0.10), **SELL** ≤ `SELL_THRESHOLD` (-0.10). **Aturan kompas MTF:** H4 bullish → HANYA BUY, H4 bearish → HANYA SELL (D1 sebagai fallback). Sinyal tervalidasi bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1. Confidence `clamp(25, 95, 55 + |skor|*40)`. Total skor **dinormalisasi** ke jumlah bobot yang benar-benar dipakai (On-chain dilewati bila tidak berlaku/tersedia). Entry/SL/TP dipetakan dari zona H1 (SL di luar Demand/Supply zone/OB; TP di level S&R H1), fallback persentase statis bila tak ada zona.
 
 ## Risk-to-Reward Ratio (RRR)
 
@@ -151,7 +156,7 @@ Di `bot._eligible_pair()`:
        - Resistance dekat (1.2%)
     + [M15] MACD Golden Cross & RSI Rebound
 💸 Momentum 24j +1.9% | Fear&Greed 29
-📊 Skor: +0.38  (Tek +0.30 · SMC +1.00 · Sent +0.40 · Whale +0.00 · Onch +0.00)
+📊 Skor: +0.38  (SR +0.35 · SMC +1.00 · Fibo +0.45 · EMA +0.60 · Tek +0.30 · Onch +0.00 · Sent +0.40)
 
 ───
 
@@ -171,7 +176,7 @@ Di `bot._eligible_pair()`:
        - FVG tervalidasi di atas harga
     + [M15] MACD Death Cross & RSI Melemah
 💸 Momentum 24j -2.3% | Fear&Greed 29
-📊 Skor: -0.21  (Tek -0.30 · SMC -0.85 · Sent +0.40 · Whale +0.00 · Onch +0.00)
+📊 Skor: -0.21  (SR -0.35 · SMC -0.85 · Fibo +0.00 · EMA -0.30 · Tek -0.30 · Onch +0.00 · Sent +0.40)
 
 ───
 

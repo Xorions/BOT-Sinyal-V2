@@ -66,13 +66,16 @@ SL_MIN_DIST_PCT: float = _env_float("SL_MIN_DIST_PCT", 0.015)
 # SL_ATR_MULT * ATR/price) sehingga koin volatil dapat SL lebih lebar.
 SL_ATR_MULT: float = _env_float("SL_ATR_MULT", 1.0)
 
-# --- Bobot kategori skoring (jumlah harus 1.0) ---
-# Prioritas day trading MTF: SMC + S&D (kompas H4/D1 + zona H1) paling besar.
-WEIGHT_TECHNICAL: float = _env_float("WEIGHT_TECHNICAL", 0.20)
-WEIGHT_SMC: float = _env_float("WEIGHT_SMC", 0.40)
-WEIGHT_SENTIMENT: float = _env_float("WEIGHT_SENTIMENT", 0.15)
-WEIGHT_WHALE: float = _env_float("WEIGHT_WHALE", 0.15)
-WEIGHT_ONCHAIN: float = _env_float("WEIGHT_ONCHAIN", 0.10)
+# --- Bobot kategori skoring (jumlah harus 1.00) ---
+# Prioritas day trading MTF: S&R sebagai kompas utama (0.35), disusul konfluensi
+# SMC (OB/FVG, 0.20), Fibonacci Golden Zone (0.15) & EMA 20/50 (0.15).
+WEIGHT_SR: float = _env_float("WEIGHT_SR", 0.35)
+WEIGHT_SMC: float = _env_float("WEIGHT_SMC", 0.20)
+WEIGHT_FIBO: float = _env_float("WEIGHT_FIBO", 0.15)
+WEIGHT_EMA: float = _env_float("WEIGHT_EMA", 0.15)
+WEIGHT_TECHNICAL: float = _env_float("WEIGHT_TECHNICAL", 0.08)
+WEIGHT_ONCHAIN: float = _env_float("WEIGHT_ONCHAIN", 0.05)
+WEIGHT_SENTIMENT: float = _env_float("WEIGHT_SENTIMENT", 0.02)
 
 # Batas maksimum skor kategori "sentimen" (Fear&Greed + funding + L/S).
 # Sentimen adalah bias pasar (regime), bukan penentu arah: tanpa cap, kondisi

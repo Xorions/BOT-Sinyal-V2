@@ -1,10 +1,20 @@
-"""Mesin skoring sinyal v2.3 — Day Trading Multi-Timeframe (MTF SMC + Supply & Demand).
+"""Mesin skoring sinyal v2.4 — Day Trading Multi-Timeframe (S&R + SMC + Fibo + EMA).
 
 Alur analisa 3 lapis:
   [Kompas H4/D1]   -> arah utama (BUY bila bullish, SELL bila bearish; BOS/CHoCH skala besar).
-  [Pemetaan H1]    -> area institusional: Supply & Demand, OB, FVG, EQH/EQL, Liquidity
-                      Sweep, pivot & swing Support/Resistance. Entry/SL/TP dari zona H1.
+  [Pemetaan H1]    -> S&R key level (kompas utama), area institusional SMC (OB, FVG,
+                      Liquidity Sweep), Fibonacci Golden Zone (0.5/0.618/0.786),
+                      EMA 20/50 dynamic S/R + pullback. Entry/SL/TP dari zona H1.
   [Pelatuk M15]    -> konfirmasi eksekusi akhir (RSI / MACD cross / momentum / BOS M15).
+
+Pembobotan baru (total 1.00):
+  - WEIGHT_SR       0.35  Support & Resistance sebagai kompas utama
+  - WEIGHT_SMC      0.20  Smart Money Concepts (OB & FVG)
+  - WEIGHT_FIBO     0.15  Fibonacci Golden Zone
+  - WEIGHT_EMA      0.15  EMA 20 & EMA 50 dynamic S/R
+  - WEIGHT_TECHNICAL 0.08 MACD / RSI momentum
+  - WEIGHT_ONCHAIN  0.05  Netflow / Whale Data
+  - WEIGHT_SENTIMENT 0.02 Fear & Greed, Funding Rate
 
 Aturan baku:
   - H4 bullish  -> HANYA izinkan sinyal BUY.
@@ -30,13 +40,17 @@ from config import (
     SL_BUFFER_PCT,
     SL_MIN_DIST_PCT,
     TOP_SIGNALS,
+    WEIGHT_EMA,
+    WEIGHT_FIBO,
     WEIGHT_ONCHAIN,
     WEIGHT_SENTIMENT,
     WEIGHT_SMC,
+    WEIGHT_SR,
     WEIGHT_TECHNICAL,
-    WEIGHT_WHALE,
 )
 from data.sentiment import score_fear_greed
+from indicators.ema import analyze_ema
+from indicators.fibonacci import analyze_fibonacci
 from indicators.macd import macd_histogram_series
 from indicators.rsi import rsi
 from indicators.smc import (
@@ -281,7 +295,7 @@ def score_trigger(m15_candles: List[Dict[str, float]], pct_change_24h: float) ->
     return max(-1.0, min(1.0, score)), reasons
 
 
-# ---------------------------------------------------------------- skor SMC MTF
+# ---------------------------------------------------------------- skor S&R (kompas 0.35)
 def _dist_pct(price: float, level: Optional[float]) -> Optional[float]:
     if level is None or not price:
         return None
@@ -312,13 +326,17 @@ def _atr(candles: List[Dict[str, float]], period: int = 14) -> Optional[float]:
     return sum(trs[-period:]) / period
 
 
-def score_smc_mtf(
+def score_sr(
+    price: float,
+    h1_map: Dict,
     h4_candles: List[Dict[str, float]],
     d1_candles: List[Dict[str, float]],
-    h1_map: Dict,
-    price: float,
 ) -> tuple:
-    """[Kompas + Pemetaan] Skor struktur H4/D1 + zona H1 -> -1.0..+1.0."""
+    """[S&R Kompas] Key levels skala besar (H4/D1) + zona/level S&R H1 -> -1.0..+1.0.
+
+    S&R adalah kompas utama (bobot 0.35): tren struktur H4/D1, harga di/ dekat
+    Demand/Supply key level, Support/Resistance terdekat, dan breakout level kunci.
+    """
     reasons: List[str] = []
     score = 0.0
     compass = analyze_compass(h4_candles, d1_candles)
@@ -327,23 +345,21 @@ def score_smc_mtf(
 
     if h4_trend == "bullish":
         label = "BOS skala besar" if compass["h4_bos"] == "bullish" else "higher high"
-        reasons.append(f"[H4] Tren utama Bullish ({label})")
-        score += 0.45
+        reasons.append(f"[H4] S&R skala besar Bullish ({label})")
+        score += 0.35
     elif h4_trend == "bearish":
         label = "CHoCH skala besar" if compass["h4_choch"] == "bearish" else "lower low"
-        reasons.append(f"[H4] Tren utama Bearish ({label})")
-        score -= 0.45
+        reasons.append(f"[H4] S&R skala besar Bearish ({label})")
+        score -= 0.35
     elif d1_trend == "bullish":
-        reasons.append("[D1] Tren Bullish (fallback)")
-        score += 0.30
+        reasons.append("[D1] S&R skala besar Bullish (fallback)")
+        score += 0.25
     elif d1_trend == "bearish":
-        reasons.append("[D1] Tren Bearish (fallback)")
-        score -= 0.30
+        reasons.append("[D1] S&R skala besar Bearish (fallback)")
+        score -= 0.25
 
     demand = h1_map.get("demand_zones", [])
     supply = h1_map.get("supply_zones", [])
-    sweeps = h1_map.get("sweeps", [])
-
     in_demand = [z for z in demand if in_zone(price, z)]
     in_supply = [z for z in supply if in_zone(price, z)]
     near_demand = nearest_demand(price, h1_map.get("zones", []))
@@ -351,7 +367,7 @@ def score_smc_mtf(
 
     if in_demand:
         reasons.append("[H1] Harga masuk Demand Zone")
-        score += 0.30
+        score += 0.25
     elif near_demand:
         dist = _dist_pct(near_demand["high"], price)
         if dist is not None and dist <= 2.0:
@@ -359,42 +375,169 @@ def score_smc_mtf(
             score += 0.15
     if in_supply:
         reasons.append("[H1] Harga masuk Supply Zone")
-        score -= 0.30
+        score -= 0.25
     elif near_supply:
         dist = _dist_pct(price, near_supply["low"])
         if dist is not None and dist <= 2.0:
             reasons.append(f"[H1] Harga dekat Supply Zone ({dist:.1f}%)")
             score -= 0.15
 
-    if h1_map.get("bullish_ob"):
-        reasons.append("[H1] Bullish OB di bawah harga")
-        score += 0.20
-    if h1_map.get("bearish_ob"):
-        reasons.append("[H1] Bearish OB di atas harga")
-        score -= 0.20
-
-    fvgs = h1_map.get("fvgs", [])
-    if [g for g in fvgs if g["type"] == "bullish" and g["bottom"] < price]:
-        reasons.append("[H1] FVG bullish tervalidasi di bawah harga")
-        score += 0.15
-    if [g for g in fvgs if g["type"] == "bearish" and g["top"] > price]:
-        reasons.append("[H1] FVG bearish tervalidasi di atas harga")
-        score -= 0.15
-
-    if [s for s in sweeps if s["type"] == "sell_sweep"]:
-        reasons.append("[H1] Liquidity Sweep tereksekusi (EQL tersapu)")
-        score += 0.25
-    elif [s for s in sweeps if s["type"] == "buy_sweep"]:
-        reasons.append("[H1] Liquidity Sweep tereksekusi (EQH tersapu)")
-        score -= 0.25
-
     levels = h1_map.get("levels", {})
     if levels.get("support_dist_pct") is not None and levels["support_dist_pct"] <= 3:
         reasons.append(f"[H1] Support dekat ({levels['support_dist_pct']:.1f}%)")
-        score += 0.15
+        score += 0.20
     if levels.get("resistance_dist_pct") is not None and levels["resistance_dist_pct"] <= 3:
         reasons.append(f"[H1] Resistance dekat ({levels['resistance_dist_pct']:.1f}%)")
-        score -= 0.15
+        score -= 0.20
+    if levels.get("resistance") is not None and price > levels["resistance"]:
+        reasons.append("[H1] Breakout Resistance kunci")
+        score += 0.20
+    if levels.get("support") is not None and price < levels["support"]:
+        reasons.append("[H1] Breakout Support kunci")
+        score -= 0.20
+
+    return max(-1.0, min(1.0, score)), reasons
+
+
+# ---------------------------------------------------------------- skor SMC (OB & FVG 0.20)
+def score_smc(price: float, h1_map: Dict, compass_dir: Optional[str] = None) -> tuple:
+    """[SMC] Order Block + FVG + Liquidity Sweep H1 -> -1.0..+1.0.
+
+    SMC adalah lapisan konfluensi: saat arah kompas sudah jelas (BUY/SELL), hanya
+    komponen yang searah yang dinilai (bullish OB/FVG untuk BUY, bearish OB/FVG
+    untuk SELL) agar setup campuran tidak meniadakan skor kompas. Tanpa arah
+    kompas (None), kedua arah dievaluasi independen (bukan if/elif).
+    """
+    reasons: List[str] = []
+    score = 0.0
+    allow_bull = compass_dir in (None, ACTION_BUY)
+    allow_bear = compass_dir in (None, ACTION_SELL)
+
+    if allow_bull and h1_map.get("bullish_ob"):
+        reasons.append("[H1] Bullish OB di bawah harga")
+        score += 0.35
+    if allow_bear and h1_map.get("bearish_ob"):
+        reasons.append("[H1] Bearish OB di atas harga")
+        score -= 0.35
+
+    for gap in h1_map.get("fvgs", []):
+        if allow_bull and gap["type"] == "bullish" and gap["bottom"] < price:
+            reasons.append("[H1] FVG bullish tervalidasi di bawah harga")
+            score += 0.25
+        if allow_bear and gap["type"] == "bearish" and gap["top"] > price:
+            reasons.append("[H1] FVG bearish tervalidasi di atas harga")
+            score -= 0.25
+
+    for sweep in h1_map.get("sweeps", []):
+        if allow_bull and sweep["type"] == "sell_sweep":
+            reasons.append("[H1] Liquidity Sweep tereksekusi (EQL tersapu)")
+            score += 0.40
+        elif allow_bear and sweep["type"] == "buy_sweep":
+            reasons.append("[H1] Liquidity Sweep tereksekusi (EQH tersapu)")
+            score -= 0.40
+
+    return max(-1.0, min(1.0, score)), reasons
+
+
+# ---------------------------------------------------------------- skor Fibonacci (0.15)
+def _golden_zone_overlaps_sr(fibo: Dict, h1_map: Dict) -> bool:
+    """Golden Zone beririsan dengan Support/Resistance key level H1."""
+    levels = h1_map.get("levels") or {}
+    gz_lo = fibo["golden_zone_low"]
+    gz_hi = fibo["golden_zone_high"]
+    for level in (levels.get("support"), levels.get("resistance")):
+        if level is not None and gz_lo <= level <= gz_hi:
+            return True
+    return False
+
+
+def _golden_zone_overlaps_ob(fibo: Dict, h1_map: Dict) -> bool:
+    """Golden Zone beririsan dengan Order Block SMC (bullish/bearish)."""
+    gz_lo = fibo["golden_zone_low"]
+    gz_hi = fibo["golden_zone_high"]
+    return any(
+        block.get("low") <= gz_hi and block.get("high") >= gz_lo
+        for block in h1_map.get("order_blocks", [])
+    )
+
+
+def score_fibo(fibo: Dict, price: float, h1_map: Dict, compass_dir: Optional[str]) -> tuple:
+    """[Fibonacci] Golden Zone (0.5/0.618/0.786) -> -1.0..+1.0.
+
+    - Harga di Golden Zone  -> skor dasar tinggi.
+    - Harga dekat (<=1%)    -> skor dasar sedang.
+    - Konfluensi: Golden Zone ∩ Key Level S&R (+0.25) / Order Block SMC (+0.20)
+      -> skor konfirmasi tinggi.
+    - Arah mengikuti kompas (BUY = +, SELL = -). Tanpa arah kompas -> netral.
+    """
+    reasons: List[str] = []
+    if not fibo or not fibo.get("ok") or fibo.get("range", 0) <= 0:
+        return 0.0, reasons
+
+    magnitude = 0.0
+    if fibo["in_golden_zone"]:
+        magnitude = 0.45
+        reasons.append("[H1] Harga di Fibonacci Golden Zone (0.500/0.618/0.786)")
+    else:
+        dist = fibo.get("golden_zone_dist_pct")
+        if dist is not None and dist <= 1.0:
+            magnitude = 0.20
+            reasons.append(f"[H1] Harga dekat Fibonacci Golden Zone ({dist:.1f}%)")
+    if magnitude <= 0:
+        return 0.0, reasons
+
+    if _golden_zone_overlaps_sr(fibo, h1_map):
+        magnitude += 0.25
+        reasons.append("[H1] Konfluensi Golden Zone ∩ Key Level S&R")
+    if _golden_zone_overlaps_ob(fibo, h1_map):
+        magnitude += 0.20
+        reasons.append("[H1] Konfluensi Golden Zone ∩ Order Block (SMC)")
+
+    if compass_dir == ACTION_BUY:
+        score = magnitude
+    elif compass_dir == ACTION_SELL:
+        score = -magnitude
+    else:
+        score = 0.0
+    return max(-1.0, min(1.0, score)), reasons
+
+
+# ---------------------------------------------------------------- skor EMA 20/50 (0.15)
+def score_ema(
+    ema_info: Dict,
+    rsi_now: Optional[float],
+    rsi_prev: Optional[float],
+) -> tuple:
+    """[EMA] EMA 20 & EMA 50 dynamic S/R + pullback + RSI hook -> -1.0..+1.0.
+
+    - Uptrend (BUY):  Harga > EMA 20 > EMA 50.
+    - Pullback BUY:   Harga mendekati/menyentuh EMA 20 (<=0.5%) + RSI hook up 30-40.
+    - Downtrend (SELL): Harga < EMA 20 < EMA 50.
+    - Pullback SELL:  Harga mendekati/menyentuh EMA 20 (<=0.5%) + RSI hook down 60-70.
+    """
+    reasons: List[str] = []
+    if not ema_info or ema_info.get("ema_fast") is None:
+        return 0.0, reasons
+
+    score = 0.0
+    if ema_info["uptrend"]:
+        reasons.append("[H1] EMA 20 > EMA 50 (dynamic support naik)")
+        score += 0.30
+        if ema_info["pullback_buy"]:
+            reasons.append(f"[H1] Pullback ke EMA 20 ({ema_info['dist_fast_pct']:.1f}%)")
+            score += 0.30
+            if rsi_now is not None and rsi_prev is not None and 30 <= rsi_now <= 40 and rsi_now > rsi_prev:
+                reasons.append(f"[H1] RSI Hook UP ({rsi_now:.0f}) di pullback EMA 20")
+                score += 0.40
+    elif ema_info["downtrend"]:
+        reasons.append("[H1] EMA 20 < EMA 50 (dynamic resistance turun)")
+        score -= 0.30
+        if ema_info["pullback_sell"]:
+            reasons.append(f"[H1] Pullback ke EMA 20 ({ema_info['dist_fast_pct']:.1f}%)")
+            score -= 0.30
+            if rsi_now is not None and rsi_prev is not None and 60 <= rsi_now <= 70 and rsi_now < rsi_prev:
+                reasons.append(f"[H1] RSI Hook DOWN ({rsi_now:.0f}) di pullback EMA 20")
+                score -= 0.40
 
     return max(-1.0, min(1.0, score)), reasons
 
@@ -470,7 +613,10 @@ def _build_reasons(
     h1_map: Dict,
     pct_change_24h: Optional[float],
     fg_value: float,
+    sr_reasons: List[str],
     smc_reasons: List[str],
+    fibo_reasons: List[str],
+    ema_reasons: List[str],
     trigger_reasons: List[str],
 ) -> List[str]:
     price = h1_map["price"]
@@ -493,7 +639,7 @@ def _build_reasons(
 
     pct_str = f"{pct_change_24h:+.1f}%" if pct_change_24h is not None else "n/a"
     last_line = f"Momentum 24j {pct_str} | Fear&Greed {fg_value:.0f}"
-    return [headline] + smc_reasons + trigger_reasons + [last_line]
+    return [headline] + sr_reasons + smc_reasons + fibo_reasons + ema_reasons + trigger_reasons + [last_line]
 
 
 def assemble_signal(
@@ -514,43 +660,68 @@ def assemble_signal(
     compass = analyze_compass(h4_candles, d1_candles)
     h1_map = map_h1_zones(h1_candles, price)
     trigger = analyze_trigger(m15_candles)
+    compass_dir = compass["direction"]
 
+    # EMA 20/50 dihitung pada H1 (fallback H4 bila H1 kosong); RSI hook memakai
+    # seri yang sama agar pullback EMA dinilai dengan momentum konsisten.
+    ema_source = h1_candles or h4_candles
+    ema_info = analyze_ema(ema_source, price)
+    ema_closes = [c["close"] for c in ema_source if c.get("close") is not None]
+    rsi_now = rsi(ema_closes, RSI_PERIOD)
+    rsi_prev = rsi(ema_closes[:-1], RSI_PERIOD) if len(ema_closes) > 1 else None
+
+    fibo = analyze_fibonacci(ema_source, price)
+
+    sr, sr_reasons = score_sr(price, h1_map, h4_candles, d1_candles)
+    smc, smc_reasons = score_smc(price, h1_map, compass_dir)
+    fibo_score, fibo_reasons = score_fibo(fibo, price, h1_map, compass_dir)
+    ema_score, ema_reasons = score_ema(ema_info, rsi_now, rsi_prev)
     tech, tech_reasons = score_trigger(m15_candles, pct_change_24h)
-    smc, smc_reasons = score_smc_mtf(h4_candles, d1_candles, h1_map, price)
     senti, senti_reasons = score_sentiment(fg_value, funding_rates, ls_ratio)
+
     # Fix #2: whale (netflow ETH) & on-chain (statistik BTC) bukan konstanta
     # global untuk SEMUA koin — hanya diterapkan ke koin sumbernya (ETH / BTC).
-    # Sebelumnya netflow ETH ikut menggeser skor DOGE/SOL/dst sebesar +-0.20
-    # (lebih besar dari BUY_THRESHOLD), membuat setup netral bisa jadi BUY.
-    # Data opsional yang tidak tersedia (whale_flow/btc_stats = None) = kategori
-    # DILEWATI sepenuhnya, tidak ikut dihitung bobotnya — sesuai prinsip graceful
-    # degradation (AGENTS.md: "gagal -> dilewati tanpa mempengaruhi kategori lain").
+    # Sebelumnya netflow ETH ikut menggeser skor DOGE/SOL/dst, membuat setup
+    # netral bisa jadi BUY. Data opsional yang tidak tersedia (whale_flow /
+    # btc_stats = None) = kategori DILEWATI sepenuhnya, tidak ikut dihitung
+    # bobotnya — sesuai prinsip graceful degradation (AGENTS.md).
     use_whale = base == "ETH" and whale_flow is not None
     use_onchain = base == "BTC" and btc_stats is not None
     whale, whale_reasons = score_whale(whale_flow) if use_whale else (0.0, [])
     onchain, onchain_reasons = score_onchain(btc_stats) if use_onchain else (0.0, [])
+    # Netflow / Whale Data digabung ke kategori On-chain (WEIGHT_ONCHAIN = 0.05).
+    if use_whale:
+        onchain_score, onchain_reasons = whale, whale_reasons
+    elif use_onchain:
+        onchain_score, onchain_reasons = onchain, onchain_reasons
+    else:
+        onchain_score, onchain_reasons = 0.0, []
 
     total = (
-        tech * WEIGHT_TECHNICAL
+        sr * WEIGHT_SR
         + smc * WEIGHT_SMC
+        + fibo_score * WEIGHT_FIBO
+        + ema_score * WEIGHT_EMA
+        + tech * WEIGHT_TECHNICAL
         + senti * WEIGHT_SENTIMENT
-        + whale * WEIGHT_WHALE
-        + onchain * WEIGHT_ONCHAIN
+        + onchain_score * WEIGHT_ONCHAIN
     )
     # Renormalisasi: total dibagi jumlah bobot yang BENAR-BENAR dipakai agar koin
-    # tanpa kategori whale/on-chain (atau datanya sedang tidak tersedia) tidak
-    # mendapat skor lebih kecil sistematis (dan skor sebanding lintas koin,
-    # bukan rata-rata parsial).
+    # tanpa kategori on-chain (atau datanya sedang tidak tersedia) tidak mendapat
+    # skor lebih kecil sistematis (dan skor sebanding lintas koin, bukan rata-rata
+    # parsial). Kategori S&R/SMC/Fibo/EMA/Teknikal/Sentimen selalu tersedia (derivasi
+    # candle/price); hanya On-chain yang opsional.
     weight_sum = (
-        WEIGHT_TECHNICAL
+        WEIGHT_SR
         + WEIGHT_SMC
+        + WEIGHT_FIBO
+        + WEIGHT_EMA
+        + WEIGHT_TECHNICAL
         + WEIGHT_SENTIMENT
-        + (WEIGHT_WHALE if use_whale else 0.0)
-        + (WEIGHT_ONCHAIN if use_onchain else 0.0)
+        + (WEIGHT_ONCHAIN if (use_whale or use_onchain) else 0.0)
     )
     total = max(-1.0, min(1.0, total / weight_sum)) if weight_sum else 0.0
 
-    compass_dir = compass["direction"]
     valid = _setup_valid(compass_dir, h1_map, trigger)
     if valid and compass_dir == ACTION_BUY and total >= BUY_THRESHOLD:
         action = ACTION_BUY
@@ -569,13 +740,18 @@ def assemble_signal(
         levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=intended)
     entry, sl, tp1, tp2 = levels
     breakdown = {
-        "teknikal": round(tech, 2),
+        "sr": round(sr, 2),
         "smc": round(smc, 2),
+        "fibo": round(fibo_score, 2),
+        "ema": round(ema_score, 2),
+        "teknikal": round(tech, 2),
+        "onchain": round(onchain_score, 2),
         "sentimen": round(senti, 2),
-        "whale": round(whale, 2),
-        "onchain": round(onchain, 2),
     }
-    reasons = _build_reasons(action, h1_map, pct_change_24h, fg_value, smc_reasons, tech_reasons)
+    reasons = _build_reasons(
+        action, h1_map, pct_change_24h, fg_value,
+        sr_reasons, smc_reasons, fibo_reasons, ema_reasons, tech_reasons,
+    )
     if rr_rejected:
         reasons.append("[RR] Ditolak: Risk:Reward < 1:1.5 — target H1 terlalu dekat dengan Entry")
 
@@ -839,7 +1015,7 @@ def _signal_lines(sig: Signal) -> List[str]:
         f"🎯 TP2: <b>{_esc(_fmt_price(sig.tp2))}</b> ({_level_pct(sig.entry, sig.tp2, sig.action):+.2f}%)",
         f"💹 24j: {sig.pct_change_24h:+.2f}%",
         *reason_lines,
-        f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (Tek {b['teknikal']:+.2f} · SMC {b['smc']:+.2f} · Sent {b['sentimen']:+.2f} · Whale {b['whale']:+.2f} · Onch {b['onchain']:+.2f})",
+        f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (SR {b['sr']:+.2f} · SMC {b['smc']:+.2f} · Fibo {b['fibo']:+.2f} · EMA {b['ema']:+.2f} · Tek {b['teknikal']:+.2f} · Onch {b['onchain']:+.2f} · Sent {b['sentimen']:+.2f})",
         "",
         "━━━━━━━━━━━━",
         "",

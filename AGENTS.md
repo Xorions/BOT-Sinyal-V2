@@ -24,10 +24,12 @@ data/
 indicators/                # murni, tanpa I/O
   rsi.py                   # Wilder RSI
   macd.py                  # EMA + MACD line/signal/histogram + histogram series (cross)
+  ema.py                   # EMA 20/50 dynamic S/R + deteksi pullback (analyze_ema)
+  fibonacci.py             # Fib level 0.5/0.618/0.786 + Golden Zone (analyze_fibonacci)
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (128 kasus)
+tests/                     # pytest (160 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -41,18 +43,21 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 
 | Kategori | Bobot | Komponen |
 |---|---|---|
-| SMC & S&D (MTF) | 0.40 | **Kompas H4/D1** (BOS:+0.45 / CHoCH:-0.45, fallback D1 ±0.30) + **Zona H1**: Demand/Supply ter-sentuh (±0.30/dekat ±0.15), OB (±0.20), FVG (±0.15), Liquidity Sweep (±0.25), Support/Resistance dekat (±0.15) |
-| Teknikal (M15) | 0.20 | RSI (<30:+0.20, >70:-0.20), MACD cross (±0.25) / histogram (±0.15) — cross berbobot LEBIH BESAR dari histogram (Fix #1), BOS/CHoCH M15 (±0.20), momentum 24j kontrarian (≤-3%:+0.20, ≥3%:-0.20) (Fix #6) |
-| Sentiment | 0.15 | `score_fear_greed` (contrarian), funding (≥0.03%:-0.30, ≤-0.03%:+0.30), L/S ratio (≥1.5:-0.20, ≤0.7:+0.20) |
-| Whale | 0.15 | netflow ETH: masuk exchange:-0.5, keluar:+0.5 (proxy, dibatasi agar tak sendirian meloloskan sinyal) — HANYA untuk koin ETH (Fix #2) |
-| On-chain | 0.10 | BTC `n_tx_24h` ada:+0.5 — HANYA untuk koin BTC (Fix #2) |
+| S&R (kompas utama) | 0.35 | **Kompas H4/D1**: BOS skala besar:+0.35 / CHoCH:-0.35 (fallback D1 ±0.25) + **H1**: di Demand/Supply zone (±0.25, dekat ≤2% ±0.15), Support/Resistance dekat ≤3% (±0.20), breakout Resistance kunci +0.20 / Support -0.20 |
+| SMC (konfluensi) | 0.20 | **H1 searah kompas**: Bullish OB +0.35 / Bearish OB -0.35, FVG ±0.25, Liquidity Sweep sell +0.40 / buy -0.40 — komponen campuran (bull+bear) **tidak** dinilai agar setup campuran tidak meniadakan skor kompas |
+| Fibonacci | 0.15 | **Golden Zone 0.5/0.618/0.786**: di zone ±0.45, dekat ≤1% ±0.20; konfluensi Golden Zone ∩ Key Level S&R +0.25 / Order Block +0.20; arah ikut kompas (tanpa kompas → netral 0) |
+| EMA 20/50 | 0.15 | **Dynamic S/R** (H1, fallback H4): uptrend/downtrend ±0.30, pullback ke EMA 20 ≤0.5% ±0.30, RSI hook UP 30-40 naik +0.40 / hook DOWN 60-70 turun -0.40 |
+| Teknikal (M15) | 0.08 | RSI (<30:+0.20, >70:-0.20), MACD cross (±0.25) / histogram (±0.15) — cross berbobot LEBIH BESAR dari histogram (Fix #1), BOS/CHoCH M15 (±0.20), momentum 24j kontrarian (≤-3%:+0.20, ≥3%:-0.20) (Fix #6) |
+| On-chain / Whale | 0.05 | netflow ETH ±0.5 (proxy) & statistik BTC +0.5 — HANYA untuk koin ETH/BTC; kategori **opsional** (`None` = dilewati). Whale digabung ke kategori On-chain (tidak ada bobot Whale terpisah) |
+| Sentimen | 0.02 | `score_fear_greed` (contrarian), funding (≥0.03%:-0.30, ≤-0.03%:+0.30), L/S ratio (≥1.5:-0.20, ≤0.7:+0.20) |
 
 - **Aturan kompas (baku):** H4 bullish → **HANYA** izinkan sinyal BUY; H4 bearish → **HANYA** SELL (D1 fallback bila H4 netral).
 - **Validasi setup:** sinyal hanya BUY/SELL bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1 (`engine._setup_valid`). Di luar itu → NEUTRAL.
 - Aksi: skor ≥ `BUY_THRESHOLD` (0.10) = BUY, ≤ `SELL_THRESHOLD` (-0.10) = SELL, else NEUTRAL.
 - Confidence: `clamp(25, 95, CONFIDENCE_BASE + |skor|*40)`.
 - **Konvensi RSI/funding/momentum = kontrarian**: overbought/euforia = negatif (antisipasi pullback). Momentum 24j mengikuti konvensi ini (Fix #6).
-- **Renormalisasi (Fix #2)**: total skor dibagi jumlah bobot kategori yang **benar-benar dipakai** untuk koin itu — koin non-ETH/BTC TIDAK dihitung bobot Whale/On-chain; ETH/BTC juga tidak dihitung bila datanya tidak tersedia (`None` = kategori dilewati, sesuai prinsip graceful degradation). Skor tetap sebanding lintas koin (bukan rata-rata parsial).
+- **Renormalisasi (Fix #2)**: total skor dibagi jumlah bobot kategori yang **benar-benar dipakai** untuk koin itu — koin non-ETH/BTC TIDAK dihitung bobot On-chain; ETH/BTC juga tidak dihitung bila datanya tidak tersedia (`None` = kategori dilewati, sesuai prinsip graceful degradation). Kategori S&R/SMC/Fibo/EMA/Teknikal/Sentimen selalu tersedia (derivasi candle/price), hanya On-chain yang opsional. Skor tetap sebanding lintas koin (bukan rata-rata parsial).
+- **S&R adalah kompas utama** (bobot 0.35): skor arah dari tren struktur H4/D1 dan zone/key level H1; arah BUY/SELL ditentukan oleh kompas, bukan konfluensi kecil. **Fibonacci & EMA hanya menambah/mengurangi skor bila searah kompas** (Fibo: tanpa kompas → netral; EMA: arah melekat pada trend EMA itu sendiri, bukan kompas).
 - Entry/SL/TP di `engine._levels_mtf()`: dari zona H1 (Demand/Supply zone atau OB; SL di luar zona, TP di level S&R H1); fallback persentase bila tidak ada zona.
 
 ### Risk-to-Reward Ratio (RRR) — aturan baku level SL/TP
@@ -100,7 +105,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 - Header seksi: `<b>📈 SINYAL LONG (BUY)</b>`, `<b>📉 SINYAL SHORT (SELL)</b>`, `<b>⚪ WATCHLIST (NEUTRAL)</b>` (seksi kosong di-skip).
 - Baris meta briefing (dari `engine.meta_lines()`): `📊 DAY TRADING BRIEFING — MTF SMC + S&D`, `🕐 <tanggal jam> WIB`, `⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15`, `🌐 Fear&Greed: N`.
-- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝` tanpa dash) → `💸` momentum → `📊 Skor` (total + breakdown SMC/Tek/Sent/Whale/Onch) → pemisah `───`.
+- Tiap sinyal = blok dari `_signal_lines()`: baris judul `#BASE (SYMBOL)` → Entry → SL → TP1 → TP2 → perubahan 24j → alasan `📝` (baris pertama berprefix `📝` tanpa dash) → `💸` momentum → `📊 Skor` (total + breakdown SR/SMC/Fibo/EMA/Tek/Onch/Sent) → pemisah `───`.
 - **Alasan wajib MTF (kelompok per timeframe)**: baris pertama `📝` = headline zona H1 (mis. "Demand Zone & Bullish OB H1 Tersentuh"). Alasan berikutnya dipakai `engine._group_reason_lines()`: tag `+ [H4]`/`+ [H1]`/`+ [M15]` ditulis **1x** sebagai header grup (indent 4 spasi); sub-alasan berindent **7 spasi + `- `**. Grup dgn 1 item → inline (`+ [H4] Tren utama Bullish`); banyak item → header lalu daftar `- ...`. Baris non-tag (momentum) dicetak ber-prefix `💸` sebagai baris terpisah.
 - Urutan header & baris sinyal adalah **kontrak visual** — ubah hanya bila diminta user. Format harga lewat `_fmt_price()` (≥1000: 0 desimal, ≥1: 2 desimal, <1: 6 desimal).
 - Kirim memakai Telegram HTML parse mode (`telegram_sender.py`).
@@ -131,7 +136,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 128 test
+venv\Scripts\python.exe -m pytest tests -v   # 160 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 
