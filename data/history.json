@@ -655,5 +655,27 @@
       "timestamp": "Sunday, 09 Aug 2026, 02:35 WIB"
     }
   ],
-  "2026-08-09 13:35": []
+  "2026-08-09 13:35": [],
+  "2026-08-09 15:35": [
+    {
+      "symbol": "ICPUSDT",
+      "base": "ICP",
+      "action": "BUY",
+      "entry": 2.182,
+      "sl": 2.14927,
+      "tp1": 2.257,
+      "tp2": 2.2801899999999997,
+      "timestamp": "Sunday, 09 Aug 2026, 15:35 WIB"
+    },
+    {
+      "symbol": "LTCUSDT",
+      "base": "LTC",
+      "action": "BUY",
+      "entry": 46.21,
+      "sl": 45.51685,
+      "tp1": 47.249725000000005,
+      "tp2": 48.28945000000001,
+      "timestamp": "Sunday, 09 Aug 2026, 15:35 WIB"
+    }
+  ]
 }

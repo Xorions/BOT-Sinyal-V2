@@ -10,6 +10,7 @@ from engine import (
     ACTION_SELL,
     Signal,
     _blocked_by_zone,
+    _group_reason_lines,
     _levels_mtf,
     _ob_near,
     _setup_valid,
@@ -697,6 +698,89 @@ class TestFormat:
         assert "🛡️ SL: <b>$104.00</b> (-4.00%)" in message
         assert "🎯 TP1: <b>$96.00</b> (+4.00%)" in message
         assert "🎯 TP2: <b>$92.00</b> (+8.00%)" in message
+
+    def test_message_new_alert_header_first_line(self):
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        sig = assemble_signal(
+            symbol="BTCUSDT",
+            base="BTC",
+            price=price,
+            pct_change_24h=5.2,
+            h4_candles=h4,
+            d1_candles=d1,
+            h1_candles=h1,
+            m15_candles=m15,
+            fg_value=29.0,
+            funding_rates=[0.0001],
+            ls_ratio=1.0,
+            whale_flow=None,
+            btc_stats=None,
+        )
+        message = format_message(rank_signals([sig]), "Jumat, 07 Agu 2026, 13:30 WIB", "Fear&Greed: 29")
+        first = message.splitlines()[0]
+        assert first == "<b>🚨 NEW SIGNAL ALERTS 🚨</b>"
+
+    def test_message_updated_title_sr_smc_fibo_ema(self):
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        sig = assemble_signal(
+            symbol="BTCUSDT",
+            base="BTC",
+            price=price,
+            pct_change_24h=5.2,
+            h4_candles=h4,
+            d1_candles=d1,
+            h1_candles=h1,
+            m15_candles=m15,
+            fg_value=29.0,
+            funding_rates=[0.0001],
+            ls_ratio=1.0,
+            whale_flow=None,
+            btc_stats=None,
+        )
+        message = format_message(rank_signals([sig]), "Jumat, 07 Agu 2026, 13:30 WIB")
+        assert "📊 DAY TRADING BRIEFING — MTF S&amp;R + SMC + FIBO + EMA" in message
+        assert "MTF SMC + S&amp;D" not in message
+
+
+class TestGroupReasonLinesDedup:
+    """Fix: FVG / Liquidity Sweep tidak dicetak berulang-ulang per baris."""
+
+    def test_fvg_and_sweep_deduplicated_with_count(self):
+        reasons = [
+            "[H4] S&R skala besar Bullish",
+            "[H1] Harga masuk Demand Zone",
+            "[H1] FVG bullish tervalidasi di bawah harga",
+            "[H1] FVG bullish tervalidasi di bawah harga",
+            "[H1] FVG bullish tervalidasi di bawah harga",
+            "[H1] Liquidity Sweep tereksekusi (EQL tersapu)",
+            "[H1] Liquidity Sweep tereksekusi (EQL tersapu)",
+            "[H1] Bullish OB di bawah harga",
+            "[M15] RSI Rebound",
+        ]
+        lines = _group_reason_lines(reasons)
+        joined = "\n".join(lines)
+        assert "FVG bullish tervalidasi di bawah harga (x3)" in joined
+        assert "Liquidity Sweep tereksekusi (EQL tersapu) (x2)" in joined
+        assert joined.count("FVG bullish") == 1  # tidak berulang baris terpisah
+        assert joined.count("Liquidity Sweep") == 1
+        assert "Harga masuk Demand Zone" in joined
+        assert "(x1)" not in joined
+
+    def test_dedup_collapses_single_repeated_item_to_inline(self):
+        lines = _group_reason_lines(
+            ["[H1] FVG bullish tervalidasi di bawah harga"] * 2
+        )
+        assert lines == ["    + [H1] FVG bullish tervalidasi di bawah harga (x2)"]
+
+    def test_unique_items_untouched(self):
+        lines = _group_reason_lines(
+            ["[H1] Harga masuk Demand Zone", "[H1] Bullish OB di bawah harga"]
+        )
+        assert lines == [
+            "    + [H1] ",
+            "       - Harga masuk Demand Zone",
+            "       - Bullish OB di bawah harga",
+        ]
 
 
 class TestConfigWeights:

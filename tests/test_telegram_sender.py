@@ -17,7 +17,7 @@ def _coin_block(base: str, symbol: str) -> list:
         "    + [H4] Tren utama Bullish",
         "    + [H1] Harga masuk Demand Zone",
         "    + [M15] RSI Rebound",
-        "📊 Skor: <b>+0.42</b>  (Tek +0.20 · SMC +0.20 · Sent +0.00 · Whale +0.00 · Onch +0.00)",
+        "📊 Skor: <b>+0.42</b>  (SR +0.35 · SMC +0.20 · Fibo +0.00 · EMA +0.00 · Tek +0.20 · Onch +0.00 · Sent +0.00)",
         "",
         "━━━━━━━━━━━━",
         "",
@@ -26,7 +26,8 @@ def _coin_block(base: str, symbol: str) -> list:
 
 def _briefing_text(n_coins: int = 8, disclaimer: bool = True) -> str:
     lines = [
-        "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&amp;D</b>",
+        "<b>🚨 NEW SIGNAL ALERTS 🚨</b>",
+        "<b>📊 DAY TRADING BRIEFING — MTF S&amp;R + SMC + FIBO + EMA</b>",
         "🕐 Jumat, 07 Agu 2026, 13:30 WIB",
         "⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15",
         "🌐 Fear&Greed: 29",
@@ -53,7 +54,7 @@ class TestSignalBlockDetection:
 
     def test_section_header_not_detected(self):
         assert not _is_signal_block_start("<b>📈 SINYAL LONG (BUY)</b>")
-        assert not _is_signal_block_start("<b>📊 DAY TRADING BRIEFING — MTF SMC + S&amp;D</b>")
+        assert not _is_signal_block_start("<b>📊 DAY TRADING BRIEFING — MTF S&amp;R + SMC + FIBO + EMA</b>")
         assert not _is_signal_block_start("🕐 Jumat, 07 Agu 2026, 13:30 WIB")
 
     def test_disclaimer_not_detected(self):
@@ -116,7 +117,7 @@ class TestSplitSignalBlocks:
         # Fix #3: header seksi ⚪ WATCHLIST dijadikan batas blok, sehingga tidak
         # terpisah dari koin NEUTRAL-nya saat pesan dipecah antar chunk.
         lines = [
-            "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&amp;D</b>",
+            "<b>📊 DAY TRADING BRIEFING — MTF S&amp;R + SMC + FIBO + EMA</b>",
             "<b>📈 SINYAL LONG (BUY)</b>",
             "",
         ]

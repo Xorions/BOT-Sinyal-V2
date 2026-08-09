@@ -24,6 +24,7 @@ Aturan baku:
 Output: Signal (BUY/SELL/NEUTRAL) + confidence + Entry/SL/TP1/TP2 dari zona H1.
 """
 
+from collections import Counter
 from dataclasses import dataclass, field
 from html import escape as _html_escape
 from typing import Dict, List, Optional
@@ -972,6 +973,9 @@ def _group_reason_lines(reasons: List[str]) -> List[str]:
 
     Tag `[TF]` ditulis 1x sebagai header grup; sub-alasan diindentasi `- `.
     Baris tanpa tag (mis. momentum) dicetak sebagai baris terpisah ber-prefix 💸.
+    Item yang sama terulang (mis. FVG / Liquidity Sweep per-gap) dideduplikasi
+    menjadi 1 baris dengan jumlah, contoh: "FVG bullish tervalidasi di bawah
+    harga (x8)" — menghindari kalimat berulang-ulang dalam baris terpisah.
     """
     out: List[str] = []
     groups: List[tuple] = []  # [(tf, [item, ...])]
@@ -988,11 +992,14 @@ def _group_reason_lines(reasons: List[str]) -> List[str]:
         else:
             standalone.append(reason)
     for tf, items in groups:
-        if len(items) == 1:
-            out.append(f"    + [{_esc(tf)}] {_esc(items[0])}")
+        dedup: List[str] = []
+        for item, count in Counter(items).items():
+            dedup.append(f"{item} (x{count})" if count > 1 else item)
+        if len(dedup) == 1:
+            out.append(f"    + [{_esc(tf)}] {_esc(dedup[0])}")
         else:
             out.append(f"    + [{_esc(tf)}] ")
-            for item in items:
+            for item in dedup:
                 out.append(f"       - {_esc(item)}")
     for line in standalone:
         out.append(f"💸 {_esc(line)}")
@@ -1029,7 +1036,8 @@ def format_message(signals: List[Signal], timestamp: str, market_note: str = "")
     neutrals = [s for s in signals if s.action == ACTION_NEUTRAL]
 
     lines = [
-        "<b>📊 DAY TRADING BRIEFING — MTF SMC + S&amp;D</b>",
+        "<b>🚨 NEW SIGNAL ALERTS 🚨</b>",
+        "<b>📊 DAY TRADING BRIEFING — MTF S&amp;R + SMC + FIBO + EMA</b>",
         f"🕐 {_esc(timestamp)}",
         "⚙️ Analisa: Kompas H4/D1 → Zona H1 → Konfirmasi M15",
     ]
