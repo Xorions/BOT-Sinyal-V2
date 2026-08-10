@@ -80,7 +80,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (160 kasus)
+tests/                     # pytest (176 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -89,9 +89,9 @@ tests/                     # pytest (160 kasus)
 | Kategori | Bobot | Isi |
 |---|---|---|
 | S&R (kompas utama) | 35% | Tren struktur H4/D1 (BOS/CHoCH skala besar ±0.35, fallback D1 ±0.25) + harga di/dekat Demand-Supply zone H1 (±0.25/±0.15) + Support/Resistance dekat (±0.20) + breakout key level (±0.20) |
-| SMC (konfluensi) | 20% | Order Block (±0.35), FVG (±0.25), Liquidity Sweep (±0.40) — hanya komponen **searah kompas** (setup campuran tidak dinilai) |
+| SMC (konfluensi) | 20% | Order Block (±0.35), FVG (±0.25), Liquidity Sweep (±0.40) — hanya komponen **searah kompas** (setup campuran tidak dinilai); tiap tipe dinilai **sekali** (kehadiran, bukan per-gap) |
 | Fibonacci | 15% | Golden Zone 0.5/0.618/0.786 (±0.45, dekat ≤1%: ±0.20) + konfluensi Key Level S&R (+0.25) / Order Block (+0.20); arah ikut kompas |
-| EMA 20/50 | 15% | Dynamic S/R: trend (±0.30) + pullback ke EMA 20 ≤0.5% (±0.30) + RSI hook 30-40 naik / 60-70 turun (±0.40) |
+| EMA 20/50 | 15% | Dynamic S/R: trend (±0.30) + pullback ke EMA 20 ≤0.5% (±0.30) + RSI hook 30-40 naik / 60-70 turun (±0.40); bila arah trend EMA **berlawanan kompas**, skor dinetralkan (0) |
 | Teknikal (M15) | 8% | RSI (contrarian), MACD (cross > histogram), BOS M15, momentum 24j (contrarian) |
 | On-chain / Whale | 5% | Netflow ETH (proxy, ETH) & aktivitas BTC (BTC) — kategori opsional (None = dilewati) |
 | Sentimen | 2% | Fear & Greed (contrarian), funding rate, long/short ratio |
@@ -113,7 +113,7 @@ Alur perhitungan (`_levels_mtf` → `_rr_targets`):
 1. **SL** = zona Demand/Supply H1 terdekat **+ buffer 0.3%** di luar zona (BUY: Demand/Support di bawah harga; SELL: Supply/Resistance di atas harga). Bila tak ada zona → fallback persentase statis.
 2. **Jarak SL (%)** dihitung dari Entry.
 3. **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **dengan syarat** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). 
-4. Bila target H1 terdekat **terlalu dekat** (TP1 < `RRR_MIN` x SL): paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) — **hanya bila tidak terhalang zona Supply/Demand kuat** di antara Entry dan proyeksi TP1. Bila terhalang → `_levels_mtf` mengembalikan `None` → **sinyal di-reject menjadi NEUTRAL** (alasan `[RR]` ditambahkan).
+4. Bila target H1 terdekat **terlalu dekat** (TP1 < `RRR_MIN` x SL): paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) — **hanya bila tidak terhalang zona Supply/Demand kuat** di antara Entry dan proyeksi TP1. Zona yang **berisi Entry tidak dianggap terhalang** (BUY: harga meninggalkan zona ke atas; SELL: ke bawah). Bila terhalang → `_levels_mtf` mengembalikan `None` → **sinyal di-reject menjadi NEUTRAL** (alasan `[RR]` ditambahkan).
 5. **TP2** = Entry ± (jarak SL x `RRR_TP2`).
 6. **Urutan TP dijamin** (`_rr_targets`): TP1 selalu target **terdekat**. Bila target struktur H1 melewati proyeksi TP2 (1:3), posisi TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`.
 
@@ -129,7 +129,7 @@ Di `bot._eligible_pair()`:
 
 ## Format pesan Telegram
 
-`engine.format_message()` — baris paling atas = **alert header** `🚨 NEW SIGNAL ALERTS 🚨`, lalu judul briefing (S&R + SMC + FIBO + EMA). Sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`. Alasan `📝` dicetak dengan baris pertama (headline zona SMC/S&D H1) tanpa dash; alasan selanjutnya **dikelompokkan per timeframe** — tag `+ [H4]`/`+ [H1]`/`+ [M15]` hanya ditulis 1x sebagai header grup, sub-alasan diindentasi `- ` (dengan 7 spasi) di bawah grup yang sama. **Deduplikasi alasan**: item yang terulang dari loop (FVG, Liquidity Sweep) diringkas jadi 1 baris dengan jumlah `(xN)`, mis. `FVG bullish tervalidasi di bawah harga (x8)` — tidak dicetak berulang-ulang. Baris momentum dipisahkan emoji `💸` tepat sebelum `📊 Skor`:
+`engine.format_message()` — baris paling atas = **alert header** `🚨 NEW SIGNAL ALERTS 🚨`, lalu judul briefing (S&R + SMC + FIBO + EMA). Sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`. Alasan `📝` dicetak dengan baris pertama (headline zona SMC/S&D H1) tanpa dash; alasan selanjutnya **dikelompokkan per timeframe** — tag `+ [H4]`/`+ [H1]`/`+ [M15]` hanya ditulis 1x sebagai header grup, sub-alasan diindentasi `- ` (dengan 7 spasi) di bawah grup yang sama. **Deduplikasi alasan**: skor SMC **berbasis kehadiran** — FVG dan Liquidity Sweep dinilai **sekali per tipe** (banyak FVG searah = +0.25 sekali), sehingga alasan tidak lagi tercetak berulang-ulang; ringkasan `(xN)` tetap ada sebagai jaring pengaman untuk alasan duplikat lain. Baris momentum dipisahkan emoji `💸` tepat sebelum `📊 Skor`:
 
 ```
 🚨 NEW SIGNAL ALERTS 🚨
@@ -151,8 +151,8 @@ Di `bot._eligible_pair()`:
     + [H1] 
        - Harga masuk Demand Zone
        - Bullish OB di bawah harga
-       - FVG bullish tervalidasi di bawah harga (x8)
-       - Liquidity Sweep tereksekusi (x3)
+       - FVG bullish tervalidasi di bawah harga
+       - Liquidity Sweep tereksekusi (EQL tersapu)
        - Support dekat (0.4%)
        - Resistance dekat (1.2%)
     + [M15] MACD Golden Cross & RSI Rebound
