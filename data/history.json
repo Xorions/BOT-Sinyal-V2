@@ -712,5 +712,47 @@
       "tp2": 0.044965399999999996,
       "timestamp": "Monday, 10 Aug 2026, 19:06 WIB"
     }
+  ],
+  "2026-08-10 23:32": [
+    {
+      "symbol": "MUBARAKUSDT",
+      "base": "MUBARAK",
+      "action": "BUY",
+      "entry": 0.02247,
+      "sl": 0.02084,
+      "tp1": 0.02581,
+      "tp2": 0.02736,
+      "timestamp": "Monday, 10 Aug 2026, 23:31 WIB"
+    },
+    {
+      "symbol": "EDUUSDT",
+      "base": "EDU",
+      "action": "BUY",
+      "entry": 0.0382,
+      "sl": 0.0373,
+      "tp1": 0.04089999999999999,
+      "tp2": 0.041,
+      "timestamp": "Monday, 10 Aug 2026, 23:31 WIB"
+    },
+    {
+      "symbol": "SHELLUSDT",
+      "base": "SHELL",
+      "action": "BUY",
+      "entry": 0.0205,
+      "sl": 0.0199,
+      "tp1": 0.0217,
+      "tp2": 0.0223,
+      "timestamp": "Monday, 10 Aug 2026, 23:31 WIB"
+    },
+    {
+      "symbol": "OMGUSDT",
+      "base": "OMG",
+      "action": "SELL",
+      "entry": 0.383,
+      "sl": 0.3902857142857143,
+      "tp1": 0.3720714285714286,
+      "tp2": 0.36114285714285715,
+      "timestamp": "Monday, 10 Aug 2026, 23:31 WIB"
+    }
   ]
 }
