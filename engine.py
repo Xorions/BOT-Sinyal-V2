@@ -1026,9 +1026,9 @@ def _group_reason_lines(reasons: List[str]) -> List[str]:
 
     Tag `[TF]` ditulis 1x sebagai header grup; sub-alasan diindentasi `- `.
     Baris tanpa tag (mis. momentum) dicetak sebagai baris terpisah ber-prefix 💸.
-    Item yang sama terulang (mis. FVG / Liquidity Sweep per-gap) dideduplikasi
-    menjadi 1 baris dengan jumlah, contoh: "FVG bullish tervalidasi di bawah
-    harga (x8)" — menghindari kalimat berulang-ulang dalam baris terpisah.
+    Item identik yang terulang dideduplikasi jadi 1 baris dengan jumlah `(xN)`
+    — jaring pengaman untuk alasan duplikat lain (skor SMC kini berbasis
+    kehadiran, sehingga FVG/Liquidity Sweep muncul sekali per tipe).
     """
     out: List[str] = []
     groups: List[tuple] = []  # [(tf, [item, ...])]
