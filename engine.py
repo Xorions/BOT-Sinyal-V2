@@ -365,23 +365,29 @@ def score_sr(
     in_supply = [z for z in supply if in_zone(price, z)]
     near_demand = nearest_demand(price, h1_map.get("zones", []))
     near_supply = nearest_supply(price, h1_map.get("zones", []))
+    # Sisi zona yang berlawanan dengan bias kompas tidak dilaporkan: zona yang
+    # berisi Entry sudah tidak memblokir (lihat _blocked_by_zone), sehingga
+    # "masuk Demand Zone" + "masuk Supply Zone" sekaligus hanya noise.
+    bias = compass["direction"]
 
-    if in_demand:
-        reasons.append("[H1] Harga masuk Demand Zone")
-        score += 0.25
-    elif near_demand:
-        dist = _dist_pct(near_demand["high"], price)
-        if dist is not None and dist <= 2.0:
-            reasons.append(f"[H1] Harga dekat Demand Zone ({dist:.1f}%)")
-            score += 0.15
-    if in_supply:
-        reasons.append("[H1] Harga masuk Supply Zone")
-        score -= 0.25
-    elif near_supply:
-        dist = _dist_pct(price, near_supply["low"])
-        if dist is not None and dist <= 2.0:
-            reasons.append(f"[H1] Harga dekat Supply Zone ({dist:.1f}%)")
-            score -= 0.15
+    if bias != ACTION_SELL:
+        if in_demand:
+            reasons.append("[H1] Harga masuk Demand Zone")
+            score += 0.25
+        elif near_demand:
+            dist = _dist_pct(near_demand["high"], price)
+            if dist is not None and dist <= 2.0:
+                reasons.append(f"[H1] Harga dekat Demand Zone ({dist:.1f}%)")
+                score += 0.15
+    if bias != ACTION_BUY:
+        if in_supply:
+            reasons.append("[H1] Harga masuk Supply Zone")
+            score -= 0.25
+        elif near_supply:
+            dist = _dist_pct(price, near_supply["low"])
+            if dist is not None and dist <= 2.0:
+                reasons.append(f"[H1] Harga dekat Supply Zone ({dist:.1f}%)")
+                score -= 0.15
 
     levels = h1_map.get("levels", {})
     if levels.get("support_dist_pct") is not None and levels["support_dist_pct"] <= 3:
@@ -421,21 +427,37 @@ def score_smc(price: float, h1_map: Dict, compass_dir: Optional[str] = None) -> 
         reasons.append("[H1] Bearish OB di atas harga")
         score -= 0.35
 
-    for gap in h1_map.get("fvgs", []):
-        if allow_bull and gap["type"] == "bullish" and gap["bottom"] < price:
-            reasons.append("[H1] FVG bullish tervalidasi di bawah harga")
-            score += 0.25
-        if allow_bear and gap["type"] == "bearish" and gap["top"] > price:
-            reasons.append("[H1] FVG bearish tervalidasi di atas harga")
-            score -= 0.25
+    # Fix: kehadiran per tipe, bukan per-gap. Sebelumnya tiap FVG/sweep
+    # dijumlahkan (+0.25/+0.40 per gap) sehingga kategori SMC jenuh di ±1.00
+    # untuk hampir semua koin (double-counting) dan tidak lagi membedakan
+    # kekuatan setup; alasan mentah juga penuh baris duplikat.
+    bull_fvg = any(
+        gap["type"] == "bullish" and gap["bottom"] < price
+        for gap in h1_map.get("fvgs", [])
+    )
+    bear_fvg = any(
+        gap["type"] == "bearish" and gap["top"] > price
+        for gap in h1_map.get("fvgs", [])
+    )
+    if allow_bull and bull_fvg:
+        reasons.append("[H1] FVG bullish tervalidasi di bawah harga")
+        score += 0.25
+    if allow_bear and bear_fvg:
+        reasons.append("[H1] FVG bearish tervalidasi di atas harga")
+        score -= 0.25
 
-    for sweep in h1_map.get("sweeps", []):
-        if allow_bull and sweep["type"] == "sell_sweep":
-            reasons.append("[H1] Liquidity Sweep tereksekusi (EQL tersapu)")
-            score += 0.40
-        elif allow_bear and sweep["type"] == "buy_sweep":
-            reasons.append("[H1] Liquidity Sweep tereksekusi (EQH tersapu)")
-            score -= 0.40
+    bull_sweep = any(
+        sweep["type"] == "sell_sweep" for sweep in h1_map.get("sweeps", [])
+    )
+    bear_sweep = any(
+        sweep["type"] == "buy_sweep" for sweep in h1_map.get("sweeps", [])
+    )
+    if allow_bull and bull_sweep:
+        reasons.append("[H1] Liquidity Sweep tereksekusi (EQL tersapu)")
+        score += 0.40
+    if allow_bear and bear_sweep:
+        reasons.append("[H1] Liquidity Sweep tereksekusi (EQH tersapu)")
+        score -= 0.40
 
     return max(-1.0, min(1.0, score)), reasons
 
@@ -508,6 +530,7 @@ def score_ema(
     ema_info: Dict,
     rsi_now: Optional[float],
     rsi_prev: Optional[float],
+    compass_dir: Optional[str] = None,
 ) -> tuple:
     """[EMA] EMA 20 & EMA 50 dynamic S/R + pullback + RSI hook -> -1.0..+1.0.
 
@@ -515,10 +538,25 @@ def score_ema(
     - Pullback BUY:   Harga mendekati/menyentuh EMA 20 (<=0.5%) + RSI hook up 30-40.
     - Downtrend (SELL): Harga < EMA 20 < EMA 50.
     - Pullback SELL:  Harga mendekati/menyentuh EMA 20 (<=0.5%) + RSI hook down 60-70.
+
+    Fix (alignment kompas): bila `compass_dir` (BUY/SELL) diberikan dan arah
+    trend EMA berlawanan (mis. kompas H4 bearish tapi EMA H1 uptrend), skor EMA
+    dinetralkan agar EMA tidak menggeser skor melawan arah kompas — konsisten
+    dengan aturan "H4 bullish -> HANYA BUY / H4 bearish -> HANYA SELL".
+    Tanpa kompas (None), perilaku lama dipertahankan (arah ikut EMA).
     """
     reasons: List[str] = []
     if not ema_info or ema_info.get("ema_fast") is None:
         return 0.0, reasons
+
+    ema_bull = bool(ema_info.get("uptrend"))
+    ema_bear = bool(ema_info.get("downtrend"))
+    if compass_dir in (ACTION_BUY, ACTION_SELL):
+        if (compass_dir == ACTION_BUY and ema_bear) or (
+            compass_dir == ACTION_SELL and ema_bull
+        ):
+            reasons.append("[H1] EMA berlawanan arah kompas (dinetralkan)")
+            return 0.0, reasons
 
     score = 0.0
     if ema_info["uptrend"]:
@@ -676,7 +714,7 @@ def assemble_signal(
     sr, sr_reasons = score_sr(price, h1_map, h4_candles, d1_candles)
     smc, smc_reasons = score_smc(price, h1_map, compass_dir)
     fibo_score, fibo_reasons = score_fibo(fibo, price, h1_map, compass_dir)
-    ema_score, ema_reasons = score_ema(ema_info, rsi_now, rsi_prev)
+    ema_score, ema_reasons = score_ema(ema_info, rsi_now, rsi_prev, compass_dir)
     tech, tech_reasons = score_trigger(m15_candles, pct_change_24h)
     senti, senti_reasons = score_sentiment(fg_value, funding_rates, ls_ratio)
 
@@ -794,13 +832,24 @@ def _below_targets(price: float, h1_candles: List[Dict[str, float]], h1_map: Dic
 
 
 def _blocked_by_zone(lo: float, hi: float, zones: List[Dict], zone_type: str) -> bool:
-    """True bila zona kuat (supply/demand) memotong ATAU mencakup jalur [lo, hi].
+    """True bila zona kuat (supply/demand) memotong jalur [lo, hi] menuju target.
 
-    - supply: zona di antara Entry dan proyeksi TP1, ATAU Entry sudah berada di
-      dalam zona Supply -> harga tertahan di zona.
-    - demand: zona di antara proyeksi TP1 dan Entry (arah SELL), ATAU Entry
-      sudah berada di dalam zona Demand.
+    - BUY (zone_type="supply", jalur naik entry->tp): HANYA zona supply yang
+      SELURUHNYA berada di atas Entry yang memblokir. Zona yang BERISI Entry
+      tidak dianggap terblokir — saat BUY harga justru bergerak KELUAR dari
+      zona itu (naik), bukan masuk ke dalamnya.
+    - SELL (zone_type="demand", jalur turun entry->tp): HANYA zona demand yang
+      SELURUHNYA berada di bawah Entry yang memblokir (simetris).
+
+    (Fix: sebelumnya zona yang berisi Entry ikut memblokir, sehingga hampir
+    semua BUY/SELL valid di-reject jadi NEUTRAL karena zona S&D yang lebar
+    selalu "mengandung" harga saat ini.)
     """
+    # BUY: Entry = ujung bawah (lo); SELL: Entry = ujung atas (hi).
+    if zone_type == "supply":
+        entry, tp = lo, hi
+    else:
+        entry, tp = hi, lo
     for z in zones:
         if z.get("type") != zone_type:
             continue
@@ -808,8 +857,12 @@ def _blocked_by_zone(lo: float, hi: float, zones: List[Dict], zone_type: str) ->
         z_hi = z.get("high")
         if z_lo is None or z_hi is None:
             continue
-        if z_lo < hi and z_hi > lo:
-            return True
+        if zone_type == "supply":
+            if z_lo > entry and z_lo < tp:
+                return True
+        else:
+            if z_hi < entry and z_hi > tp:
+                return True
     return False
 
 

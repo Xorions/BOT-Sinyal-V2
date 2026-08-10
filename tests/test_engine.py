@@ -417,6 +417,25 @@ class TestLevelsRRR:
         price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(102, 103)])
         assert _levels_mtf(price, [], h1_map, ACTION_BUY) is None
 
+    def test_buy_not_blocked_by_supply_zone_containing_entry(self):
+        # Trap lama: supply zone BERISI Entry (99..103) + swing high 100.5 terlalu
+        # dekat -> forced TP1 sebelumnya selalu dianggap "terblokir" -> NEUTRAL.
+        # Kini zona yang berisi Entry tidak memblokir BUY (harga keluar zona saat
+        # naik), sehingga setup valid tetap jadi BUY.
+        candles = [
+            {"open": 99.2, "high": 99.0, "low": 98.0, "close": 99.0},
+            {"open": 99.5, "high": 100.0, "low": 99.0, "close": 99.8},
+            {"open": 99.8, "high": 100.2, "low": 99.3, "close": 100.1},
+            {"open": 100.1, "high": 100.5, "low": 99.4, "close": 100.4},
+            {"open": 100.4, "high": 100.3, "low": 99.5, "close": 100.0},
+            {"open": 100.0, "high": 100.1, "low": 99.2, "close": 99.5},
+            {"open": 99.5, "high": 100.0, "low": 99.0, "close": 99.8},
+        ]
+        price, h1_map = 100.0, self._map(demand=[(98, 102)], supply=[(99, 103)])
+        entry, sl, tp1, tp2 = _levels_mtf(price, candles, h1_map, ACTION_BUY)
+        assert sl < entry < tp1 < tp2
+        assert tp1 > price  # proyeksi RRR, bukan ditolak jadi NEUTRAL
+
     def test_buy_swaps_tp_when_target_beyond_tp2_projection(self):
         # Supply zone di 120 melewati proyeksi TP2 (1:3) -> TP1/TP2 ditukar agar
         # target terdekat jadi TP1: entry < TP1 < TP2 tetap terjaga.
@@ -499,16 +518,30 @@ class TestLevelsRRR:
 
 
 class TestBlockedByZone:
-    """Fix #2: `_blocked_by_zone` harus mendeteksi harga yang sudah di dalam zona."""
+    """`_blocked_by_zone`: hanya zona SELURUHNYA di atas/bawah Entry yang blokir.
 
-    def test_price_inside_supply_blocks_buy(self):
-        # Harga 100 sudah DI DALAM supply zone (99..102) -> jalur ke TP1 terblokir.
+    Zona yang BERISI Entry TIDAK memblokir — saat BUY harga bergerak keluar
+    dari zona (naik); saat SELL keluar dari zona (turun).
+    """
+
+    def test_price_inside_supply_does_not_block_buy(self):
+        # Harga 100 sudah DI DALAM supply zone (99..102) -> bukan blokir BUY.
         zones = [{"type": "supply", "low": 99.0, "high": 102.0}]
+        assert _blocked_by_zone(100.0, 110.0, zones, "supply") is False
+
+    def test_price_inside_demand_does_not_block_sell(self):
+        # Harga 100 sudah DI DALAM demand zone (98..101) -> bukan blokir SELL.
+        zones = [{"type": "demand", "low": 98.0, "high": 101.0}]
+        assert _blocked_by_zone(90.0, 100.0, zones, "demand") is False
+
+    def test_supply_above_entry_between_entry_and_tp_blocks_buy(self):
+        # Supply zone di 103..106 sepenuhnya di atas Entry 100 & di jalur ke TP -> blokir.
+        zones = [{"type": "supply", "low": 103.0, "high": 106.0}]
         assert _blocked_by_zone(100.0, 110.0, zones, "supply") is True
 
-    def test_price_inside_demand_blocks_sell(self):
-        # Harga 100 sudah DI DALAM demand zone (98..101) -> jalur SELL terblokir.
-        zones = [{"type": "demand", "low": 98.0, "high": 101.0}]
+    def test_demand_below_entry_between_tp_and_entry_blocks_sell(self):
+        # Demand zone di 94..97 sepenuhnya di bawah Entry 100 & di jalur SELL -> blokir.
+        zones = [{"type": "demand", "low": 94.0, "high": 97.0}]
         assert _blocked_by_zone(90.0, 100.0, zones, "demand") is True
 
     def test_zone_below_entry_not_blocking(self):
@@ -526,18 +559,67 @@ class TestBlockedByZone:
         assert _blocked_by_zone(100.0, 110.0, zones, "supply") is False
 
 
-class TestSwapBlocked:
-    """Fix #1: swap TP1/TP2 saat target melewati proyeksi TP2 wajib cek zona."""
+class TestZoneReasonsDirectionAware:
+    """Fix kosmetik: alasan zona tidak menampilkan sisi berlawanan kompas.
 
-    def test_buy_swap_blocked_by_supply_inside_path(self):
-        # Target jauh (120) melewati proyeksi TP2 (swap), tapi supply zone
-        # (98..108) mencakup harga & jalur proyeksi -> swap dibatalkan (None).
+    Karena zona yang berisi Entry tidak lagi memblokir, sinyal BUY tidak perlu
+    lagi dilaporkan "Harga masuk Supply Zone" (dan SELL tidak "masuk Demand
+    Zone") — hanya sisi zona yang searah bias yang dilaporkan & dinilai.
+    """
+
+    @staticmethod
+    def _h1_map(price):
+        demand = [{"type": "demand", "low": price - 3.0, "high": price + 1.0}]
+        supply = [{"type": "supply", "low": price - 1.0, "high": price + 3.0}]
+        return {
+            "zones": demand + supply,
+            "demand_zones": demand,
+            "supply_zones": supply,
+            "order_blocks": [],
+            "levels": {"support": None, "resistance": None},
+        }
+
+    def test_buy_reports_only_demand_side(self):
+        price, h1_map = 100.0, self._h1_map(100.0)
+        h4 = _candles_from_closes(_bullish_series())
+        d1 = _candles_from_closes(_bullish_series())
+        _, reasons = score_sr(price, h1_map, h4, d1)
+        assert "[H1] Harga masuk Demand Zone" in reasons
+        assert "[H1] Harga masuk Supply Zone" not in reasons
+
+    def test_sell_reports_only_supply_side(self):
+        price, h1_map = 100.0, self._h1_map(100.0)
+        h4 = _candles_from_closes(_bearish_series())
+        d1 = _candles_from_closes(_bearish_series())
+        _, reasons = score_sr(price, h1_map, h4, d1)
+        assert "[H1] Harga masuk Supply Zone" in reasons
+        assert "[H1] Harga masuk Demand Zone" not in reasons
+
+    def test_neutral_compass_reports_both(self):
+        price, h1_map = 100.0, self._h1_map(100.0)
+        h4 = _candles_from_closes(_neutral_series())
+        _, reasons = score_sr(price, h1_map, h4, [])
+        assert "[H1] Harga masuk Demand Zone" in reasons
+        assert "[H1] Harga masuk Supply Zone" in reasons
+
+
+class TestSwapBlocked:
+    """Swap TP1/TP2 saat target melewati proyeksi TP2 wajib cek zona."""
+
+    def test_buy_swap_succeeds_when_zone_contains_entry(self):
+        # Target jauh (120) melewati proyeksi TP2 (swap). Supply zone (98..108)
+        # BERISI Entry -> TIDAK memblokir (harga keluar zona saat naik),
+        # sehingga swap berjalan normal: entry < TP1 < TP2.
         price, h1_map = 100.0, TestLevelsRRR._map(demand=[(97, 99)], supply=[(98, 108), (120, 122)])
-        assert _levels_mtf(price, [], h1_map, ACTION_BUY) is None
+        entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_BUY)
+        sl_dist = price - sl
+        assert tp1 == pytest.approx(price + 3 * sl_dist)
+        assert tp2 == pytest.approx(120.0)
+        assert sl < entry < tp1 < tp2
 
     def test_sell_swap_blocked_by_demand_inside_path(self):
-        # Target jauh (80) melewati proyeksi TP2, tapi ada demand zone (96..98)
-        # yang memotong jalur SELL -> swap harus dibatalkan (None).
+        # Target jauh (80) melewati proyeksi TP2; demand zone (96..98) di bawah
+        # Entry memotong jalur SELL -> swap dibatalkan (None).
         price, h1_map = 100.0, TestLevelsRRR._map(demand=[(80, 82), (96, 98)], supply=[(101, 103)])
         assert _levels_mtf(price, [], h1_map, ACTION_SELL) is None
 
@@ -648,6 +730,29 @@ class TestFvgIndependent:
         }
         score, _ = score_smc(100.0, h1_map)
         assert score == pytest.approx(-0.25)
+
+    def test_fvg_multiple_gaps_score_once(self):
+        # Fix double-counting: banyak FVG bullish hanya menambah +0.25 SEKALI
+        # (kehadiran per tipe), bukan +0.25 per-gap.
+        h1_map = {
+            "price": 100.0,
+            "demand_zones": [],
+            "supply_zones": [],
+            "zones": [],
+            "order_blocks": [],
+            "fvgs": [
+                {"type": "bullish", "bottom": 95.0, "top": 97.0, "index": 1},
+                {"type": "bullish", "bottom": 94.0, "top": 96.0, "index": 3},
+                {"type": "bullish", "bottom": 93.0, "top": 95.5, "index": 4},
+            ],
+            "sweeps": [],
+            "levels": {"support_dist_pct": None, "resistance_dist_pct": None},
+            "bullish_ob": None,
+            "bearish_ob": None,
+        }
+        score, reasons = score_smc(100.0, h1_map)
+        assert score == pytest.approx(0.25)
+        assert len([r for r in reasons if "FVG bullish" in r]) == 1
 
 
 class TestFormat:
@@ -969,3 +1074,19 @@ class TestScoreEma:
         score, reasons = score_ema(info, 50.0, 50.0)
         assert score == 0.0
         assert reasons == []
+
+    def test_ema_opposing_compass_neutralized(self):
+        # Fix alignment: EMA uptrend tapi kompas SELL -> dinetralkan (0.0).
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        info = analyze_ema(self._closes(closes), ema_series(closes, 20)[-1] * 1.001)
+        score, reasons = score_ema(info, rsi_now=35.0, rsi_prev=32.0, compass_dir=ACTION_SELL)
+        assert score == 0.0
+        assert any("berlawanan arah kompas" in r for r in reasons)
+
+    def test_ema_aligned_compass_scored(self):
+        # EMA uptrend selaras kompas BUY -> skor normal tetap dihitung.
+        closes = [100.0 + i * 0.5 for i in range(80)]
+        info = analyze_ema(self._closes(closes), ema_series(closes, 20)[-1] * 1.001)
+        score, reasons = score_ema(info, rsi_now=35.0, rsi_prev=32.0, compass_dir=ACTION_BUY)
+        assert score == pytest.approx(0.30 + 0.30 + 0.40)
+        assert not any("berlawanan arah kompas" in r for r in reasons)

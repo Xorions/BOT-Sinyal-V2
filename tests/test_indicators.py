@@ -17,6 +17,7 @@ from indicators.smc import (
     nearest_order_block,
 )
 from indicators.supply_demand import (
+    _dedupe_zones,
     detect_supply_demand,
     in_zone,
     nearest_demand,
@@ -247,6 +248,32 @@ class TestSupplyDemand:
         ]
         zones = detect_supply_demand(candles, left=1, right=1, pause=2)
         assert any(z["type"] == "supply" for z in zones)
+
+    def test_zone_merge_limited_by_max_width(self):
+        # Fix zona raksasa: merge dihentikan bila lebar gabungan > MAX_ZONE_WIDTH_PCT.
+        zones = [
+            {"type": "demand", "low": 100.0, "high": 103.0, "index": 0},
+            # 101..108 overlap zona0; gabungan 100..108 (8%) > 3% -> tidak digabung
+            {"type": "demand", "low": 101.0, "high": 108.0, "index": 1},
+            # 102..104.5 overlap zona0; gabungan 100..104.5 (4.5%) > 3% -> tidak digabung
+            {"type": "demand", "low": 102.0, "high": 104.5, "index": 2},
+        ]
+        merged = _dedupe_zones(zones)
+        assert merged
+        assert all(
+            (m["high"] - m["low"]) / m["low"] * 100.0 <= 3.0 for m in merged
+        )
+
+    def test_zone_merge_within_width_is_merged(self):
+        # Merge tetap berjalan selama lebar gabungan masih <= 3%.
+        zones = [
+            {"type": "demand", "low": 100.0, "high": 102.0, "index": 0},
+            {"type": "demand", "low": 101.0, "high": 102.5, "index": 1},
+        ]
+        merged = _dedupe_zones(zones)
+        assert len(merged) == 1
+        assert merged[0]["low"] == pytest.approx(100.0)
+        assert merged[0]["high"] == pytest.approx(102.5)
 
 
 def _closes_candles(closes):

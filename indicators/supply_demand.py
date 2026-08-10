@@ -11,6 +11,12 @@ from typing import Dict, List, Optional
 
 from indicators.support_resistance import find_swings
 
+# Lebar maksimum zona demand/supply hasil merge (dalam % dari low zona).
+# Merge dihentikan bila lebar gabungan melebihi batas ini, agar zona tidak
+# melebar menjadi satu zona raksasa yang mencakup hampir seluruh range
+# (penyebab harga selalu "di dalam zona" & `_blocked_by_zone` selalu blokir).
+MAX_ZONE_WIDTH_PCT = 3.0
+
 
 def detect_supply_demand(
     candles: List[Dict[str, float]],
@@ -71,8 +77,13 @@ def nearest_supply(price: float, zones: List[Dict[str, float]]) -> Optional[Dict
     return min(candidates, key=lambda z: z["low"])
 
 
-def _dedupe_zones(zones: List[Dict[str, float]]) -> List[Dict[str, float]]:
-    """Gabungkan zona sejenis yang tumpang-tindih."""
+def _dedupe_zones(zones: List[Dict[str, float]], max_width_pct: float = MAX_ZONE_WIDTH_PCT) -> List[Dict[str, float]]:
+    """Gabungkan zona sejenis yang tumpang-tindih, dengan batas lebar zona.
+
+    Merge hanya dilakukan bila lebar gabungan masih <= `max_width_pct` (% dari
+    low zona). Zona baru yang tumpang-tindih namun akan melebihi batas lebar
+    tidak ikut digabung (dilewati) agar tidak terbentuk zona raksasa.
+    """
     if not zones:
         return []
     merged: List[Dict[str, float]] = []
@@ -83,8 +94,11 @@ def _dedupe_zones(zones: List[Dict[str, float]]) -> List[Dict[str, float]]:
                 continue
             overlap = min(m["high"], zone["high"]) - max(m["low"], zone["low"])
             if overlap > 0:
-                m["low"] = min(m["low"], zone["low"])
-                m["high"] = max(m["high"], zone["high"])
+                new_low = min(m["low"], zone["low"])
+                new_high = max(m["high"], zone["high"])
+                if new_low > 0 and (new_high - new_low) / new_low * 100.0 <= max_width_pct:
+                    m["low"] = new_low
+                    m["high"] = new_high
                 placed = True
                 break
         if not placed:
