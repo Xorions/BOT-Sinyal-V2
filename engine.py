@@ -41,6 +41,8 @@ from config import (
     SL_BUFFER_PCT,
     SL_MIN_DIST_PCT,
     TOP_SIGNALS,
+    TRIG_MIN_BARS,
+    TRIG_MARGIN_RATIO,
     WEIGHT_EMA,
     WEIGHT_FIBO,
     WEIGHT_ONCHAIN,
@@ -50,7 +52,7 @@ from config import (
     WEIGHT_TECHNICAL,
 )
 from data.sentiment import score_fear_greed
-from indicators.ema import analyze_ema
+from indicators.ema import analyze_ema, ema_latest
 from indicators.fibonacci import analyze_fibonacci
 from indicators.macd import macd_histogram_series
 from indicators.rsi import rsi
@@ -99,8 +101,19 @@ class Signal:
 
 
 # ---------------------------------------------------------------- kompas H4/D1
-def analyze_compass(h4_candles: List[Dict[str, float]], d1_candles: List[Dict[str, float]]) -> Dict[str, Optional[str]]:
-    """[Kompas] Tren utama skala besar: H4 utama, D1 sebagai fallback bila H4 netral."""
+def analyze_compass(
+    h4_candles: List[Dict[str, float]],
+    d1_candles: List[Dict[str, float]],
+    price: Optional[float] = None,
+) -> Dict[str, Optional[str]]:
+    """[Kompas] Tren utama skala besar: H4 utama, D1 sebagai fallback bila H4 netral.
+
+    Fix R3: filter konfirmasi harga vs EMA 50 H4. Swing kompas baru "resmi"
+    setelah min 3 bar (H4 ~16 jam), sehingga reversal pendek yang belum membentuk
+    swing baru masih terdeteksi sebagai tren lama. Bila harga sudah menembus
+    sisi berlawanan EMA 50 H4, kompas ditahan (direction=None) karena tren lama
+    sudah rusak di skala harga, bukan sekadar konsolidasi di dalamnya.
+    """
     h4 = detect_structure(h4_candles)
     d1 = detect_structure(d1_candles)
     h4_trend = h4.get("trend")
@@ -116,6 +129,19 @@ def analyze_compass(h4_candles: List[Dict[str, float]], d1_candles: List[Dict[st
     elif d1_trend == "bearish":
         direction = ACTION_SELL
 
+    ema50_blocked = False
+    if price is not None and price > 0 and direction is not None:
+        h4_closes = [c["close"] for c in h4_candles if c.get("close") is not None]
+        if len(h4_closes) >= 50:
+            ema50 = ema_latest(h4_closes, 50)
+            if ema50 is not None:
+                if direction == ACTION_BUY and price < ema50:
+                    ema50_blocked = True
+                elif direction == ACTION_SELL and price > ema50:
+                    ema50_blocked = True
+        if ema50_blocked:
+            direction = None
+
     return {
         "direction": direction,
         "h4_trend": h4_trend,
@@ -124,6 +150,7 @@ def analyze_compass(h4_candles: List[Dict[str, float]], d1_candles: List[Dict[st
         "h4_choch": h4.get("choch"),
         "d1_bos": d1.get("bos"),
         "d1_choch": d1.get("choch"),
+        "ema50_blocked": ema50_blocked,
     }
 
 
@@ -152,6 +179,49 @@ def map_h1_zones(h1_candles: List[Dict[str, float]], price: float) -> Dict:
 
 
 # ---------------------------------------------------------------- pelatuk M15
+def _hist_confirmed(
+    hist: List[float],
+    positive: bool,
+    min_bars: int = TRIG_MIN_BARS,
+    margin_ratio: float = TRIG_MARGIN_RATIO,
+) -> bool:
+    """True bila histogram MACD searah selama `min_bars` bar terakhir dengan margin.
+
+    Fix R2: histogram yang nyaris nol (noise) tidak boleh memutuskan valid/tidaknya
+    setup. Bar "valid" = melebihi `margin_ratio x puncak |histogram|` pada jendela
+    `min_bars + 48` bar terakhir, dan harus berjumlah >= min_bars berturut-turut.
+    """
+    valid: List[float] = [h for h in hist if h == h]
+    if len(valid) < min_bars:
+        return False
+    window = valid[-(min_bars + 48):]
+    peak = max((abs(h) for h in window), default=0.0)
+    threshold = peak * margin_ratio
+    last_bars = valid[-min_bars:]
+    if positive:
+        return all(h > threshold for h in last_bars)
+    return all(h < -threshold for h in last_bars)
+
+
+def _trigger_confirmed(trigger: Dict, side: str) -> bool:
+    """Konfirmasi arah M15 searah kompas dengan fallback ke tanda histogram lama."""
+    if side == ACTION_BUY:
+        hist_bull = trigger.get("hist_confirm_bull")
+        if hist_bull is not None:
+            return bool(hist_bull)
+        return bool(
+            trigger.get("histogram") is not None and trigger["histogram"] > 0
+        )
+    if side == ACTION_SELL:
+        hist_bear = trigger.get("hist_confirm_bear")
+        if hist_bear is not None:
+            return bool(hist_bear)
+        return bool(
+            trigger.get("histogram") is not None and trigger["histogram"] < 0
+        )
+    return False
+
+
 def analyze_trigger(m15_candles: List[Dict[str, float]]) -> Dict:
     """[Pelatuk] Konfirmasi M15: RSI, histogram/cross MACD, struktur BOS/CHoCH."""
     closes = [c["close"] for c in m15_candles]
@@ -175,6 +245,8 @@ def analyze_trigger(m15_candles: List[Dict[str, float]]) -> Dict:
         "trend": struct.get("trend"),
         "bos": struct.get("bos"),
         "choch": struct.get("choch"),
+        "hist_confirm_bull": _hist_confirmed(hist, True),
+        "hist_confirm_bear": _hist_confirmed(hist, False),
     }
 
 
@@ -203,7 +275,7 @@ def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> boo
             or [s for s in h1_map["sweeps"] if s["type"] == "sell_sweep"]
         )
         trig_ok = bool(
-            (trigger["histogram"] is not None and trigger["histogram"] > 0)
+            _trigger_confirmed(trigger, ACTION_BUY)
             or trigger["cross"] == "golden"
             or trigger["bos"] == "bullish"
         )
@@ -215,7 +287,7 @@ def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> boo
             or [s for s in h1_map["sweeps"] if s["type"] == "buy_sweep"]
         )
         trig_ok = bool(
-            (trigger["histogram"] is not None and trigger["histogram"] < 0)
+            _trigger_confirmed(trigger, ACTION_SELL)
             or trigger["cross"] == "death"
             or trigger["choch"] == "bearish"
         )
@@ -262,10 +334,14 @@ def score_trigger(m15_candles: List[Dict[str, float]], pct_change_24h: float) ->
             score -= 0.15
 
     if rsi_val is not None:
-        if rsi_val < 30:
+        # Fix R2: skor RSI contrarian hanya aktif bila histogram MACD searah
+        # momentum terkonfirmasi. Sebelumnya RSI<30/RSI>70 langsung +0.20/-0.20
+        # meski histogram MACD berlawanan arah (kontradiksi: RSI "oversold rebound"
+        # tapi MACD tetap bearish), yang meracuni skor teknikal untuk setup SELL.
+        if rsi_val < 30 and _hist_confirmed(hist, True):
             m15_parts.append("RSI Rebound")
             score += 0.20
-        elif rsi_val > 70:
+        elif rsi_val > 70 and _hist_confirmed(hist, False):
             m15_parts.append("RSI Melemah")
             score -= 0.20
 
@@ -332,32 +408,41 @@ def score_sr(
     h1_map: Dict,
     h4_candles: List[Dict[str, float]],
     d1_candles: List[Dict[str, float]],
+    compass: Optional[Dict] = None,
 ) -> tuple:
     """[S&R Kompas] Key levels skala besar (H4/D1) + zona/level S&R H1 -> -1.0..+1.0.
 
     S&R adalah kompas utama (bobot 0.35): tren struktur H4/D1, harga di/ dekat
     Demand/Supply key level, Support/Resistance terdekat, dan breakout level kunci.
+
+    Fix R3: `compass` boleh disuplai dari luar (precomputed dengan filter EMA 50
+    H4 di `analyze_compass`). Bila `ema50_blocked=True`, blok skor tren H4/D1
+    dilewati — harga sudah menembus sisi berlawanan EMA 50 H4, jadi tren lama
+    tidak lagi boleh mendongkrak skor S&R (mengurangi lag kompas saat reversal).
     """
     reasons: List[str] = []
     score = 0.0
-    compass = analyze_compass(h4_candles, d1_candles)
+    compass = compass or analyze_compass(h4_candles, d1_candles)
     h4_trend = compass["h4_trend"]
     d1_trend = compass["d1_trend"]
 
-    if h4_trend == "bullish":
-        label = "BOS skala besar" if compass["h4_bos"] == "bullish" else "higher high"
-        reasons.append(f"[H4] S&R skala besar Bullish ({label})")
-        score += 0.35
-    elif h4_trend == "bearish":
-        label = "CHoCH skala besar" if compass["h4_choch"] == "bearish" else "lower low"
-        reasons.append(f"[H4] S&R skala besar Bearish ({label})")
-        score -= 0.35
-    elif d1_trend == "bullish":
-        reasons.append("[D1] S&R skala besar Bullish (fallback)")
-        score += 0.25
-    elif d1_trend == "bearish":
-        reasons.append("[D1] S&R skala besar Bearish (fallback)")
-        score -= 0.25
+    if not compass.get("ema50_blocked"):
+        if h4_trend == "bullish":
+            label = "BOS skala besar" if compass["h4_bos"] == "bullish" else "higher high"
+            reasons.append(f"[H4] S&R skala besar Bullish ({label})")
+            score += 0.35
+        elif h4_trend == "bearish":
+            label = "CHoCH skala besar" if compass["h4_choch"] == "bearish" else "lower low"
+            reasons.append(f"[H4] S&R skala besar Bearish ({label})")
+            score -= 0.35
+        elif d1_trend == "bullish":
+            reasons.append("[D1] S&R skala besar Bullish (fallback)")
+            score += 0.25
+        elif d1_trend == "bearish":
+            reasons.append("[D1] S&R skala besar Bearish (fallback)")
+            score -= 0.25
+    else:
+        reasons.append("[H4] Kompas ditahan: harga di sisi berlawanan EMA 50 H4 (reversal)")
 
     demand = h1_map.get("demand_zones", [])
     supply = h1_map.get("supply_zones", [])
@@ -696,7 +781,7 @@ def assemble_signal(
     whale_flow: Optional[Dict[str, float]],
     btc_stats: Optional[Dict],
 ) -> Signal:
-    compass = analyze_compass(h4_candles, d1_candles)
+    compass = analyze_compass(h4_candles, d1_candles, price=price)
     h1_map = map_h1_zones(h1_candles, price)
     trigger = analyze_trigger(m15_candles)
     compass_dir = compass["direction"]
@@ -711,7 +796,7 @@ def assemble_signal(
 
     fibo = analyze_fibonacci(ema_source, price)
 
-    sr, sr_reasons = score_sr(price, h1_map, h4_candles, d1_candles)
+    sr, sr_reasons = score_sr(price, h1_map, h4_candles, d1_candles, compass=compass)
     smc, smc_reasons = score_smc(price, h1_map, compass_dir)
     fibo_score, fibo_reasons = score_fibo(fibo, price, h1_map, compass_dir)
     ema_score, ema_reasons = score_ema(ema_info, rsi_now, rsi_prev, compass_dir)
@@ -995,8 +1080,20 @@ def _levels_mtf(
 
 # ---------------------------------------------------------------- pesan
 def rank_signals(signals: List[Signal]) -> List[Signal]:
-    signals.sort(key=lambda s: abs(s.total_score), reverse=True)
-    return signals[:TOP_SIGNALS]
+    """Pilih top signal dengan prioritas BUY/SELL di atas NEUTRAL.
+
+    Fix R1: sebelumnya seluruh sinyal diurutkan hanya oleh |skor|, sehingga
+    NEUTRAL ber-skore sedang (0.4-0.67) bisa menekan BUY/SELL valid keluar
+    dari TOP_SIGNALS (contoh 13:30 — 6 dari 10 sinyal teratas NEUTRAL).
+    Kini sinyal directional (BUY/SELL) didahulukan; NEUTRAL hanya mengisi
+    slot yang tersisa.
+    """
+    directional = [s for s in signals if s.action in (ACTION_BUY, ACTION_SELL)]
+    neutral = [s for s in signals if s.action == ACTION_NEUTRAL]
+    directional.sort(key=lambda s: abs(s.total_score), reverse=True)
+    neutral.sort(key=lambda s: abs(s.total_score), reverse=True)
+    ranked = directional + neutral
+    return ranked[:TOP_SIGNALS]
 
 
 def _fmt_price(value: float) -> str:

@@ -58,6 +58,13 @@ RRR_TP2: float = _env_float("RRR_TP2", 3.0)
 # Buffer SL di luar zona Demand/Supply terdekat (0.3% = 0.003).
 SL_BUFFER_PCT: float = _env_float("SL_BUFFER_PCT", 0.003)
 
+# Konfirmasi M15 stabil (Fix R2): histogram MACD M15 harus searah kompas selama
+# TRIG_MIN_BARS bar terakhir & tiap bar melebihi TRIG_MARGIN_RATIO x puncak
+# |histogram| pada jendela terakhir, agar bar histogram nyaris-nol (noise) tidak
+# memutuskan valid/tidaknya setup (sebelumnya tanda 1 bar terakhir menetukan).
+TRIG_MIN_BARS: int = _env_int("TRIG_MIN_BARS", 2)
+TRIG_MARGIN_RATIO: float = _env_float("TRIG_MARGIN_RATIO", 0.10)
+
 # Jarak SL MINIMAL dari Entry (dalam % harga) — SL yang terlalu dekat (<1%)
 # rawan tersapu noise pasar (contoh VIRTUAL -0.63%, DASH -0.84%). Bila zona
 # memberi SL lebih dekat dari batas ini, SL dipaksa menjauh ke batas minimum.

@@ -11,9 +11,11 @@ from engine import (
     Signal,
     _blocked_by_zone,
     _group_reason_lines,
+    _hist_confirmed,
     _levels_mtf,
     _ob_near,
     _setup_valid,
+    _trigger_confirmed,
     analyze_compass,
     analyze_trigger,
     assemble_signal,
@@ -160,6 +162,51 @@ class TestCompass:
         assert compass["direction"] is None
 
 
+class TestCompassEma50Filter:
+    """Fix R3: kompas H4/D1 ditahan bila harga menembus sisi berlawanan EMA 50 H4."""
+
+    def _trending(self, series):
+        """Seri trending >= 50 bar agar EMA 50 H4 terhitung."""
+        base = _bullish_series() if series == "bull" else _bearish_series()
+        return _candles_from_closes(base * 2)
+
+    def test_buy_blocked_when_price_below_ema50(self):
+        h4 = self._trending("bull")
+        d1 = _candles_from_closes(_bullish_series())
+        price = _bullish_series()[-1]  # close terakhir seri tren
+        compass = analyze_compass(h4, d1, price=price)
+        assert compass["direction"] == ACTION_BUY  # harga di atas EMA50 -> tidak diblokir
+        compass = analyze_compass(h4, d1, price=price * 0.5)
+        assert compass["ema50_blocked"] is True
+        assert compass["direction"] is None
+
+    def test_sell_blocked_when_price_above_ema50(self):
+        h4 = self._trending("bear")
+        d1 = _candles_from_closes(_bearish_series())
+        price = _bearish_series()[-1]
+        compass = analyze_compass(h4, d1, price=price)
+        assert compass["direction"] == ACTION_SELL
+        compass = analyze_compass(h4, d1, price=price * 2.0)
+        assert compass["ema50_blocked"] is True
+        assert compass["direction"] is None
+
+    def test_no_filter_without_price(self):
+        h4 = self._trending("bull")
+        d1 = _candles_from_closes(_bullish_series())
+        compass = analyze_compass(h4, d1)
+        assert compass["direction"] == ACTION_BUY
+        assert compass["ema50_blocked"] is False
+
+    def test_no_filter_when_insufficient_h4_bars(self):
+        # < 50 bar H4 -> EMA 50 belum ada -> filter tidak aktif.
+        h4 = _candles_from_closes(_bullish_series())
+        d1 = _candles_from_closes(_bullish_series())
+        price = _bullish_series()[-1]
+        compass = analyze_compass(h4, d1, price=price * 0.5)
+        assert compass["ema50_blocked"] is False
+        assert compass["direction"] == ACTION_BUY
+
+
 class TestTrigger:
     def test_bullish_input_positive(self):
         # pct_change_24h netral (0.0) agar momentum kontrarian tidak menambahi.
@@ -207,6 +254,100 @@ class TestTrigger:
         trig = analyze_trigger(_candles_from_closes(_bullish_series()))
         assert trig["histogram"] is not None
         assert trig["cross"] in (None, "golden", "death")
+
+
+class TestTriggerStability:
+    """Fix R2: konfirmasi M15 stabil — histogram harus searah selama N bar
+    berturut-turut dengan margin, agar bar nyaris-nol tidak memutuskan setup."""
+
+    def test_single_strong_bar_not_enough(self):
+        # 1 bar kuat bukan konfirmasi: butuh TRIG_MIN_BARS=2 bar beruntun.
+        hist = [0.0] * 60 + [2.0]
+        assert _hist_confirmed(hist, True) is False
+
+    def test_two_consecutive_bars_confirms(self):
+        hist = [0.0] * 60 + [1.8, 2.0]
+        assert _hist_confirmed(hist, True) is True
+
+    def test_last_bar_zero_breaks_confirmation(self):
+        # Bar terakhir nyaris nol (noise) -> setup tidak konfirmasi walau bar
+        # sebelumnya kuat. Inilah kasus yang dulu membuat valid/nevalid flip.
+        hist = [0.0] * 60 + [2.0, 0.01]
+        assert _hist_confirmed(hist, True) is False
+
+    def test_bear_direction_requires_negative_bars(self):
+        hist = [0.0] * 60 + [-1.8, -2.0]
+        assert _hist_confirmed(hist, False) is True
+        assert _hist_confirmed(hist, True) is False
+
+    def test_margin_ignores_small_noise_bars(self):
+        # Histogram sempat kecil (di bawah 10% puncak) = noise, bukan pembalikan.
+        hist = [0.0] * 60 + [0.5, 2.0]
+        assert _hist_confirmed(hist, True) is True
+
+    def test_nan_values_skipped(self):
+        hist = [float("nan")] * 60 + [1.5, 1.6]
+        assert _hist_confirmed(hist, True) is True
+        assert _hist_confirmed([float("nan")] * 70, True) is False
+
+    def test_analyze_trigger_exposes_confirmation_flags(self):
+        trig = analyze_trigger(_candles_from_closes(_bullish_series()))
+        assert trig["hist_confirm_bull"] is True
+        assert trig["hist_confirm_bear"] is False
+
+    def test_manual_trigger_dict_fallback(self):
+        # Dict trigger manual (tanpa key hist_confirm_*) tetap memakai tanda histogram.
+        manual = {"histogram": 0.5, "cross": None, "bos": "bullish", "choch": None}
+        assert _trigger_confirmed(manual, ACTION_BUY) is True
+        assert _trigger_confirmed(manual, ACTION_SELL) is False
+        manual_bear = {"histogram": -0.5, "cross": None, "bos": None, "choch": "bearish"}
+        assert _trigger_confirmed(manual_bear, ACTION_SELL) is True
+
+    def test_analyze_trigger_flag_overrides_fallback(self):
+        # Flag eksplisit (False) mengalahkan tanda histogram (positif) — ini yang
+        # mencegah trigger "M15 benar tapi hist 1 bar terakhir sudah membalik".
+        trig = {"histogram": 0.5, "hist_confirm_bull": False, "cross": None, "bos": None, "choch": None}
+        assert _trigger_confirmed(trig, ACTION_BUY) is False
+
+
+class TestRsiContrarianNeedsMomentum:
+    """Fix R2: skor RSI contrarian tidak boleh kontradiksi arah histogram MACD."""
+
+    def _score(self, rsi_val, hist, structure=None, pct=0.0, monkeypatch=None):
+        import engine as engine_mod
+        candles = _candles_from_closes([100.0] * 40)
+        monkeypatch.setattr(engine_mod, "rsi", lambda *a, **k: rsi_val)
+        monkeypatch.setattr(
+            engine_mod, "macd_histogram_series",
+            lambda *a, **k: hist,
+        )
+        monkeypatch.setattr(
+            engine_mod, "detect_structure",
+            lambda *a, **k: structure or {"bos": None, "choch": None},
+        )
+        return engine_mod.score_trigger(candles, pct)
+
+    def test_rsi_oversold_requires_bullish_histogram(self, monkeypatch):
+        # RSI<30 TAPI histogram turun (histogram negatif) -> TIDAK ada "RSI Rebound"
+        # (dulu tetap +0.20, meracuni setup SELL yang RSI-nya oversold).
+        hist = [float("nan")] * 38 + [-1.5, -1.6]
+        score, reasons = self._score(25.0, hist, monkeypatch=monkeypatch)
+        assert not any("RSI Rebound" in r for r in reasons)
+
+    def test_rsi_oversold_with_bullish_histogram_rebounds(self, monkeypatch):
+        hist = [float("nan")] * 38 + [1.5, 1.6]
+        score, reasons = self._score(25.0, hist, monkeypatch=monkeypatch)
+        assert any("RSI Rebound" in r for r in reasons)
+
+    def test_rsi_overbought_requires_bearish_histogram(self, monkeypatch):
+        hist = [float("nan")] * 38 + [1.5, 1.6]
+        score, reasons = self._score(75.0, hist, monkeypatch=monkeypatch)
+        assert not any("RSI Melemah" in r for r in reasons)
+
+    def test_rsi_overbought_with_bearish_histogram_weakens(self, monkeypatch):
+        hist = [float("nan")] * 38 + [-1.5, -1.6]
+        score, reasons = self._score(75.0, hist, monkeypatch=monkeypatch)
+        assert any("RSI Melemah" in r for r in reasons)
 
 
 class TestAssembleSignal:
@@ -962,6 +1103,83 @@ class TestScoreSR:
         assert -1.0 <= score <= 1.0
         assert score == 0.0
         assert reasons == []
+
+    def test_ema50_blocked_skips_trend_score(self):
+        # Fix R3: kompas ditahan (harga menembus sisi berlawanan EMA 50 H4) ->
+        # blok skor tren H4/D1 dihilangkan, diganti alasan penahanan.
+        price = 100.0
+        demand = [{"type": "demand", "low": 98.0, "high": 101.0}]
+        h1_map = {
+            "price": price,
+            "demand_zones": demand,
+            "supply_zones": [],
+            "zones": demand,
+            "levels": {
+                "support": None, "resistance": None,
+                "support_dist_pct": None, "resistance_dist_pct": None,
+            },
+        }
+        h4 = _candles_from_closes(_bullish_series())
+        d1 = _candles_from_closes(_bullish_series())
+        blocked_compass = {
+            "direction": None,
+            "h4_trend": "bullish",
+            "d1_trend": "bullish",
+            "h4_bos": None,
+            "h4_choch": None,
+            "d1_bos": None,
+            "d1_choch": None,
+            "ema50_blocked": True,
+        }
+        score, reasons = score_sr(price, h1_map, h4, d1, compass=blocked_compass)
+        assert not any("S&R skala besar" in r for r in reasons)
+        assert any("Kompas ditahan" in r for r in reasons)
+        assert score == pytest.approx(0.25)  # hanya zona Demand H1, tanpa +0.35 tren
+
+
+class TestRankSignalsPriority:
+    """Fix R1: BUY/SELL diprioritaskan di atas NEUTRAL pada top signal."""
+
+    def _sig(self, action, score):
+        return Signal(
+            "XUSDT", "X", 100.0, 0.0, score, action, 50, 100.0, 99.0, 102.0, 104.0,
+            breakdown={}, reasons=[],
+        )
+
+    def test_buy_sell_beat_high_scored_neutral(self):
+        # NEUTRAL ber-skore tinggi (0.6-0.7) dulu bisa menekan BUY/SELL keluar
+        # dari top-5 (kasus 13:30). Sekarang BUY/SELL didahulukan apa pun skornya.
+        neutrals = [self._sig(ACTION_NEUTRAL, 0.66), self._sig(ACTION_NEUTRAL, 0.60)]
+        buys = [self._sig(ACTION_BUY, 0.42), self._sig(ACTION_BUY, 0.30)]
+        ranked = rank_signals(neutrals + buys)
+        assert [s.action for s in ranked] == [
+            ACTION_BUY, ACTION_BUY, ACTION_NEUTRAL, ACTION_NEUTRAL,
+        ]
+
+    def test_neutral_fills_remaining_slots(self):
+        import config
+
+        buys = [self._sig(ACTION_BUY, s) for s in (0.5, 0.4, 0.3)]
+        neutrals = [self._sig(ACTION_NEUTRAL, 0.9), self._sig(ACTION_NEUTRAL, 0.8)]
+        top = rank_signals(buys + neutrals)
+        assert [s.action for s in top] == [
+            ACTION_BUY, ACTION_BUY, ACTION_BUY, ACTION_NEUTRAL, ACTION_NEUTRAL,
+        ]
+        assert len(top) == min(5, config.TOP_SIGNALS)
+
+    def test_directional_sorted_by_abs_score(self):
+        sigs = [
+            self._sig(ACTION_SELL, -0.55),
+            self._sig(ACTION_BUY, 0.30),
+            self._sig(ACTION_BUY, 0.70),
+        ]
+        ranked = rank_signals(sigs)
+        assert [s.total_score for s in ranked] == [0.70, -0.55, 0.30]
+
+    def test_empty_and_single(self):
+        assert rank_signals([]) == []
+        one = self._sig(ACTION_NEUTRAL, 0.1)
+        assert rank_signals([one]) == [one]
 
 
 class TestScoreFibo:
