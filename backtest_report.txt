@@ -1,48 +1,47 @@
 ==============================================================
-BACKTEST SINYAL MTF — SIMULASI HISTORI BINANCE
+BACKTEST SINYAL MTF — SIMULASI HISTORI BITGET
 ==============================================================
   Pasangan          : 20 pair
   Jendela           : 7 hari terakhir
-  Bar M15 discan    : 11,520
-  Sinyal berarah    : 630 (cooldown ditekan 301, filter 0, posisi ganda 0, error 0)
-  Dievaluasi        : 329
+  Bar M15 discan    : 8,455
+  Sinyal berarah    : 549 (cooldown ditekan 357, filter 0, posisi ganda 0, error 0)
+  Dievaluasi        : 192
 --------------------------------------------------------------
-  WIN RATE          : 65.8%   (96 menang / 146 selesai)
-  Total TP vs SL    : 96 TP  vs  50 SL
-    TP1             : 92
-    TP2             : 4
-    SL              : 50
-    FLOATING        : 183 (tak terselesaikan dalam 24.0h)
+  WIN RATE          : 59.1%   (55 menang / 93 selesai)
+  Total TP vs SL    : 55 TP  vs  38 SL
+    TP1             : 53
+    TP2             : 2
+    SL              : 38
+    FLOATING        : 99 (tak terselesaikan dalam 24.0h)
 --------------------------------------------------------------
   Per arah:
-    BUY  :  71 W /  32 L  (68.9%)
-    SELL :  25 W /  18 L  (58.1%)
+    BUY  :  40 W /  28 L  (58.8%)
+    SELL :  15 W /  10 L  (60.0%)
 --------------------------------------------------------------
   Per konfidensi (bucket):
-    conf  60-69 :  13 W /   7 L  (65%)  F=4
-    conf  70-79 :  78 W /  37 L  (68%)  F=172
-    conf  80-89 :   5 W /   6 L  (45%)  F=7
+    conf  60-69 :   3 W /   4 L  (43%)  F=10
+    conf  70-79 :  46 W /  31 L  (60%)  F=78
+    conf  80-89 :   6 W /   3 L  (67%)  F=11
 --------------------------------------------------------------
   Per pair (selesai > 0):
-    MMTUSDT      :  10 W /   5 L  (67%)  F=0
-    BABYUSDT     :  10 W /   4 L  (71%)  F=0
-    TUTUSDT      :  11 W /   3 L  (79%)  F=1
-    PUMPUSDT     :   9 W /   5 L  (64%)  F=0
-    PROMUSDT     :   7 W /   4 L  (64%)  F=0
-    UNIUSDT      :   3 W /   7 L  (30%)  F=0
-    NEARUSDT     :   5 W /   4 L  (56%)  F=0
-    ZECUSDT      :   4 W /   4 L  (50%)  F=0
-    HOLOUSDT     :   4 W /   4 L  (50%)  F=1
-    XRPUSDT      :   6 W /   1 L  (86%)  F=1
-    SOLUSDT      :   4 W /   2 L  (67%)  F=7
-    DOGEUSDT     :   3 W /   2 L  (60%)  F=10
-    LINKUSDT     :   3 W /   2 L  (60%)  F=11
-    XAUTUSDT     :   5 W /   0 L  (100%)  F=24
-    BNBUSDT      :   3 W /   1 L  (75%)  F=21
-    SUIUSDT      :   3 W /   1 L  (75%)  F=9
-    BTCUSDT      :   2 W /   1 L  (67%)  F=26
-    ETHUSDT      :   3 W /   0 L  (100%)  F=21
-    TRXUSDT      :   1 W /   0 L  (100%)  F=28
-    UUSDT        :   0 W /   0 L  (0%)  F=23
+    RSOXLUSDT    :   5 W /   7 L  (42%)  F=2
+    RSPCXUSDT    :   8 W /   3 L  (73%)  F=3
+    RMUUSDT      :   3 W /   5 L  (38%)  F=0
+    RINTCUSDT    :   3 W /   4 L  (43%)  F=1
+    RTSLAUSDT    :   4 W /   3 L  (57%)  F=6
+    RLITEUSDT    :   3 W /   3 L  (50%)  F=10
+    RNVDAUSDT    :   2 W /   3 L  (40%)  F=6
+    RAMDUSDT     :   3 W /   2 L  (60%)  F=2
+    RNBISUSDT    :   3 W /   2 L  (60%)  F=0
+    RPLTRUSDT    :   4 W /   1 L  (80%)  F=2
+    RSNDKUSDT    :   1 W /   3 L  (25%)  F=0
+    RMSFTUSDT    :   4 W /   0 L  (100%)  F=16
+    RAMZNUSDT    :   3 W /   1 L  (75%)  F=1
+    RAAPLUSDT    :   2 W /   1 L  (67%)  F=8
+    RMETAUSDT    :   3 W /   0 L  (100%)  F=12
+    RGOOGLUSDT   :   2 W /   0 L  (100%)  F=20
+    RCRWVUSDT    :   2 W /   0 L  (100%)  F=0
+    RSPYUSDT     :   0 W /   0 L  (0%)  F=4
+    RQQQUSDT     :   0 W /   0 L  (0%)  F=6
 --------------------------------------------------------------
-  Waktu eksekusi    : 58.1 detik
+  Waktu eksekusi    : 39.0 detik
