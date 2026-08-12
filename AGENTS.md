@@ -18,7 +18,7 @@ evaluation.py              # Riwayat sinyal + evaluasi/recap sesi sebelumnya
 telegram_sender.py         # HTTP Bot API sendMessage
 data/
   _client.py               # http_get_json: retry + backoff + 429 Retry-After
-  binance.py               # klines MTF (1d/4h/1h/15m), ticker 24j, funding, L/S ratio
+  bitget.py               # klines MTF (1d/4h/1h/15m), ticker 24j, funding, L/S ratio
   cmc.py                   # top symbols + market overview (free tier)
   sentiment.py             # Fear & Greed + score_fear_greed (contrarian)
   onchain.py               # whale netflow ETH (Etherscan), BTC stats (blockchain.info)
@@ -31,12 +31,13 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (198 kasus)
+tests/                     # pytest (217 kasus)
 .github/workflows/daily.yml
 ```
 
 - **Python 3.12**, `requests`, `python-dotenv`, `pytest` (dev).
-- Sumber data: **Binance `data-api.binance.vision`** (spot, tidak geo-block) + **CMC** (opsional, free tier) + **alternative.me** (Fear & Greed) + **Etherscan / blockchain.info** (opsional proxy on-chain).
+- Sumber data: **Bitget V2 `api.bitget.com`** (spot + futures, tanpa API key) + **CMC** (opsional, free tier) + **alternative.me** (Fear & Greed) + **Etherscan / blockchain.info** (opsional proxy on-chain).
+- Konvensi symbol Bitget: **Spot** `BTCUSDT`, **Futures USDT-M Perpetual** `BTCUSDT_UMCBL` (konversi via `bitget.to_spot_symbol` / `bitget.to_futures_symbol`); granularity spot `15min/1h/4h/1day`, futures `15m/1H/4H/1D`.
 - Tidak ada server 24/7; GitHub Actions gratis.
 
 ## 2. Skoring (aturan baku — jangan diubah tanpa alasan)
@@ -84,23 +85,23 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 1. **Stablecoin** — set `STABLECOINS` di `bot.py` (USDT, USDC, DAI, USDD, FDUSD, RLUSD, XUSD, EURS/EURC/EUR/EURI/EURIT, FRAX, BFUSD, dll).
 2. **Leveraged token** — `SKIP_SUFFIXES = ("UP", "DOWN", "BULL", "BEAR")` (mis. BTCUP/BTCDOWN).
-3. **Token saham/ETF Binance (Binance Shares)** — `US_STOCK_TICKERS` + `_is_stock_token()`: base = ticker saham/ETF US atau `ticker + "B"` (NVDAB→NVDA, QQQB→QQQ, SPYB→SPY, GOOGLB→GOOGL, TSLAB→TSLA, SPCXB→SPCX, MUUB→MUU; langsung: MUB, BE).
+3. **Token saham/ETF Bitget (Bitget Shares)** — `US_STOCK_TICKERS` + `_is_stock_token()`: base = ticker saham/ETF US atau `ticker + "B"` (NVDAB→NVDA, QQQB→QQQ, SPYB→SPY, GOOGLB→GOOGL, TSLAB→TSLA, SPCXB→SPCX, MUUB→MUU; langsung: MUB, BE).
 
 > **Penting:** koin kripto asli yang berakhiran `B` (**BNB, ARB, SHIB, TRB, DGB, CKB, BB**) **tidak boleh** terkena filter — deteksi selalu via lookup ke `US_STOCK_TICKERS`, bukan sekadar cek suffix `B`. Jika ada token saham baru, tambahkan ticker polosnya (tanpa `B`) ke set.
 
-## 4. Data: Binance & Sumber Lain
+## 4. Data: Bitget & Sumber Lain
 
 - **MTF**: `get_klines_multi(symbol)` mengembalikan `{interval: [candle, ...]}` untuk `1d`, `4h`, `1h`, `15m` (konstanta `INTERVAL_1D/4H/1H/M15`, limit default `MTF_LIMITS`). Satu interval gagal → interval itu dilewati, analisa tetap jalan (sinyal di-skip).
-- **Evaluasi presisi**: `get_klines_since(symbol, interval, since)` memakai `startTime` API — Binance mengembalikan candle pertama dengan `openTime >= since`, sehingga candle yang memuat waktu entry ikut dihitung tanpa mengikutsertakan aksi harga pra-entry dari candle sebelumnya (Fix #4: TIDAK mundur 1 interval).
+- **Evaluasi presisi**: `get_klines_since(symbol, interval, since)` memakai `startTime` API — Bitget V2 membulatkan startTime ke bawah per granularity, sehingga candle yang memuat `since` bisa ikut dikembalikan; di sisi klien candle dengan `openTime < since` dibuang, jadi candle pertama = `openTime >= since` — candle yang memuat waktu entry ikut dihitung tanpa mengikutsertakan aksi harga pra-entry dari candle sebelumnya (Fix #4: TIDAK mundur 1 interval).
 - `get_ticker_24h(symbol)` → `ticker_24h` di `bot.py` (1 panggilan agregat).
-- CMC opsional (free tier): tanpa candle historis; bila kosong → fallback semua pasangan USDT by volume Binance.
+- CMC opsional (free tier): tanpa candle historis; bila kosong → fallback semua pasangan USDT by volume Bitget.
 - `get_funding_rate` / `get_long_short_ratio` (futures): diprobe sekali murah; bila gagal → sentiment pakai Fear & Greed saja.
 - Whale/on-chain opsional; gagal → kategori dilewati tanpa mempengaruhi kategori lain.
 
 ## 5. Evaluasi Sinyal & Riwayat (`evaluation.py`) — aturan baku
 
 - **`add_signals_today()`** dipanggil di `bot.py` **setelah pesan berhasil dikirim** — menyimpan sinyal terpilih sesi itu ke `data/history.json` (key sesi WIB `YYYY-MM-DD HH:MM`; kunci lama `YYYY-MM-DD` tetap didukung).
-- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (robust terhadap hari/sesi kosong), mengambil **list candle M15 kronologis** via `fetch_fn` (dari `binance.get_klines_since` — kline M15 sejak sesi sinyal, `_range_since` di `bot.py`), lalu menentukan status. Evaluasi di-walk **candle-per-candle dalam urutan waktu** (`_evaluate_candles`): TP menang bila tersentuh di candle yang tak menyentuh SL di candle-candle sebelumnya; SL menang bila tersentuh di candle yang juga menyentuh TP (urutan tak bisa dipastikan → SL konservatif). Jendela dibatasi `EVAL_MAX_HOURS` (24 jam) sejak sesi sinyal (`_within_window`) — harga bergerak lebih lama dianggap di luar cakupan day trade. Bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch harga gagal), recap **mundur ke sesi lebih lama yang valid** (Fix #5).
+- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (robust terhadap hari/sesi kosong), mengambil **list candle M15 kronologis** via `fetch_fn` (dari `bitget.get_klines_since` — kline M15 sejak sesi sinyal, `_range_since` di `bot.py`), lalu menentukan status. Evaluasi di-walk **candle-per-candle dalam urutan waktu** (`_evaluate_candles`): TP menang bila tersentuh di candle yang tak menyentuh SL di candle-candle sebelumnya; SL menang bila tersentuh di candle yang juga menyentuh TP (urutan tak bisa dipastikan → SL konservatif). Jendela dibatasi `EVAL_MAX_HOURS` (24 jam) sejak sesi sinyal (`_within_window`) — harga bergerak lebih lama dianggap di luar cakupan day trade. Bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch harga gagal), recap **mundur ke sesi lebih lama yang valid** (Fix #5).
 - **Anti sinyal berulang (Fix R4, `_apply_cooldown` di `bot.py`)**: bila base + arah + entry (toleransi `COOLDOWN_ENTRY_TOL_PCT` 0.5%) sudah disinyalkan pada `COOLDOWN_SESSIONS` sesi terakhir, sinyal diturunkan jadi NEUTRAL + alasan `[Cooldown]` (tetap tampil di WATCHLIST). Mencegah bot menyuruh re-entry level yang sama berulang sesi (mis. UTK 0.00795 diulang 7 sesi).
 - **Presisi evaluasi**: `build_recap` meng-parse kunci sesi WIB ke datetime (`_session_since`) dan meneruskannya sebagai `since` ke `fetch_fn(pair, since)`. `bot._range_since()` mengambil candle M15 **setelah sesi sinyal** (bukan ticker 24j rolling yang bisa mencakup pergerakan harga SEBELUM entry). Fallback otomatis ke ticker 24j (`_ticker_range` → 1 candle sintetis) bila klines sejak-sesi gagal / kosong.
 - Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
@@ -137,14 +138,14 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 - **Jangan pernah** meng-inline request `requests.get` langsung tanpa lewat `_client` (kecuali WebSocket khusus).
 
 ### Sifat opsional / graceful degradation
-- **Binance futures** (funding/L-S ratio) dapat diblokir region → fungsi mengembalikan `[]` / `None`, dan `bot.py` memakai `futures_ok` probe sekali di awal. **Jangan jadikan futures wajib** — bot harus tetap jalan hanya dengan spot + Fear & Greed.
+- **Bitget futures** (funding/L-S ratio) dapat diblokir region → fungsi mengembalikan `[]` / `None`, dan `bot.py` memakai `futures_ok` probe sekali di awal. **Jangan jadikan futures wajib** — bot harus tetap jalan hanya dengan spot + Fear & Greed.
 - **Data MTF**: interval yang gagal dilewati; jika `15m`/`1h` tidak tersedia, `engine` memakai kompas + zona tanpa trigger (sinyal tetap bisa NEUTRAL).
 - Whale & on-chain butuh API key opsional → `None` bila tidak dikonfigurasi.
 - Pola ini wajib dipertahankan: satu sumber gagal ≠ seluruh scan gagal.
 
 ### Menjalankan & menguji
 ```powershell
-venv\Scripts\python.exe -m pytest tests -v   # 160 test
+venv\Scripts\python.exe -m pytest tests -v   # 217 test
 venv\Scripts\python.exe bot.py               # scan nyata; tanpa kredensial → print konsol
 ```
 

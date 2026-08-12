@@ -7,7 +7,7 @@ Support & Resistance, Fibonacci Golden Zone (0.5/0.618/0.786), EMA 20/50 dynamic
 whale proxy, on-chain, dan sentiment pasar (Fear & Greed)**.
 
 > Dibangun dari pengalaman BOT-Sinyal-Trading v1 (CoinGecko only). v2 memakai
-> Binance (candle/ticker) sebagai sumber utama teknikal + CoinMarketCap (ranking) +
+> Bitget (candle/ticker) sebagai sumber utama teknikal + CoinMarketCap (ranking) +
 > Fear & Greed (sentiment) + Etherscan/blockchain.info (on-chain proxy).
 
 ## Cara Kerja
@@ -17,8 +17,8 @@ Dijalankan otomatis **2x sehari** — jadwal dipicu dari luar oleh **Cron-Job.or
 melalui API `workflow_dispatch` GitHub Actions (cron internal GitHub dihapus agar
 tidak ada pemicu ganda):
 
-1. Satu panggilan ticker 24j Binance (`data-api.binance.vision` — tidak geo-block, aman untuk runner AS).
-2. Pilih top coin: daftar CoinMarketCap bila `CMC_API_KEY` diisi, else **semua pasangan USDT Binance**. Filter aset non-koin (stablecoin, leveraged token, token saham Binance) + likuiditas (`MIN_VOLUME_USD`), urut volume, ambil `TOP_COINS` (maks 250).
+1. Satu panggilan ticker 24j Bitget (`https://api.bitget.com/api/v2/spot/market/tickers` — publik, tanpa key).
+2. Pilih top coin: daftar CoinMarketCap bila `CMC_API_KEY` diisi, else **semua pasangan USDT Bitget**. Filter aset non-koin (stablecoin, leveraged token, token saham) + likuiditas (`MIN_VOLUME_USD`), urut volume, ambil `TOP_COINS` (maks 250).
 3. Tiap coin diambil klines **4 timeframe** untuk analisa MTF:
    - **D1 & H4** → *kompas* (tren utama & struktur SMC BOS/CHoCH skala besar).
    - **H1** → *pemetaan* zona institusional (S&D, OB, FVG, EQH/EQL, Liquidity Sweep, S&R pivot/swing). Entry/SL/TP dipetakan dari zona H1.
@@ -33,12 +33,17 @@ tidak ada pemicu ganda):
 
 | Sumber | Dipakai untuk | Akses |
 |---|---|---|
-| Binance Spot (`data-api.binance.vision`) | ticker 24j, klines 1d/4h/1h/15m → indikator MTF | publik, tanpa key |
-| Binance Futures (`fapi.binance.com`) | funding rate, long/short ratio | opsional — dapat diblokir region |
+| Bitget Spot V2 (`api.bitget.com/api/v2/spot/market/*`) | ticker 24j, klines 1d/4h/1h/15m → indikator MTF | publik, tanpa key |
+| Bitget Futures V2 (`api.bitget.com/api/v2/mix/market/*`) | funding rate, long/short ratio | opsional — dapat diblokir region |
 | CoinMarketCap (`pro-api.coinmarketcap.com`) | ranking top coin | `CMC_API_KEY` (opsional, free tier) |
 | alternative.me | Fear & Greed Index | publik, tanpa key |
 | Etherscan | whale netflow ETH (proxy) | `ETHERSCAN_API_KEY` (opsional) |
 | blockchain.info | statistik BTC (`n_tx_24h`) | publik, tanpa key |
+
+Symbol Bitget: **Spot** memakai `BTCUSDT`, **Futures** (USDT-M Perpetual) memakai
+`BTCUSDT_UMCBL` — konversi transparan di `data/bitget.py` (`to_spot_symbol` /
+`to_futures_symbol`). Semua kline memakai `granularity` Bitget yang sesuai
+(spot: `15min/1h/4h/1day`; futures: `15m/1H/4H/1D`).
 
 Semua data via `data/_client.py` (retry + backoff + handling HTTP 429). Satu sumber gagal **tidak** menggagalkan seluruh scan (graceful degradation).
 
@@ -69,7 +74,7 @@ evaluation.py              # Riwayat sinyal (history.json) + evaluasi/recap sesi
 telegram_sender.py         # Kirim pesan ke Telegram
 data/
   _client.py               # HTTP client (retry, backoff, rate-limit)
-  binance.py               # Klines MTF (1d/4h/1h/15m), ticker 24j, funding, long/short ratio
+  bitget.py                # Klines MTF (1d/4h/1h/15m), ticker 24j, funding, long/short ratio
   cmc.py                   # Top coins + market overview (free tier)
   sentiment.py             # Fear & Greed Index + skoring contrarian
   onchain.py               # Whale netflow ETH, statistik BTC (proxy)
@@ -82,7 +87,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (198 kasus)
+tests/                     # pytest (217 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -132,7 +137,7 @@ Di `bot._eligible_pair()`:
 
 - **Stablecoin** (`STABLECOINS`): USDT, USDC, DAI, BUSD, TUSD, USDD, FDUSD, EURS/EURC/EUR/EURI/EURIT, RLUSD, XUSD, FRAX, BFUSD, dsb.
 - **Leveraged token** (`SKIP_SUFFIXES`): pasangan berakhiran `UP`, `DOWN`, `BULL`, `BEAR` (mis. BTCUP/BTCDOWN).
-- **Token saham/ETF Binance (Binance Shares)** (`US_STOCK_TICKERS` + `_is_stock_token()`): base berbasis ticker saham/ETF US, umumnya berakhiran `B` — mis. `NVDAB`→NVDA, `QQQB`→QQQ, `SPYB`→SPY, `GOOGLB`→GOOGL, `TSLAB`→TSLA, `MUB` (ETF langsung), `BE`. Deteksi: `base == ticker` atau `base = ticker + "B"`. Koin kripto asli yang berakhiran `B` (BNB, ARB, SHIB, TRB, DGB, CKB, BB) **tetap diproses**.
+- **Token saham/ETF (Binance Shares style)** (`US_STOCK_TICKERS` + `_is_stock_token()`): base berbasis ticker saham/ETF US, umumnya berakhiran `B` — mis. `NVDAB`→NVDA, `QQQB`→QQQ, `SPYB`→SPY, `GOOGLB`→GOOGL, `TSLAB`→TSLA, `MUB` (ETF langsung), `BE`. Deteksi: `base == ticker` atau `base = ticker + "B"`. Koin kripto asli yang berakhiran `B` (BNB, ARB, SHIB, TRB, DGB, CKB, BB) **tetap diproses**.
 
 ## Format pesan Telegram
 
@@ -200,7 +205,7 @@ Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blo
 `evaluation.py` + `data/history.json`:
 
 - **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
-- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **candle M15 kronologis** tiap pair dari Binance (jendela dibatasi `EVAL_MAX_HOURS` = 24 jam sejak sesi), lalu **walk candle-per-candle dalam urutan waktu** — TP menang bila tersentuh di candle yang tidak menyentuh SL sebelumnya; SL menang bila menyentuh keduanya di candle yang sama (urutan tak bisa dipastikan → konservatif SL). High/low diambil dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j (1 candle sintetis) bila data sejak-sesi tidak tersedia. Bila sesi terakhir gagal dievaluasi (tanpa sinyal / fetch gagal), recap **mundur ke sesi lebih lama yang valid**.
+- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **candle M15 kronologis** tiap pair dari Bitget (jendela dibatasi `EVAL_MAX_HOURS` = 24 jam sejak sesi), lalu **walk candle-per-candle dalam urutan waktu** — TP menang bila tersentuh di candle yang tidak menyentuh SL sebelumnya; SL menang bila menyentuh keduanya di candle yang sama (urutan tak bisa dipastikan → konservatif SL). High/low diambil dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j (1 candle sintetis) bila data sejak-sesi tidak tersedia. Bila sesi terakhir gagal dievaluasi (tanpa sinyal / fetch gagal), recap **mundur ke sesi lebih lama yang valid**.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP1/TP2/SL/Floating).
 - Recap dikirim sebagai **pesan Telegram terpisah** (History Review) sebelum blok `📊 DAY TRADING BRIEFING — MTF S&R + SMC + FIBO + EMA`:
 
@@ -231,8 +236,8 @@ Bila belum ada riwayat (sesi pertama) atau semua sesi gagal diambil datanya, rec
 
 ## Catatan penting
 
-- **Binance futures** (funding/L-S ratio) dapat diblokir region tertentu. Bila tidak terjangkau, bot otomatis memakai Fear & Greed saja — tidak pernah gagal total.
-- **CMC free tier**: data delay, tanpa candle historis → hanya untuk ranking. Candle tetap dari Binance.
+- **Bitget futures** (funding/L-S ratio) dapat diblokir region tertentu. Bila tidak terjangkau, bot otomatis memakai Fear & Greed saja — tidak pernah gagal total.
+- **CMC free tier**: data delay, tanpa candle historis → hanya untuk ranking. Candle tetap dari Bitget.
 - **Whale & on-chain** adalah *proxy* data gratis, bukan level Glassnode/Santiment. Parameter `WHALE_MIN_USD` / `WHALE_LOOKBACK_HOURS` di `.env`.
 
 ## Disclaimer

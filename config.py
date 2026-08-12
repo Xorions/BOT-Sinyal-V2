@@ -25,12 +25,13 @@ TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # --- Sumber data ---
-# Endpoint publik Binance (tidak geo-block, aman dipakai GitHub Actions runner AS)
-BINANCE_BASE_URL: str = os.getenv("BINANCE_BASE_URL", "https://data-api.binance.vision")
+# Endpoint publik Bitget V2 (tidak geo-block, aman dipakai GitHub Actions runner AS).
+# Taksi: klines/ticker spot = /api/v2/spot/market/*, futures = /api/v2/mix/market/*.
+BITGET_BASE_URL: str = os.getenv("BITGET_BASE_URL", "https://api.bitget.com")
 
-# Futures Binance (funding rate / long-short ratio). Opsional — dapat
+# Futures Bitget (funding rate / long-short ratio). Opsional — dapat
 # diblokir region tertentu; bila gagal, skor sentiment memakai Fear & Greed saja.
-BINANCE_FUTURES_URL: str = os.getenv("BINANCE_FUTURES_URL", "https://fapi.binance.com")
+BITGET_FUTURES_URL: str = os.getenv("BITGET_FUTURES_URL", "https://api.bitget.com")
 
 # Opsional: CoinMarketCap free key (banyak keterbatasan di tier free)
 CMC_API_KEY: str = os.getenv("CMC_API_KEY", "")

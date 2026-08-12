@@ -1,4 +1,4 @@
-"""Backtest simulasi sinyal MTF terhadap data histori Binance (offline, tanpa network socket).
+"""Backtest simulasi sinyal MTF terhadap data histori Bitget (offline, tanpa network socket).
 
 Menjelajah bar M15: pada tiap bar tertutup, mesin sinyal (`assemble_signal`) dijalankan
 persis seperti bot live — kompas H4/D1, zona H1, pelatuk M15 — memakai candle yang SUDAH
@@ -28,7 +28,7 @@ from config import (  # noqa: E402
     EVAL_MAX_HOURS,
     MIN_VOLUME_USD,
 )
-from data import binance  # noqa: E402
+from data import bitget  # noqa: E402
 from engine import (  # noqa: E402
     ACTION_BUY,
     ACTION_SELL,
@@ -47,10 +47,10 @@ def fetch_pair(symbol: str, eval_start_ms: int, days: int) -> Dict[str, List[Dic
     m15_start = eval_start_ms - 3 * DAY_MS  # lookback 200 bar M15 (~2.1 hari) + 24j pct change
     h1_start = eval_start_ms - 6 * DAY_MS   # 120 bar H1 = 5 hari
     h4_start = eval_start_ms - 22 * DAY_MS  # 120 bar H4 = 20 hari
-    m15 = binance._klines(symbol, binance.INTERVAL_M15, 1000, start_time=m15_start)
-    h1 = binance._klines(symbol, binance.INTERVAL_1H, 1000, start_time=h1_start)
-    h4 = binance._klines(symbol, binance.INTERVAL_4H, 1000, start_time=h4_start)
-    d1 = binance._klines(symbol, binance.INTERVAL_1D, 90)
+    m15 = bitget._klines(symbol, bitget.INTERVAL_M15, 1000, start_time=m15_start)
+    h1 = bitget._klines(symbol, bitget.INTERVAL_1H, 1000, start_time=h1_start)
+    h4 = bitget._klines(symbol, bitget.INTERVAL_4H, 1000, start_time=h4_start)
+    d1 = bitget._klines(symbol, bitget.INTERVAL_1D, 90)
     return {
         "m15": m15,
         "h1": h1,
@@ -283,7 +283,7 @@ def render_report(stats: Dict, days: int) -> str:
     win_rate = (stats["wins"] / decided * 100.0) if decided else 0.0
     lines = []
     lines.append("=" * 62)
-    lines.append("BACKTEST SINYAL MTF — SIMULASI HISTORI BINANCE")
+    lines.append("BACKTEST SINYAL MTF — SIMULASI HISTORI BITGET")
     lines.append("=" * 62)
     lines.append(f"  Pasangan          : {stats['pairs']} pair")
     lines.append(f"  Jendela           : {days} hari terakhir")
@@ -325,14 +325,14 @@ def render_report(stats: Dict, days: int) -> str:
 
 # ---------------------------------------------------------------- main
 def _pick_pairs(limit: int) -> List[str]:
-    tickers = binance.get_all_tickers_24h()
+    tickers = bitget.get_all_tickers_24h()
     cands = [p for p in tickers if bot._eligible_pair(p) and tickers[p]["quote_volume"] >= MIN_VOLUME_USD]
     cands.sort(key=lambda p: tickers[p]["quote_volume"], reverse=True)
     return cands[:limit]
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Backtest mesin sinyal MTF vs histori Binance")
+    parser = argparse.ArgumentParser(description="Backtest mesin sinyal MTF vs histori Bitget")
     parser.add_argument("--days", type=int, default=5, help="jendela backtest (hari), default 5")
     parser.add_argument("--pairs", type=int, default=15, help="jumlah pair terlikuid, default 15")
     parser.add_argument("--step", default="15m", choices=["15m", "30m", "1h", "4h"], help="frekuensi scan sinyal")

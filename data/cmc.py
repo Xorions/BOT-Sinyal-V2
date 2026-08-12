@@ -4,7 +4,7 @@ Catatan keterbatasan tier free CMC:
 - Kuota sangat terbatas (perlu hemat pemakaian).
 - Data harga dapat delay dan tidak ada candle/OHLCV historis.
 Karena itu: CMC dipakai hanya untuk ranking; semua indikator
-teknikal tetap dihitung dari candle Binance.
+teknikal tetap dihitung dari candle Bitget.
 """
 
 from typing import List
@@ -34,7 +34,7 @@ def _symbols_from_cmc(top: int = TOP_COINS) -> List[str]:
 
 def get_top_symbols(top: int = TOP_COINS) -> List[str]:
     """Symbol top-N dari CMC. Jika CMC tidak dikonfigurasi, kembalikan kosong
-    (caller bisa fallback ke daftar Binance populer)."""
+    (caller bisa fallback ke daftar Bitget populer)."""
     if not is_configured():
         return []
     try:

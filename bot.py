@@ -1,6 +1,6 @@
 """Entry point bot sinyal trading v2 — Day Trading Multi-Timeframe (MTF SMC + S&D).
 
-Alur: ambil ticker 24j Binance (1 panggilan) → tentukan top coin (CMC bila
+Alur: ambil ticker 24j Bitget (1 panggilan) → tentukan top coin (CMC bila
 dikonfigurasi, else fallback) → kumpulkan klines MTF (D1/H4 kompas, H1 pemetaan,
 M15 pelatuk) + funding/LS tiap coin → agregat sentiment/whale/on-chain → skoring
 MTF berbobot → evaluasi sinyal sesi sebelumnya → kirim Telegram.
@@ -33,7 +33,7 @@ from config import (
     TELEGRAM_CHAT_ID,
     TOP_COINS,
 )
-from data import binance
+from data import bitget
 from data import cmc
 from data._client import DataSourceError
 from data.onchain import get_btc_stats, get_exchange_flow_eth
@@ -57,10 +57,10 @@ STABLECOINS = {
     "usd0", "usda", "usdt0", "usdy", "usdl", "lusd", "susd", "xsusd",
     "rlusd", "xusd", "frax", "bfusd", "eurit",
 }
-# Binance leveraged token (BTCUP/BTCDOWN/BTCBULL/BTCBEAR) — bukan aset riil.
+# Bitget leveraged token (BTCUP/BTCDOWN/BTCBULL/BTCBEAR) — bukan aset riil.
 # Wajib lowercase karena `base` sudah di-lowercase sebelum dicek endswith.
 SKIP_SUFFIXES = ("up", "down", "bull", "bear")
-# Token saham/ETF Binance (Binance Shares) — base = ticker US, atau ticker US + "B"
+# Token saham/ETF Bitget (Bitget Shares) — base = ticker US, atau ticker US + "B"
 # (mis. NVDAB -> NVDA, QQQB -> QQQ, SPYB -> SPY). MUB/BB sudah bertipe langsung.
 US_STOCK_TICKERS = {
     "aapl", "amzn", "googl", "goog", "meta", "msft", "nvda", "tsla", "avgo",
@@ -97,7 +97,7 @@ def _eligible_pair(pair: str) -> bool:
 
 
 def _pick_pairs(tickers: Dict[str, Dict]) -> List[str]:
-    """Pilih pasangan kandidat: CMC top bila ada, else semua USDT Binance.
+    """Pilih pasangan kandidat: CMC top bila ada, else semua USDT Bitget.
     Filter stablecoin/leveraged token + likuiditas min, urut volume, ambil TOP_COINS."""
     cmc_symbols = cmc.get_top_symbols(TOP_COINS)
     if cmc_symbols:
@@ -106,10 +106,10 @@ def _pick_pairs(tickers: Dict[str, Dict]) -> List[str]:
             for base in cmc_symbols
             if f"{base.upper().replace('USDT', '')}USDT" in tickers
         ]
-        log.info("Daftar top coin dari CoinMarketCap (%d symbol, %d tersedia di Binance).", len(cmc_symbols), len(wanted))
+        log.info("Daftar top coin dari CoinMarketCap (%d symbol, %d tersedia di Bitget).", len(cmc_symbols), len(wanted))
     else:
         wanted = list(tickers.keys())
-        log.info("CMC tidak dikonfigurasi — pakai semua pasangan USDT Binance (%d).", len(wanted))
+        log.info("CMC tidak dikonfigurasi — pakai semua pasangan USDT Bitget (%d).", len(wanted))
 
     candidates: List[str] = []
     for pair in wanted:
@@ -129,12 +129,12 @@ def _pick_pairs(tickers: Dict[str, Dict]) -> List[str]:
 def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale_flow: Optional[Dict], btc_stats: Optional[Dict], futures_ok: bool):
     info = tickers[pair]
     # MTF Day Trading: kompas (D1/H4), pemetaan zona (H1), pelatuk (M15)
-    d1 = binance.get_klines(pair, binance.INTERVAL_1D, binance.MTF_LIMITS[binance.INTERVAL_1D])
-    h4 = binance.get_klines(pair, binance.INTERVAL_4H, binance.MTF_LIMITS[binance.INTERVAL_4H])
-    h1 = binance.get_klines(pair, binance.INTERVAL_1H, binance.MTF_LIMITS[binance.INTERVAL_1H])
-    m15 = binance.get_klines(pair, binance.INTERVAL_M15, binance.MTF_LIMITS[binance.INTERVAL_M15])
-    funding = binance.get_funding_rate(pair, 8) if futures_ok else []
-    ls_ratio = binance.get_long_short_ratio(pair, 1) if futures_ok else None
+    d1 = bitget.get_klines(pair, bitget.INTERVAL_1D, bitget.MTF_LIMITS[bitget.INTERVAL_1D])
+    h4 = bitget.get_klines(pair, bitget.INTERVAL_4H, bitget.MTF_LIMITS[bitget.INTERVAL_4H])
+    h1 = bitget.get_klines(pair, bitget.INTERVAL_1H, bitget.MTF_LIMITS[bitget.INTERVAL_1H])
+    m15 = bitget.get_klines(pair, bitget.INTERVAL_M15, bitget.MTF_LIMITS[bitget.INTERVAL_M15])
+    funding = bitget.get_funding_rate(pair, 8) if futures_ok else []
+    ls_ratio = bitget.get_long_short_ratio(pair, 1) if futures_ok else None
     return assemble_signal(
         symbol=pair,
         base=pair.replace("USDT", ""),
@@ -154,7 +154,7 @@ def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale
 
 def _ticker_range(pair: str) -> Optional[tuple]:
     """Fallback (high_24h, low_24h, current) dari ticker 24j; None bila gagal."""
-    ticker = binance.get_ticker_24h(pair)
+    ticker = bitget.get_ticker_24h(pair)
     if not ticker:
         return None
     return ticker["high_24h"], ticker["low_24h"], ticker["price"]
@@ -171,12 +171,12 @@ def _range_since(pair: str, since=None) -> Optional[list]:
     """
     if since is not None:
         try:
-            candles = binance.get_klines_since(pair, binance.INTERVAL_M15, since)
+            candles = bitget.get_klines_since(pair, bitget.INTERVAL_M15, since)
         except DataSourceError:
             candles = []
         if candles:
             return candles
-    ticker = binance.get_ticker_24h(pair)
+    ticker = bitget.get_ticker_24h(pair)
     if not ticker:
         return None
     return [
@@ -235,14 +235,14 @@ def _apply_cooldown(signals: List, history: Dict) -> List:
 
 
 def run_scan() -> tuple:
-    log.info("Mengambil ticker 24j Binance...")
+    log.info("Mengambil ticker 24j Bitget...")
     try:
-        tickers = binance.get_all_tickers_24h()
+        tickers = bitget.get_all_tickers_24h()
     except DataSourceError:
-        log.warning("Gagal pertama mengambil ticker Binance — coba ulang sekali...")
+        log.warning("Gagal pertama mengambil ticker Bitget — coba ulang sekali...")
         time.sleep(5)
-        tickers = binance.get_all_tickers_24h()
-    log.info("Tersedia %d pasangan USDT di Binance.", len(tickers))
+        tickers = bitget.get_all_tickers_24h()
+    log.info("Tersedia %d pasangan USDT di Bitget.", len(tickers))
 
     pairs = _pick_pairs(tickers)
     log.info("Dianalisa %d koin (MTF: kompas H4/D1 -> zona H1 -> pelatuk M15).", len(pairs))
@@ -258,11 +258,11 @@ def run_scan() -> tuple:
         fg_value = 50.0
         log.warning("Fear & Greed gagal diambil, pakai default 50.")
 
-    futures_ok = bool(binance.get_funding_rate("BTCUSDT", limit=1))
+    futures_ok = bool(bitget.get_funding_rate("BTCUSDT", limit=1))
     if futures_ok:
-        log.info("Binance futures terjangkau — funding & L/S ratio aktif.")
+        log.info("Bitget futures terjangkau — funding & L/S ratio aktif.")
     else:
-        log.warning("Binance futures tidak terjangkau — skor sentiment memakai Fear & Greed saja.")
+        log.warning("Bitget futures tidak terjangkau — skor sentiment memakai Fear & Greed saja.")
 
     eth_price = tickers.get("ETHUSDT", {}).get("price")
     whale_flow = None

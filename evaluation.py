@@ -5,7 +5,7 @@
   sesi berikutnya (2x sehari: 13:30 & 19:00 WIB).
 - `build_recap()` dipanggil SEBELUM Day Trading Briefing baru dikirim: membaca
   riwayat sesi sebelumnya (termasuk sesi pagi yang sama), mengambil harga 24j
-  terakhir tiap pair (high/low/current) dari Binance, menentukan status tiap
+  terakhir tiap pair (high/low/current) dari Bitget, menentukan status tiap
   sinyal (TP2 / TP1 / SL / Floating), menghitung win rate, lalu menyusun teks
   ringkasan evaluasi yang dikirim sebagai pesan Telegram terpisah (History Review).
 """
