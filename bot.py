@@ -26,6 +26,8 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
         pass
 
 from config import (
+    COOLDOWN_ENTRY_TOL_PCT,
+    COOLDOWN_SESSIONS,
     MIN_VOLUME_USD,
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
@@ -36,7 +38,7 @@ from data import cmc
 from data._client import DataSourceError
 from data.onchain import get_btc_stats, get_exchange_flow_eth
 from data.sentiment import get_fear_greed_current
-from engine import assemble_signal, format_message, rank_signals
+from engine import ACTION_BUY, ACTION_SELL, assemble_signal, format_message, rank_signals
 from evaluation import add_signals_today, build_recap, load_history
 from telegram_sender import TelegramSendError, send_telegram
 
@@ -158,13 +160,14 @@ def _ticker_range(pair: str) -> Optional[tuple]:
     return ticker["high_24h"], ticker["low_24h"], ticker["price"]
 
 
-def _range_since(pair: str, since=None) -> Optional[tuple]:
-    """(high, low, current) untuk evaluasi sinyal sesi sebelumnya.
+def _range_since(pair: str, since=None) -> Optional[list]:
+    """Candle M15 SETELAH sesi sinyal (kronologis) untuk evaluasi sinyal sebelumnya.
 
-    Bila `since` (datetime WIB-aware) diberikan, high/low dihitung HANYA dari
-    candle M15 SETELAH sesi sinyal (`get_klines_since`) — bukan ticker 24j
-    rolling yang bisa mencakup pergerakan harga SEBELUM entry. Fallback ke
-    `_ticker_range` (24j) bila klines sejak-sesi gagal / tidak tersedia.
+    Bila `since` (datetime WIB-aware) diberikan, candle diambil dari
+    `get_klines_since` — evaluasi SL/TP dihitung candle-per-candle dalam urutan
+    waktu (Fix R4), bukan agregat high/low yang tidak bisa membedakan urutan
+    TP vs SL. Fallback ke ticker 24j (`_ticker_range`) menjadi satu candle
+    sintetis bila klines sejak-sesi gagal / tidak tersedia.
     """
     if since is not None:
         try:
@@ -172,12 +175,63 @@ def _range_since(pair: str, since=None) -> Optional[tuple]:
         except DataSourceError:
             candles = []
         if candles:
-            return (
-                max(c["high"] for c in candles),
-                min(c["low"] for c in candles),
-                candles[-1]["close"],
-            )
-    return _ticker_range(pair)
+            return candles
+    ticker = binance.get_ticker_24h(pair)
+    if not ticker:
+        return None
+    return [
+        {"high": ticker["high_24h"], "low": ticker["low_24h"], "close": ticker["price"]}
+    ]
+
+
+def _recent_directional(history: Dict, n: int = COOLDOWN_SESSIONS) -> List[tuple]:
+    """Sinyal berarah (BUY/SELL) pada `n` sesi terakhir: [(base, action, entry), ...].
+
+    Dipakai anti re-entry: kalau base + arah + entry nyaris sama sudah pernah
+    disinyalkan di sesi-sesi terakhir, sinyal yang sama tidak ditampilkan lagi.
+    """
+    recent: List[tuple] = []
+    for key in sorted(history, reverse=True)[:n]:
+        for s in history[key]:
+            if s.get("action") in (ACTION_BUY, ACTION_SELL) and s.get("entry"):
+                recent.append((s["base"].lower(), s["action"], s["entry"]))
+    return recent
+
+
+def _apply_cooldown(signals: List, history: Dict) -> List:
+    """Turunkan sinyal yang mengulang setup sesi sebelumnya jadi NEUTRAL.
+
+    Fix R4 (anti sinyal berulang): bot sebelumnya bisa menyuruh masuk ke koin
+    yang sama di level yang hampir identik berulang sesi (contoh UTK 0.00795
+    selama 7 sesi). Bila base + arah cocok dan entry beda <=
+    COOLDOWN_ENTRY_TOL_PCT dari sinyal sesi-sesi terakhir, sinyal dilewati
+    (tetap muncul di WATCHLIST agar tidak hilang total).
+    """
+    if not history:
+        return signals
+    recent = _recent_directional(history)
+    if not recent:
+        return signals
+    out = []
+    for s in signals:
+        if s.action in (ACTION_BUY, ACTION_SELL) and s.entry:
+            for prev_base, prev_action, prev_entry in recent:
+                if not prev_entry:
+                    continue
+                if (
+                    s.base.lower() == prev_base
+                    and s.action == prev_action
+                    and abs(s.entry - prev_entry) / max(s.entry, prev_entry) <= COOLDOWN_ENTRY_TOL_PCT
+                ):
+                    intended = s.action
+                    s.action = "NEUTRAL"
+                    s.reasons.append(
+                        f"[Cooldown] {intended} yang sama (entry ≈{prev_entry}) sudah disinyalkan "
+                        f"di sesi sebelumnya — dilewati (anti re-entry level yang sama)"
+                    )
+                    break
+        out.append(s)
+    return out
 
 
 def run_scan() -> tuple:
@@ -239,6 +293,7 @@ def run_scan() -> tuple:
         except DataSourceError as exc:
             log.warning("[%d/%d] %s dilewati: %s", i, len(pairs), pair, exc)
 
+    signals = _apply_cooldown(signals, load_history())
     ranked = rank_signals(signals)
     log.info("Terpilih %d sinyal terbaik.", len(ranked))
 

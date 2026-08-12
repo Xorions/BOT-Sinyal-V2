@@ -171,10 +171,11 @@ class TestBuildRecap:
 
     def _fetch(self, pair, since=None):
         assert since is not None  # build_recap wajib meneruskan waktu sesi sinyal
+        # fetch_fn kini mengembalikan list candle M15 kronologis (Fix R4).
         return {
-            "BTCUSDT": (121.0, 95.0, 115.0),  # TP2 (high >= tp2)
-            "LITUSDT": (54.0, 44.0, 52.0),  # SL (low <= sl)
-            "XRPUSDT": (1.05, 0.89, 0.98),  # TP1 (low <= tp1)
+            "BTCUSDT": [{"high": 121.0, "low": 95.0, "close": 115.0}],  # TP2 (high >= tp2)
+            "LITUSDT": [{"high": 54.0, "low": 44.0, "close": 52.0}],  # SL (low <= sl)
+            "XRPUSDT": [{"high": 1.05, "low": 0.89, "close": 0.98}],  # TP1 (low <= tp1)
         }[pair]
 
     def test_recap_winrate_and_statuses(self):
@@ -207,7 +208,7 @@ class TestBuildRecap:
 
     def test_recap_floating_includes_pnl(self):
         history = {"2026-08-06 13:30": [_sig("BUY", 100.0, 90.0, 110.0, 120.0)]}
-        recap = build_recap(history, lambda pair, since=None: (105.0, 95.0, 102.0), now_key="2026-08-07 13:30")
+        recap = build_recap(history, lambda pair, since=None: [{"high": 105.0, "low": 95.0, "close": 102.0}], now_key="2026-08-07 13:30")
         assert recap is not None
         assert "📋 Harga saat ini $102.00 (+2.00%)" in recap
 
@@ -228,7 +229,10 @@ class TestBuildRecap:
         def fetch(pair, since=None):
             if since == datetime(2026, 8, 6, 13, 30, tzinfo=WIB):
                 return None  # sesi terbaru gagal (harga tak terambil)
-            return {"BTCUSDT": (121.0, 95.0, 115.0), "LITUSDT": (54.0, 44.0, 52.0)}[pair]
+            return {
+                "BTCUSDT": [{"high": 121.0, "low": 95.0, "close": 115.0}],
+                "LITUSDT": [{"high": 54.0, "low": 44.0, "close": 52.0}],
+            }[pair]
 
         recap = build_recap(history, fetch, now_key="2026-08-07 13:30")
         assert recap is not None
@@ -250,7 +254,7 @@ class TestBuildRecap:
 
         def fetch(pair, since=None):
             captured["since"] = since
-            return (105.0, 95.0, 100.0)
+            return [{"high": 105.0, "low": 95.0, "close": 100.0}]
 
         history = {"2026-08-06 13:30": [_sig()]}
         build_recap(history, fetch, now_key="2026-08-07 13:30")

@@ -47,6 +47,7 @@ def _klines(symbol: str, interval: str, limit: int, start_time: Optional[int] = 
                     "low": float(row[3]),
                     "close": float(row[4]),
                     "volume": float(row[5]),
+                    "ts": int(row[0]),
                 }
             )
         except (TypeError, ValueError, IndexError):

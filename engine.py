@@ -265,6 +265,37 @@ def _ob_near(price: float, ob: Optional[Dict], pct: float = 2.0) -> bool:
     return dist / price * 100.0 <= pct
 
 
+def _trigger_valid(trigger: Dict, side: str) -> bool:
+    """Konfirmasi pelatuk M15 yang lebih ketat (Fix R4).
+
+    Trigger dianggap valid bila SALAH SATU dari:
+      - MACD cross searah (golden/death), atau
+      - BOS/CHoCH M15 searah, atau
+      - histogram MACD terkonfirmasi stabil (`_hist_confirmed`, N bar + margin)
+        DAN struktur M15 searah. Histogram sendirian TANPA struktur (bounce
+        30-45 menit di tengah downtrend) tidak cukup untuk membuka posisi.
+    """
+    if side == ACTION_BUY:
+        return bool(
+            trigger.get("cross") == "golden"
+            or trigger.get("bos") == "bullish"
+            or (
+                trigger.get("trend") == "bullish"
+                and _trigger_confirmed(trigger, ACTION_BUY)
+            )
+        )
+    if side == ACTION_SELL:
+        return bool(
+            trigger.get("cross") == "death"
+            or trigger.get("choch") == "bearish"
+            or (
+                trigger.get("trend") == "bearish"
+                and _trigger_confirmed(trigger, ACTION_SELL)
+            )
+        )
+    return False
+
+
 def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> bool:
     """Validasi: harga menyentuh zona SMC/S&D H1 DAN M15 searah kompas."""
     price = h1_map["price"]
@@ -274,24 +305,14 @@ def _setup_valid(compass_dir: Optional[str], h1_map: Dict, trigger: Dict) -> boo
             or _ob_near(price, h1_map.get("bullish_ob"))
             or [s for s in h1_map["sweeps"] if s["type"] == "sell_sweep"]
         )
-        trig_ok = bool(
-            _trigger_confirmed(trigger, ACTION_BUY)
-            or trigger["cross"] == "golden"
-            or trigger["bos"] == "bullish"
-        )
-        return zone_ok and trig_ok
+        return zone_ok and _trigger_valid(trigger, ACTION_BUY)
     if compass_dir == ACTION_SELL:
         zone_ok = bool(
             [z for z in h1_map["supply_zones"] if in_zone(price, z)]
             or _ob_near(price, h1_map.get("bearish_ob"))
             or [s for s in h1_map["sweeps"] if s["type"] == "buy_sweep"]
         )
-        trig_ok = bool(
-            _trigger_confirmed(trigger, ACTION_SELL)
-            or trigger["cross"] == "death"
-            or trigger["choch"] == "bearish"
-        )
-        return zone_ok and trig_ok
+        return zone_ok and _trigger_valid(trigger, ACTION_SELL)
     return False
 
 
@@ -794,6 +815,19 @@ def assemble_signal(
     rsi_now = rsi(ema_closes, RSI_PERIOD)
     rsi_prev = rsi(ema_closes[:-1], RSI_PERIOD) if len(ema_closes) > 1 else None
 
+    # Fix R5 (filter EMA20 H1, hasil tuning backtest 3 jendela x 7 hari): harga
+    # WAJIB searah tren H1 — BUY hanya bila price > EMA20(H1), SELL hanya bila
+    # price < EMA20(H1). Entry pullback yang memotong EMA20 melawan tren H1
+    # (counter-trend SMC murni) terbukti win rate rendah (~26% SELL, ~45% BUY);
+    # menambahkan alignment EMA20 menaikkan win rate ke ~62%. Bila EMA20 tak
+    # tersedia (data kurang), filter dilewati (graceful degradation).
+    ema20 = ema_info.get("ema_fast")
+    ema_aligned = (
+        ema20 is None
+        or (compass_dir == ACTION_BUY and price > ema20)
+        or (compass_dir == ACTION_SELL and price < ema20)
+    )
+
     fibo = analyze_fibonacci(ema_source, price)
 
     sr, sr_reasons = score_sr(price, h1_map, h4_candles, d1_candles, compass=compass)
@@ -847,9 +881,12 @@ def assemble_signal(
     total = max(-1.0, min(1.0, total / weight_sum)) if weight_sum else 0.0
 
     valid = _setup_valid(compass_dir, h1_map, trigger)
-    if valid and compass_dir == ACTION_BUY and total >= BUY_THRESHOLD:
+    ema_reject = False
+    if valid and compass_dir and not ema_aligned:
+        ema_reject = True
+    if valid and ema_aligned and compass_dir == ACTION_BUY and total >= BUY_THRESHOLD:
         action = ACTION_BUY
-    elif valid and compass_dir == ACTION_SELL and total <= SELL_THRESHOLD:
+    elif valid and ema_aligned and compass_dir == ACTION_SELL and total <= SELL_THRESHOLD:
         action = ACTION_SELL
     else:
         action = ACTION_NEUTRAL
@@ -877,7 +914,12 @@ def assemble_signal(
         sr_reasons, smc_reasons, fibo_reasons, ema_reasons, tech_reasons,
     )
     if rr_rejected:
-        reasons.append("[RR] Ditolak: Risk:Reward < 1:1.5 — target H1 terlalu dekat dengan Entry")
+        reasons.append("[RR] Ditolak: Risk:Reward < 1:0.7 — target H1 terlalu dekat dengan Entry")
+    if ema_reject and ema20 is not None:
+        reasons.append(
+            f"[EMA] Ditahan: harga di sisi berlawanan EMA20 H1 ({ema20:.4g}) — tren H1 "
+            f"belum searah kompas (hanya momentum searah tren yang disinyalkan)"
+        )
 
     return Signal(
         symbol=symbol,
@@ -1016,12 +1058,13 @@ def _levels_mtf(
     action: str,
     intended: Optional[str] = None,
 ):
-    """Entry/SL/TP1/TP2 dengan RRR wajib minimal 1:1.5 (TP1) & 1:3 (TP2).
+    """Entry/SL/TP1/TP2 dengan RRR wajib minimal 1:0.7 (TP1) & 1:1.4 (TP2).
 
     - SL: di bawah Demand/Support H1 terdekat (BUY) / di atas Supply/Resistance
       H1 terdekat (SELL), buffer SL_BUFFER_PCT (0.3%) di luar zona. Jarak SL
       dipaksa minimal max(SL_MIN_DIST_PCT, SL_ATR_MULT * ATR/price) agar SL
-      yang terlalu dekat (<1%) tidak tersapu noise pasar.
+      yang terlalu dekat tidak tersapu noise pasar (Fix R4: floor & pengali
+      sedikit dinaikkan).
     - TP1: target struktur H1 terdekat bila jarak TP1 >= RRR_MIN x jarak SL;
       else paksa proyeksi Entry +/- (jarak SL x RRR_MIN) bila tidak terhalang
       zona Supply/Demand kuat. Bila terhalang -> return None (sinyal dibatalkan).

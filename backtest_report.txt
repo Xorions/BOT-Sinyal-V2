@@ -1,0 +1,48 @@
+==============================================================
+BACKTEST SINYAL MTF — SIMULASI HISTORI BINANCE
+==============================================================
+  Pasangan          : 20 pair
+  Jendela           : 7 hari terakhir
+  Bar M15 discan    : 11,520
+  Sinyal berarah    : 868 (cooldown ditekan 466, posisi ganda 0, error 0)
+  Dievaluasi        : 402
+--------------------------------------------------------------
+  WIN RATE          : 40.6%   (39 menang / 96 selesai)
+  Total TP vs SL    : 39 TP  vs  57 SL
+    TP1             : 39
+    TP2             : 0
+    SL              : 57
+    FLOATING        : 306 (tak terselesaikan dalam 24.0h)
+--------------------------------------------------------------
+  Per arah:
+    BUY  :  33 W /  40 L  (45.2%)
+    SELL :   6 W /  17 L  (26.1%)
+--------------------------------------------------------------
+  Per konfidensi (bucket):
+    conf  60-69 :   4 W /   7 L  (36%)  F=7
+    conf  70-79 :  34 W /  46 L  (42%)  F=292
+    conf  80-89 :   1 W /   4 L  (20%)  F=7
+--------------------------------------------------------------
+  Per pair (selesai > 0):
+    TUTUSDT      :   8 W /   7 L  (53%)  F=2
+    PUMPUSDT     :   6 W /   6 L  (50%)  F=0
+    BABYUSDT     :   6 W /   5 L  (55%)  F=0
+    PROMUSDT     :   5 W /   5 L  (50%)  F=0
+    MMTUSDT      :   4 W /   3 L  (57%)  F=0
+    UNIUSDT      :   1 W /   6 L  (14%)  F=0
+    ZECUSDT      :   1 W /   5 L  (17%)  F=0
+    HOLOUSDT     :   1 W /   5 L  (17%)  F=8
+    SOLUSDT      :   1 W /   3 L  (25%)  F=10
+    XRPUSDT      :   2 W /   2 L  (50%)  F=23
+    NEARUSDT     :   2 W /   2 L  (50%)  F=3
+    DOGEUSDT     :   0 W /   3 L  (0%)  F=17
+    LINKUSDT     :   0 W /   2 L  (0%)  F=24
+    XAUTUSDT     :   2 W /   0 L  (100%)  F=57
+    SUIUSDT      :   0 W /   2 L  (0%)  F=11
+    BNBUSDT      :   0 W /   1 L  (0%)  F=31
+    BTCUSDT      :   0 W /   0 L  (0%)  F=25
+    ETHUSDT      :   0 W /   0 L  (0%)  F=42
+    TRXUSDT      :   0 W /   0 L  (0%)  F=29
+    UUSDT        :   0 W /   0 L  (0%)  F=24
+--------------------------------------------------------------
+  Waktu eksekusi    : 70.7 detik

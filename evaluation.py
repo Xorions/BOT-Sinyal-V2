@@ -15,6 +15,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
+from config import EVAL_MAX_HOURS
 from engine import ACTION_BUY, ACTION_SELL, Signal, _esc, _fmt_price
 
 HISTORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -143,37 +144,74 @@ def _session_since(key: Optional[str]) -> Optional[datetime]:
 
 
 # ---------------------------------------------------------------- evaluasi
-def _evaluate(sig: Dict, high: float, low: float, current: float):
-    """(status, harga acuan) berdasar high/low/current 24j terakhir.
+def _within_window(candles: List[Dict], since: Optional[datetime], max_hours: float = EVAL_MAX_HOURS) -> List[Dict]:
+    """Potong candle ke jendela `since`..`since+max_hours` (Fix R4).
 
-    Urutan cek: TP2 → TP1 → SL → Floating. Bila SL DAN TP tersentuh di jendela
-    yang sama (high >= TP1 dan low <= SL sekaligus), urutannya tidak bisa
-    dipastikan dari data agregat — dicatat konservatif sebagai SL agar win rate
-    tidak melebih-lebihkan (SL bisa saja terjadi sebelum TP).
-    current dipakai untuk sinyal yang masih berjalan (floating).
+    Candle tanpa `ts` (mis. fallback ticker 24j) selalu dipertahankan.
+    Membatasi jendela evaluasi agar SL/TP yang tersentuh JAUH setelah sesi
+    (bukan bagian dari niat day trade) tidak ikut dihitung.
+    """
+    if not since or not max_hours:
+        return candles
+    cutoff = since + timedelta(hours=max_hours)
+    cutoff_ms = int(cutoff.timestamp() * 1000)
+    return [c for c in candles if c.get("ts") is None or c["ts"] <= cutoff_ms]
+
+
+def _evaluate_candles(sig: Dict, candles: List[Dict]):
+    """(status, harga acuan) berdasar urutan candle M15 (kronologis).
+
+    Fix R4: sebelumnya evaluasi memakai agregat high/low seluruh jendela, jadi
+    bila harga menyentuh TP1 DULUAN lalu SL belakangan (atau sebaliknya) urutan
+    tak bisa dibedakan dan selalu dihitung SL (konservatif). Kini candle diwalk
+    berurutan: posisi dianggap ditutup begitu TP1/TP2 tersentuh SEBELUM SL, dan
+    SL hanya menang bila SL tersentuh di candle yang tak menyentuh TP di
+    candle-candle sebelumnya. Dalam SATU candle yang sama menyentuh keduanya,
+    urutan tetap tak bisa dipastikan -> SL (konservatif).
     """
     action = sig.get("action")
     if action == ACTION_BUY:
-        sl_touched = low <= sig["sl"]
-        if sl_touched and high >= sig["tp1"]:
-            return STATUS_SL, sig["sl"]
-        if high >= sig["tp2"]:
-            return STATUS_TP2, sig["tp2"]
-        if high >= sig["tp1"]:
-            return STATUS_TP1, sig["tp1"]
-        if sl_touched:
-            return STATUS_SL, sig["sl"]
+        for c in candles:
+            low = c.get("low")
+            high = c.get("high")
+            if low is None or high is None:
+                continue
+            sl_touched = low <= sig["sl"]
+            if not sl_touched and high >= sig["tp2"]:
+                return STATUS_TP2, sig["tp2"]
+            if not sl_touched and high >= sig["tp1"]:
+                return STATUS_TP1, sig["tp1"]
+            if sl_touched:
+                return STATUS_SL, sig["sl"]
     elif action == ACTION_SELL:
-        sl_touched = high >= sig["sl"]
-        if sl_touched and low <= sig["tp1"]:
-            return STATUS_SL, sig["sl"]
-        if low <= sig["tp2"]:
-            return STATUS_TP2, sig["tp2"]
-        if low <= sig["tp1"]:
-            return STATUS_TP1, sig["tp1"]
-        if sl_touched:
-            return STATUS_SL, sig["sl"]
+        for c in candles:
+            low = c.get("low")
+            high = c.get("high")
+            if low is None or high is None:
+                continue
+            sl_touched = high >= sig["sl"]
+            if not sl_touched and low <= sig["tp2"]:
+                return STATUS_TP2, sig["tp2"]
+            if not sl_touched and low <= sig["tp1"]:
+                return STATUS_TP1, sig["tp1"]
+            if sl_touched:
+                return STATUS_SL, sig["sl"]
+    current = None
+    for c in reversed(candles):
+        if c.get("close") is not None:
+            current = c["close"]
+            break
     return STATUS_FLOATING, current
+
+
+def _evaluate(sig: Dict, high: float, low: float, current: float):
+    """(status, harga acuan) berdasar high/low/current agregat (satu candle).
+
+    Dipakai `evaluate_signal` untuk satu jendela agregat; dalam satu jendela
+    yang menyentuh SL DAN TP sekaligus urutannya tidak bisa dipastikan, jadi
+    dicatat konservatif sebagai SL agar win rate tidak melebih-lebihkan.
+    """
+    return _evaluate_candles(sig, [{"high": high, "low": low, "close": current}])
 
 
 def evaluate_signal(sig: Dict, high: float, low: float, current: float) -> str:
@@ -199,9 +237,9 @@ def _pnl_pct(sig: Dict, ref: Optional[float]) -> str:
 def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = None) -> List[Dict]:
     """Isi 'status' + 'ref' (harga acuan) tiap sinyal.
 
-    fetch_fn(pair, since) -> (high, low, current) atau None.
-    `since` = waktu sesi sinyal (WIB-aware) bila tersedia; pemanggil data boleh
-    memakainya untuk menghitung high/low hanya dari candle SETELAH sesi sinyal.
+    fetch_fn(pair, since) -> list candle M15 kronologis (dict {high, low, close,
+    ts}) atau None. `since` = waktu sesi sinyal (WIB-aware); dipakai untuk
+    membatasi jendela evaluasi (EVAL_MAX_HOURS) & diteruskan ke fetch_fn.
     """
     out: List[Dict] = []
     for sig in signals:
@@ -209,14 +247,14 @@ def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = 
             out.append({**sig, "status": None})
             continue
         try:
-            high_low_cur = fetch_fn(sig["symbol"], since)
+            candles = fetch_fn(sig["symbol"], since)
         except Exception:
-            high_low_cur = None
-        if not high_low_cur:
+            candles = None
+        if not candles:
             out.append({**sig, "status": None})
             continue
-        high, low, current = high_low_cur
-        status, ref = _evaluate(sig, high, low, current)
+        candles = _within_window(candles, since)
+        status, ref = _evaluate_candles(sig, candles)
         out.append({**sig, "status": status, "ref": ref})
     return out
 

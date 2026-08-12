@@ -28,6 +28,7 @@ from engine import (
     score_sr,
     score_trigger,
 )
+from config import RRR_MIN, RRR_TP2
 from indicators.ema import analyze_ema, ema as ema_series
 from indicators.fibonacci import analyze_fibonacci
 from indicators.smc import detect_order_blocks, detect_structure
@@ -258,40 +259,43 @@ class TestTrigger:
 
 class TestTriggerStability:
     """Fix R2: konfirmasi M15 stabil — histogram harus searah selama N bar
-    berturut-turut dengan margin, agar bar nyaris-nol tidak memutuskan setup."""
+    berturut-turut dengan margin, agar bar nyaris-nol tidak memutuskan setup.
+    (Fix R4: TRIG_MIN_BARS=3 bar & margin 20% dari puncak.)"""
 
     def test_single_strong_bar_not_enough(self):
-        # 1 bar kuat bukan konfirmasi: butuh TRIG_MIN_BARS=2 bar beruntun.
+        # 1 bar kuat bukan konfirmasi: butuh TRIG_MIN_BARS=3 bar beruntun.
         hist = [0.0] * 60 + [2.0]
         assert _hist_confirmed(hist, True) is False
 
-    def test_two_consecutive_bars_confirms(self):
-        hist = [0.0] * 60 + [1.8, 2.0]
+    def test_three_consecutive_bars_confirms(self):
+        hist = [0.0] * 60 + [1.7, 1.8, 2.0]
         assert _hist_confirmed(hist, True) is True
 
     def test_last_bar_zero_breaks_confirmation(self):
         # Bar terakhir nyaris nol (noise) -> setup tidak konfirmasi walau bar
         # sebelumnya kuat. Inilah kasus yang dulu membuat valid/nevalid flip.
-        hist = [0.0] * 60 + [2.0, 0.01]
+        hist = [0.0] * 60 + [2.0, 2.0, 0.01]
         assert _hist_confirmed(hist, True) is False
 
     def test_bear_direction_requires_negative_bars(self):
-        hist = [0.0] * 60 + [-1.8, -2.0]
+        hist = [0.0] * 60 + [-1.7, -1.8, -2.0]
         assert _hist_confirmed(hist, False) is True
         assert _hist_confirmed(hist, True) is False
 
     def test_margin_ignores_small_noise_bars(self):
-        # Histogram sempat kecil (di bawah 10% puncak) = noise, bukan pembalikan.
-        hist = [0.0] * 60 + [0.5, 2.0]
+        # Histogram sempat kecil (di bawah 20% puncak) = noise, bukan pembalikan.
+        hist = [0.0] * 60 + [0.45, 1.8, 2.0]
         assert _hist_confirmed(hist, True) is True
 
     def test_nan_values_skipped(self):
-        hist = [float("nan")] * 60 + [1.5, 1.6]
+        hist = [float("nan")] * 60 + [1.5, 1.6, 1.7]
         assert _hist_confirmed(hist, True) is True
         assert _hist_confirmed([float("nan")] * 70, True) is False
 
     def test_analyze_trigger_exposes_confirmation_flags(self):
-        trig = analyze_trigger(_candles_from_closes(_bullish_series()))
+        # Rally akselerasi akhir -> histogram MACD naik beruntun >= TRIG_MIN_BARS.
+        closes = [100.0 + i for i in range(30)] + [130.0 + i * 3 for i in range(10)]
+        trig = analyze_trigger(_candles_from_closes(closes))
         assert trig["hist_confirm_bull"] is True
         assert trig["hist_confirm_bear"] is False
 
@@ -335,7 +339,7 @@ class TestRsiContrarianNeedsMomentum:
         assert not any("RSI Rebound" in r for r in reasons)
 
     def test_rsi_oversold_with_bullish_histogram_rebounds(self, monkeypatch):
-        hist = [float("nan")] * 38 + [1.5, 1.6]
+        hist = [float("nan")] * 37 + [1.5, 1.6, 1.7]
         score, reasons = self._score(25.0, hist, monkeypatch=monkeypatch)
         assert any("RSI Rebound" in r for r in reasons)
 
@@ -345,7 +349,7 @@ class TestRsiContrarianNeedsMomentum:
         assert not any("RSI Melemah" in r for r in reasons)
 
     def test_rsi_overbought_with_bearish_histogram_weakens(self, monkeypatch):
-        hist = [float("nan")] * 38 + [-1.5, -1.6]
+        hist = [float("nan")] * 37 + [-1.5, -1.6, -1.7]
         score, reasons = self._score(75.0, hist, monkeypatch=monkeypatch)
         assert any("RSI Melemah" in r for r in reasons)
 
@@ -517,7 +521,7 @@ class TestLevels:
 
 
 class TestLevelsRRR:
-    """Aturan RRR di `_levels_mtf`: SL zona + buffer, TP1 >= 1.5x SL, TP2 = 3x SL."""
+    """Aturan RRR di `_levels_mtf`: SL zona + buffer, TP1 >= RRR_MIN x SL, TP2 = RRR_TP2 x SL."""
 
     @staticmethod
     def _map(demand=(), supply=(), levels=None):
@@ -532,15 +536,17 @@ class TestLevelsRRR:
         }
 
     def test_buy_valid_target_uses_nearest_supply_zone(self):
+        # Supply zone 105 melewati proyeksi TP2 (1:RRR_TP2) -> TP1/TP2 ditukar:
+        # TP1 = proyeksi TP2 (terdekat), TP2 = 105 (target zona struktur).
         price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(105, 107)])
         entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_BUY)
         assert sl == pytest.approx(97 * (1 - 0.003))
-        assert tp1 == pytest.approx(105.0)
-        assert tp2 == pytest.approx(100 + 3 * (100 - sl))
+        assert tp1 == pytest.approx(100 + RRR_TP2 * (100 - sl))
+        assert tp2 == pytest.approx(105.0)
         assert sl < entry < tp1 < tp2
 
     def test_buy_forced_projection_when_nearest_target_too_close(self):
-        # Swing high 102 terlalu dekat (< 1.5x SL) tapi tidak terhalang zona -> TP1 = proyeksi 1.5x SL.
+        # Swing high 102 terlalu dekat (< RRR_MIN x SL) tapi tidak terhalang zona -> TP1 = proyeksi RRR_MIN x SL.
         candles = [
             {"high": 99, "low": 98}, {"high": 100, "low": 99}, {"high": 101, "low": 100},
             {"high": 102, "low": 100}, {"high": 101, "low": 99}, {"high": 100, "low": 98},
@@ -549,8 +555,8 @@ class TestLevelsRRR:
         price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[])
         entry, sl, tp1, tp2 = _levels_mtf(price, candles, h1_map, ACTION_BUY)
         sl_dist = price - sl
-        assert tp1 == pytest.approx(price + 1.5 * sl_dist)
-        assert tp2 == pytest.approx(price + 3 * (price - sl))
+        assert tp1 == pytest.approx(price + RRR_MIN * sl_dist)
+        assert tp2 == pytest.approx(price + RRR_TP2 * (price - sl))
         assert sl < entry < tp1 < tp2
 
     def test_buy_blocked_by_supply_zone_returns_none(self):
@@ -578,25 +584,27 @@ class TestLevelsRRR:
         assert tp1 > price  # proyeksi RRR, bukan ditolak jadi NEUTRAL
 
     def test_buy_swaps_tp_when_target_beyond_tp2_projection(self):
-        # Supply zone di 120 melewati proyeksi TP2 (1:3) -> TP1/TP2 ditukar agar
+        # Supply zone di 120 melewati proyeksi TP2 (1:RRR_TP2) -> TP1/TP2 ditukar agar
         # target terdekat jadi TP1: entry < TP1 < TP2 tetap terjaga.
         price, h1_map = 100.0, self._map(demand=[(97, 99)], supply=[(120, 122)])
         entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_BUY)
         sl_dist = price - sl
-        assert tp1 == pytest.approx(price + 3 * sl_dist)
+        assert tp1 == pytest.approx(price + RRR_TP2 * sl_dist)
         assert tp2 == pytest.approx(120.0)
         assert sl < entry < tp1 < tp2
 
     def test_sell_valid_target_uses_nearest_demand_zone(self):
+        # Demand zone 95 melewati proyeksi TP2 (1:RRR_TP2) -> TP1/TP2 ditukar:
+        # TP1 = proyeksi TP2 (terdekat), TP2 = 95 (target zona struktur).
         price, h1_map = 100.0, self._map(demand=[(93, 95)], supply=[(101, 103)])
         entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_SELL)
         assert sl == pytest.approx(103 * (1 + 0.003))
-        assert tp1 == pytest.approx(95.0)
-        assert tp2 == pytest.approx(100 - 3 * (sl - price))
+        assert tp1 == pytest.approx(100 - RRR_TP2 * (sl - price))
+        assert tp2 == pytest.approx(95.0)
         assert sl > entry > tp1 > tp2
 
     def test_sell_forced_projection_when_nearest_target_too_close(self):
-        # Swing low 98 terlalu dekat tapi tidak terhalang zona -> TP1 = proyeksi 1.5x SL.
+        # Swing low 98 terlalu dekat tapi tidak terhalang zona -> TP1 = proyeksi RRR_MIN x SL.
         candles = [
             {"high": 102, "low": 101}, {"high": 101, "low": 100}, {"high": 100, "low": 99},
             {"high": 99, "low": 98}, {"high": 100, "low": 99}, {"high": 101, "low": 100},
@@ -605,8 +613,8 @@ class TestLevelsRRR:
         price, h1_map = 100.0, self._map(demand=[], supply=[(101, 103)])
         entry, sl, tp1, tp2 = _levels_mtf(price, candles, h1_map, ACTION_SELL)
         sl_dist = sl - price
-        assert tp1 == pytest.approx(price - 1.5 * sl_dist)
-        assert tp2 == pytest.approx(price - 3 * (sl - price))
+        assert tp1 == pytest.approx(price - RRR_MIN * sl_dist)
+        assert tp2 == pytest.approx(price - RRR_TP2 * (sl - price))
         assert sl > entry > tp1 > tp2
 
     def test_sell_blocked_by_demand_zone_returns_none(self):
@@ -614,12 +622,12 @@ class TestLevelsRRR:
         assert _levels_mtf(price, [], h1_map, ACTION_SELL) is None
 
     def test_sell_swaps_tp_when_target_beyond_tp2_projection(self):
-        # Demand zone di 82 melewati proyeksi TP2 (1:3) -> TP1/TP2 ditukar agar
+        # Demand zone di 82 melewati proyeksi TP2 (1:RRR_TP2) -> TP1/TP2 ditukar agar
         # target terdekat jadi TP1: entry > TP1 > TP2 tetap terjaga.
         price, h1_map = 100.0, self._map(demand=[(80, 82)], supply=[(101, 103)])
         entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_SELL)
         sl_dist = sl - price
-        assert tp1 == pytest.approx(price - 3 * sl_dist)
+        assert tp1 == pytest.approx(price - RRR_TP2 * sl_dist)
         assert tp2 == pytest.approx(82.0)
         assert sl > entry > tp1 > tp2
 
@@ -628,8 +636,8 @@ class TestLevelsRRR:
         entry, sl, tp1, tp2 = _levels_mtf(price, [], {}, ACTION_NEUTRAL)
         assert entry == price
         assert sl == pytest.approx(price * 0.97)
-        assert tp1 == pytest.approx(price * (1 + 1.5 * 0.03))
-        assert tp2 == pytest.approx(price * (1 + 3.0 * 0.03))
+        assert tp1 == pytest.approx(price * (1 + RRR_MIN * 0.03))
+        assert tp2 == pytest.approx(price * (1 + RRR_TP2 * 0.03))
 
     def test_bad_rr_signal_rejected_to_neutral(self, monkeypatch):
         """Setup BUY kuat namun `_levels_mtf` menolak RRR -> NEUTRAL + alasan [RR]."""
@@ -754,7 +762,7 @@ class TestSwapBlocked:
         price, h1_map = 100.0, TestLevelsRRR._map(demand=[(97, 99)], supply=[(98, 108), (120, 122)])
         entry, sl, tp1, tp2 = _levels_mtf(price, [], h1_map, ACTION_BUY)
         sl_dist = price - sl
-        assert tp1 == pytest.approx(price + 3 * sl_dist)
+        assert tp1 == pytest.approx(price + RRR_TP2 * sl_dist)
         assert tp2 == pytest.approx(120.0)
         assert sl < entry < tp1 < tp2
 

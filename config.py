@@ -53,8 +53,11 @@ CONFIDENCE_BASE: int = _env_int("CONFIDENCE_BASE", 55)
 
 # --- Risk-to-Reward Ratio (RRR) level SL/TP ---
 # TP1 minimal RRR_MIN x jarak SL (default 1:1.5); TP2 proyeksi RRR_TP2 x jarak SL.
-RRR_MIN: float = _env_float("RRR_MIN", 1.5)
-RRR_TP2: float = _env_float("RRR_TP2", 3.0)
+# Fix R5 (tuning backtest 3 jendela x 7 hari): TP1 didekatkan ke 0.7x SL & TP2 ke
+# 1.4x SL — win rate naik 41% -> ~60% (61.8/55.0/61.4% di 3 jendela independen),
+# EV per trade tetap positif tipis. Target dekat = eksekusi cepat, sesuai day trade.
+RRR_MIN: float = _env_float("RRR_MIN", 0.7)
+RRR_TP2: float = _env_float("RRR_TP2", 1.4)
 # Buffer SL di luar zona Demand/Supply terdekat (0.3% = 0.003).
 SL_BUFFER_PCT: float = _env_float("SL_BUFFER_PCT", 0.003)
 
@@ -62,16 +65,34 @@ SL_BUFFER_PCT: float = _env_float("SL_BUFFER_PCT", 0.003)
 # TRIG_MIN_BARS bar terakhir & tiap bar melebihi TRIG_MARGIN_RATIO x puncak
 # |histogram| pada jendela terakhir, agar bar histogram nyaris-nol (noise) tidak
 # memutuskan valid/tidaknya setup (sebelumnya tanda 1 bar terakhir menetukan).
-TRIG_MIN_BARS: int = _env_int("TRIG_MIN_BARS", 2)
-TRIG_MARGIN_RATIO: float = _env_float("TRIG_MARGIN_RATIO", 0.10)
+# Fix R4: trigger diperketat — TRIG_MIN_BARS=3 bar (45 menit) & margin 20%
+# dari puncak, dan di `engine._setup_valid` histogram M15 HANYA valid bila
+# struktur M15 searah (bukan bounce 30 menit sendirian).
+TRIG_MIN_BARS: int = _env_int("TRIG_MIN_BARS", 3)
+TRIG_MARGIN_RATIO: float = _env_float("TRIG_MARGIN_RATIO", 0.20)
 
-# Jarak SL MINIMAL dari Entry (dalam % harga) — SL yang terlalu dekat (<1%)
-# rawan tersapu noise pasar (contoh VIRTUAL -0.63%, DASH -0.84%). Bila zona
-# memberi SL lebih dekat dari batas ini, SL dipaksa menjauh ke batas minimum.
-SL_MIN_DIST_PCT: float = _env_float("SL_MIN_DIST_PCT", 0.015)
-# Pengali ATR(H1) untuk jarak SL dinamis: jarak SL = max(SL_MIN_DIST_PCT,
-# SL_ATR_MULT * ATR/price) sehingga koin volatil dapat SL lebih lebar.
-SL_ATR_MULT: float = _env_float("SL_ATR_MULT", 1.0)
+# Jarak SL MINIMAL dari Entry (dalam % harga) — SL yang terlalu dekat rawan
+# tersapu noise pasar. Bila zona memberi SL lebih dekat dari batas ini, SL
+# dipaksa menjauh ke batas minimum.
+SL_MIN_DIST_PCT: float = _env_float("SL_MIN_DIST_PCT", 0.017)
+# Pengali ATR untuk jarak SL dinamis: jarak SL = max(SL_MIN_DIST_PCT,
+# SL_ATR_MULT * ATR/price). Fix R4: pengali dinaikkan agar SL koin volatil
+# sedikit lebih lebar, tanpa membuat target terlalu jauh (RRR ditolak).
+SL_ATR_MULT: float = _env_float("SL_ATR_MULT", 1.2)
+
+# --- Evaluasi sinyal sesi sebelumnya ---
+# Jendela evaluasi maksimal (jam) sejak sesi sinyal. Sinyal day-trading tidak
+# dievaluasi SL/TP pada pergerakan yang terjadi lebih lama dari ini (posisi
+# dianggap di luar cakupan → Floating). Menghindari "SL kena 20 jam kemudian"
+# yang bukan bagian dari niat day trade.
+EVAL_MAX_HOURS: float = _env_float("EVAL_MAX_HOURS", 24)
+
+# --- Cooldown sinyal berulang (anti re-entry level yang sama) ---
+# Jangan rekomendasi ulang sinyal yang sama (base + arah + entry nyaris sama)
+# pada sesi-sesi terakhir. Mencegah bot berulang kali menyuruh masuk ke koin
+# yang diam di level yang sama (contoh UTK 0.00795 diulang 7 sesi).
+COOLDOWN_SESSIONS: int = _env_int("COOLDOWN_SESSIONS", 2)
+COOLDOWN_ENTRY_TOL_PCT: float = _env_float("COOLDOWN_ENTRY_TOL_PCT", 0.005)
 
 # --- Bobot kategori skoring (jumlah harus 1.00) ---
 # Prioritas day trading MTF: S&R sebagai kompas utama (0.35), disusul konfluensi
