@@ -10,7 +10,9 @@ API key, sehingga aman dipakai di GitHub Actions runner AS:
 
 Konvensi symbol (transparan, dipakai semua fungsi di modul ini):
   - Spot   : BTCUSDT
-  - Futures: BTCUSDT_UMCBL (USDT-M Perpetual) — lihat `to_futures_symbol()`.
+  - Futures: BTCUSDT (polos) — endpoint publik `mix` V2 memakai symbol polos
+    + `productType=USDT-FUTURES`; suffix `_UMCBL` hanya untuk endpoint
+    privat/WebSocket, TIDAK dipakai modul ini (lihat `to_futures_symbol()`).
 
 Semua fungsi mempertahankan kontrak output data lama (Binance):
 kline -> dict {open, high, low, close, volume, ts} dengan `ts` dalam
@@ -86,15 +88,15 @@ def to_spot_symbol(symbol: str) -> str:
 
 
 def to_futures_symbol(symbol: str) -> str:
-    """Konversi symbol Spot/plain -> format Futures Bitget (BTCUSDT -> BTCUSDT_UMCBL).
+    """Normalisasi symbol untuk endpoint publik Futures (mix) Bitget V2.
 
-    Representasi USDT-M Perpetual Bitget memakai suffix `_UMCBL` di semua
-    endpoint `mix`. Symbol yang sudah ber-suffix tidak diubah.
+    Berbeda dengan V1/WebSocket, endpoint REST publik `mix` (candles, tickers,
+    history-fund-rate, account-long-short) memakai symbol POLOS (`BTCUSDT`)
+    bersama `productType=USDT-FUTURES`; suffix `_UMCBL` (BTCUSDT_UMCBL) hanya
+    untuk endpoint privat & stream WS. Symbol yang terlanjur ber-suffix
+    (mis. dari config lama) tetap dibersihkan di sini.
     """
-    symbol = to_spot_symbol(symbol)
-    if symbol.endswith(FUTURES_SYMBOL_SUFFIX):
-        return symbol
-    return f"{symbol}{FUTURES_SYMBOL_SUFFIX}"
+    return to_spot_symbol(symbol)
 
 
 def _ok(data: Any, source: str = "bitget") -> List[Any]:
@@ -235,11 +237,16 @@ def get_ticker_24h(symbol: str, market: str = MARKET_SPOT) -> Optional[Dict[str,
         http_get_json(url, params, source="bitget" if market == MARKET_SPOT else "bitget-futures"),
         source="bitget" if market == MARKET_SPOT else "bitget-futures",
     )
-    if not rows:
+    # Endpoint futures `mix` mengabaikan param `symbol` (mengembalikan SEMUA
+    # ticker pasar) dan spot mengembalikan 1 baris; filter eksplisit memastikan
+    # ticker yang tepat diambil di kedua pasar. None = symbol tidak ditemukan
+    # (kontrak lama: fallback graceful di pemanggil).
+    matched = [row for row in rows if row.get("symbol") == api_symbol]
+    if not matched:
         return None
-    ticker = _parse_ticker(rows[0])
+    ticker = _parse_ticker(matched[0])
     if not ticker:
-        raise DataSourceError(f"[bitget] Ticker {symbol} tidak valid: {rows[0]}")
+        raise DataSourceError(f"[bitget] Ticker {symbol} tidak valid: {matched[0]}")
     return ticker
 
 

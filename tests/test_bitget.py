@@ -27,11 +27,11 @@ class TestSymbolMapping:
         assert bitget.to_spot_symbol("BTCUSDT") == "BTCUSDT"
         assert bitget.to_spot_symbol("btcusdt_umcbl") == "BTCUSDT"
 
-    def test_to_futures_symbol_appends_umcbl(self):
-        assert bitget.to_futures_symbol("BTCUSDT") == "BTCUSDT_UMCBL"
-        assert bitget.to_futures_symbol("btcusdt") == "BTCUSDT_UMCBL"
-        assert bitget.to_futures_symbol("BTCUSDT_UMCBL") == "BTCUSDT_UMCBL"
-        assert bitget.to_futures_symbol("ETHUSDT") == "ETHUSDT_UMCBL"
+    def test_to_futures_symbol_uses_plain_symbol(self):
+        assert bitget.to_futures_symbol("BTCUSDT") == "BTCUSDT"
+        assert bitget.to_futures_symbol("btcusdt") == "BTCUSDT"
+        assert bitget.to_futures_symbol("BTCUSDT_UMCBL") == "BTCUSDT"
+        assert bitget.to_futures_symbol("ETHUSDT") == "ETHUSDT"
 
     def test_granularity_spot(self):
         assert bitget._granularity(bitget.INTERVAL_M15, bitget.MARKET_SPOT) == "15min"
@@ -148,7 +148,7 @@ class TestKlinesFutures:
         out = bitget.get_klines_futures("BTCUSDT", bitget.INTERVAL_1H, 50)
 
         assert captured["url"].endswith("/api/v2/mix/market/candles")
-        assert captured["params"]["symbol"] == "BTCUSDT_UMCBL"
+        assert captured["params"]["symbol"] == "BTCUSDT"
         assert captured["params"]["productType"] == bitget.FUTURES_PRODUCT_TYPE
         assert captured["params"]["granularity"] == "1H"
         assert out[0]["ts"] == 1000
@@ -188,10 +188,10 @@ class TestTicker:
         assert out["high_24h"] == 66000.0
         assert out["low_24h"] == 64000.0
 
-    def test_ticker_24h_futures_uses_umcbl_symbol(self, monkeypatch):
+    def test_ticker_24h_futures_uses_plain_symbol(self, monkeypatch):
         captured = {}
         tick = {
-            "symbol": "BTCUSDT_UMCBL",
+            "symbol": "BTCUSDT",
             "lastPr": "65900.25",
             "high24h": "66000.0",
             "low24h": "64000.0",
@@ -210,9 +210,41 @@ class TestTicker:
         out = bitget.get_ticker_24h("BTCUSDT", market=bitget.MARKET_FUTURES)
 
         assert captured["url"].endswith("/api/v2/mix/market/tickers")
-        assert captured["params"]["symbol"] == "BTCUSDT_UMCBL"
+        assert captured["params"]["symbol"] == "BTCUSDT"
         assert captured["params"]["productType"] == bitget.FUTURES_PRODUCT_TYPE
         assert out["price_change_pct_24h"] == pytest.approx(-0.478)
+
+    def test_ticker_24h_futures_filters_matching_row(self, monkeypatch):
+        """Endpoint mix tickers mengabaikan param `symbol` (mengembalikan SEMUA
+        ticker pasar) -> klien harus memfilter baris yang tepat."""
+        captured = {}
+        rows = [
+            {"symbol": "ETHUSDT", "lastPr": "3500.0", "change24h": "0.01", "baseVolume": "1", "quoteVolume": "1", "high24h": "1", "low24h": "1", "ts": "1750332210370"},
+            {"symbol": "BTCUSDT", "lastPr": "65900.25", "change24h": "-0.00478", "baseVolume": "1875.123", "quoteVolume": "123456789.123", "high24h": "66000.0", "low24h": "64000.0", "ts": "1750332210370"},
+            {"symbol": "SOLUSDT", "lastPr": "150.0", "change24h": "-0.02", "baseVolume": "5", "quoteVolume": "5", "high24h": "1", "low24h": "1", "ts": "1750332210370"},
+        ]
+
+        def fake_get(url, params=None, **kwargs):
+            captured["url"] = url
+            captured["params"] = params
+            return _envelope(rows)
+
+        monkeypatch.setattr(bitget, "http_get_json", fake_get)
+        out = bitget.get_ticker_24h("BTCUSDT", market=bitget.MARKET_FUTURES)
+
+        assert captured["params"]["symbol"] == "BTCUSDT"
+        assert out["symbol"] == "BTCUSDT"
+        assert out["price"] == 65900.25
+        assert out["quote_volume"] == pytest.approx(123456789.123)
+
+    def test_ticker_24h_returns_none_when_symbol_missing(self, monkeypatch):
+        rows = [{"symbol": "ETHUSDT", "lastPr": "3500.0", "change24h": "0.01", "baseVolume": "1", "quoteVolume": "1", "high24h": "1", "low24h": "1", "ts": "1"}]
+
+        def fake_get(url, params=None, **kwargs):
+            return _envelope(rows)
+
+        monkeypatch.setattr(bitget, "http_get_json", fake_get)
+        assert bitget.get_ticker_24h("BTCUSDT", market=bitget.MARKET_FUTURES) is None
 
     def test_all_tickers_filters_usdt_pairs(self, monkeypatch):
         captured = {}
@@ -249,8 +281,8 @@ class TestFuturesDerivatives:
     def test_funding_rate_parses_history_fund_rate(self, monkeypatch):
         captured = {}
         rows = [
-            {"symbol": "BTCUSDT_UMCBL", "fundingRate": "-0.0003", "fundingTime": "1652396400000"},
-            {"symbol": "BTCUSDT_UMCBL", "fundingRate": "0.0002", "fundingTime": "1652400000000"},
+            {"symbol": "BTCUSDT", "fundingRate": "-0.0003", "fundingTime": "1652396400000"},
+            {"symbol": "BTCUSDT", "fundingRate": "0.0002", "fundingTime": "1652400000000"},
         ]
 
         def fake_get(url, params=None, **kwargs):
@@ -262,7 +294,7 @@ class TestFuturesDerivatives:
         out = bitget.get_funding_rate("BTCUSDT", limit=8)
 
         assert captured["url"].endswith("/api/v2/mix/market/history-fund-rate")
-        assert captured["params"]["symbol"] == "BTCUSDT_UMCBL"
+        assert captured["params"]["symbol"] == "BTCUSDT"
         assert captured["params"]["productType"] == bitget.FUTURES_PRODUCT_TYPE
         assert captured["params"]["pageSize"] == 8
         assert out == [-0.0003, 0.0002]
@@ -291,7 +323,7 @@ class TestFuturesDerivatives:
         out = bitget.get_long_short_ratio("BTCUSDT")
 
         assert captured["url"].endswith("/api/v2/mix/market/account-long-short")
-        assert captured["params"]["symbol"] == "BTCUSDT_UMCBL"
+        assert captured["params"]["symbol"] == "BTCUSDT"
         assert captured["params"]["period"] == "5m"
         assert out == pytest.approx(1.5)
 
