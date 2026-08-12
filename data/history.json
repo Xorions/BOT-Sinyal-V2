@@ -807,5 +807,57 @@
       "tp2": 0.0008445285714285716,
       "timestamp": "Tuesday, 11 Aug 2026, 19:07 WIB"
     }
+  ],
+  "2026-08-12 13:37": [
+    {
+      "symbol": "SKYUSDT",
+      "base": "SKY",
+      "action": "SELL",
+      "entry": 0.05283,
+      "sl": 0.05362245,
+      "tp1": 0.051641325,
+      "tp2": 0.05045265,
+      "timestamp": "Wednesday, 12 Aug 2026, 13:37 WIB"
+    },
+    {
+      "symbol": "TRUMPUSDT",
+      "base": "TRUMP",
+      "action": "SELL",
+      "entry": 1.481,
+      "sl": 1.5032150000000002,
+      "tp1": 1.4476775,
+      "tp2": 1.4143549999999998,
+      "timestamp": "Wednesday, 12 Aug 2026, 13:37 WIB"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "base": "TRX",
+      "action": "BUY",
+      "entry": 0.3356,
+      "sl": 0.330566,
+      "tp1": 0.343151,
+      "tp2": 0.35070199999999996,
+      "timestamp": "Wednesday, 12 Aug 2026, 13:37 WIB"
+    },
+    {
+      "symbol": "ARUSDT",
+      "base": "AR",
+      "action": "SELL",
+      "entry": 1.793,
+      "sl": 1.8198949999999998,
+      "tp1": 1.7526575000000002,
+      "tp2": 1.7123150000000003,
+      "timestamp": "Wednesday, 12 Aug 2026, 13:37 WIB"
+    },
+    {
+      "symbol": "CHZUSDT",
+      "base": "CHZ",
+      "action": "SELL",
+      "entry": 0.01267,
+      "sl": 0.012860050000000001,
+      "tp1": 0.012384925,
+      "tp2": 0.012099849999999999,
+      "timestamp": "Wednesday, 12 Aug 2026, 13:37 WIB"
+    }
   ]
 }
