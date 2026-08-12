@@ -25,9 +25,9 @@ tidak ada pemicu ganda):
    - **M15** → *pelatuk* konfirmasi eksekusi (RSI / MACD cross / momentum / BOS M15).
    - Funding rate & long/short ratio (bila futures terjangkau — diprobe sekali di awal via `get_funding_rate("BTCUSDT")`).
 4. Data agregat: Fear & Greed Index, whale netflow ETH (Etherscan), statistik jaringan BTC (blockchain.info).
-5. Skoring **berbobot** (prioritas S&R kompas + konfluensi SMC/Fibo/EMA) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 **dan** harga menyentuh zona SMC/S&D H1. **Aturan RRR:** level Entry/SL/TP wajib memenuhi Risk-to-Reward minimal (lihat [Risk-to-Reward Ratio](#risk-to-reward-ratio-rrr)).
-6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), cek harga 24j terakhir tiap sinyal → status TP2/TP1/SL/Floating + win rate → dikirim sebagai **pesan Telegram terpisah (History Review)**.
-7. Kirim **2 pesan Telegram** (HTML parse mode): pesan evaluasi (History Review) lalu Day Trading Briefing (Top 5) yang berakhir dengan disclaimer. Setelah terkirim, simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions).
+5. Skoring **berbobot** (prioritas S&R kompas + konfluensi SMC/Fibo/EMA) → BUY/SELL/NEUTRAL + confidence. **Aturan kompas:** H4 bullish → HANYA sinyal BUY; H4 bearish → HANYA SELL. Sinyal tervalidasi bila M15 searah H4/D1 (histogram MACD perlu konfirmasi 3 bar beruntun **dan** struktur M15 searah, anti bounce 30-45 menit) **dan** harga menyentuh zona SMC/S&D H1 **dan** alignment EMA20 H1 (BUY: price>EMA20, SELL: price<EMA20). **Aturan RRR:** level Entry/SL/TP wajib memenuhi Risk-to-Reward minimal (lihat [Risk-to-Reward Ratio](#risk-to-reward-ratio-rrr)).
+6. **Evaluasi sinyal sesi sebelumnya** (`data/history.json`): baca riwayat sesi terakhir sebelum sesi ini (termasuk sesi pagi yang sama), walk **candle M15 sejak sesi sinyal secara berurutan** (jendela `EVAL_MAX_HOURS` 24 jam) tiap sinyal → status TP2/TP1/SL/Floating + win rate → dikirim sebagai **pesan Telegram terpisah (History Review)**.
+7. Kirim **2 pesan Telegram** (HTML parse mode): pesan evaluasi (History Review) lalu Day Trading Briefing (Top 5) yang berakhir dengan disclaimer. Setelah terkirim, simpan sinyal sesi ini ke `history.json` (di-commit balik oleh GitHub Actions). Sinyal yang mengulang setup sesi-sesi terakhir (base + arah + entry nyaris sama) diturunkan ke NEUTRAL oleh **anti sinyal berulang** (`_apply_cooldown`, toleransi 0.5%, 2 sesi terakhir).
 
 ## Sumber Data
 
@@ -60,7 +60,9 @@ Semua data via `data/_client.py` (retry + backoff + handling HTTP 429). Satu sum
 ## Struktur
 
 ```
-bot.py                     # Entry point: kumpulkan data MTF → skoring → kirim Telegram
+bot.py                     # Entry point: kumpulkan data MTF → skoring → kirim Telegram (termasuk anti sinyal berulang)
+backtest.py                # Backtest offline: walk M15 tanpa look-ahead → win rate/EV per jendela (tuning RRR/EMA20)
+_exp.py                    # Eksperimen tuning parameter (RRR/EMA) atas data histori
 config.py                  # Kredensial & parameter dari .env
 engine.py                  # Skoring MTF (Kompas H4/D1 → Zona H1 → Pelatuk M15) + format pesan HTML
 evaluation.py              # Riwayat sinyal (history.json) + evaluasi/recap sesi sebelumnya
@@ -80,7 +82,7 @@ indicators/
   support_resistance.py    # Swing high/low, pivot, level terdekat
   smc.py                   # Order Block, FVG, BOS/CHoCH, EQH/EQL, Liquidity Sweep
   supply_demand.py         # Supply & Demand Zone (base + pause + impuls)
-tests/                     # pytest (176 kasus)
+tests/                     # pytest (198 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -104,9 +106,11 @@ Level Entry/SL/TP di `engine._levels_mtf()` dihitung dengan **RRR wajib minimal*
 
 | Parameter | Default | Arti |
 |---|---|---|
-| `RRR_MIN` | 1.5 | TP1 minimal = `RRR_MIN` x jarak SL (1:1.5) |
-| `RRR_TP2` | 3.0 | TP2 proyeksi = `RRR_TP2` x jarak SL (1:3) |
+| `RRR_MIN` | 0.7 | TP1 minimal = `RRR_MIN` x jarak SL (1:0.7) |
+| `RRR_TP2` | 1.4 | TP2 proyeksi = `RRR_TP2` x jarak SL (1:1.4) |
 | `SL_BUFFER_PCT` | 0.003 | Buffer 0.3% SL di luar zona Demand/Supply terdekat |
+| `SL_MIN_DIST_PCT` | 0.017 | Jarak SL minimal dari Entry (1.7%) agar tidak tersapu noise |
+| `SL_ATR_MULT` | 1.2 | Pengali ATR(H1) untuk SL dinamis volatil: jarak SL = `max(SL_MIN_DIST_PCT, SL_ATR_MULT x ATR/price)` |
 
 Alur perhitungan (`_levels_mtf` → `_rr_targets`):
 
@@ -115,9 +119,12 @@ Alur perhitungan (`_levels_mtf` → `_rr_targets`):
 3. **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **dengan syarat** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). 
 4. Bila target H1 terdekat **terlalu dekat** (TP1 < `RRR_MIN` x SL): paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) — **hanya bila tidak terhalang zona Supply/Demand kuat** di antara Entry dan proyeksi TP1. Zona yang **berisi Entry tidak dianggap terhalang** (BUY: harga meninggalkan zona ke atas; SELL: ke bawah). Bila terhalang → `_levels_mtf` mengembalikan `None` → **sinyal di-reject menjadi NEUTRAL** (alasan `[RR]` ditambahkan).
 5. **TP2** = Entry ± (jarak SL x `RRR_TP2`).
-6. **Urutan TP dijamin** (`_rr_targets`): TP1 selalu target **terdekat**. Bila target struktur H1 melewati proyeksi TP2 (1:3), posisi TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`.
+6. **Urutan TP dijamin** (`_rr_targets`): TP1 selalu target **terdekat**. Bila target struktur H1 melewati proyeksi TP2 (1:1.4), posisi TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`.
+7. **Filter alignment EMA20 H1**: BUY hanya bila `price > EMA20(H1)`, SELL hanya bila `price < EMA20(H1)` — entry counter-trend SMC murni (menembus EMA20 melawan tren H1) ditolak jadi NEUTRAL dengan alasan `[EMA]` (anti sinyal win rate rendah).
 
-Contoh BUY: Entry $102, SL $99.70 (Demand $100 − 0.3%), jarak SL 2.30% → TP1 minimal $105.45 (1:1.5), TP2 $108.90 (1:3).
+> Nilai 0.7/1.4 hasil **backtest 3 jendela independen x 7 hari** (`backtest.py`): win rate naik ~41% → ~60% (61.8/55.0/61.4%) dan EV per trade tetap positif tipis. Target dekat = eksekusi cepat, sesuai day trading.
+
+Contoh BUY: Entry $102, SL $99.70 (Demand $100 − 0.3%), jarak SL 2.30% → TP1 minimal $103.64 (1:0.7), TP2 $105.28 (1:1.4).
 
 ## Filter aset (bukan koin kripto yang valid)
 
@@ -193,7 +200,7 @@ Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blo
 `evaluation.py` + `data/history.json`:
 
 - **Penyimpanan riwayat**: tiap sesi (2x sehari) menyimpan sinyal terpilih (Symbol, Direction, Entry, SL, TP1, TP2, Timestamp) dengan **key sesi WIB** `YYYY-MM-DD HH:MM` (kunci lama `YYYY-MM-DD` tetap didukung). Karena runner GitHub Actions di-reset tiap run, workflow meng-*commit balik* `history.json` ke repo.
-- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **high/low/current** tiap pair dari Binance, lalu menentukan status tiap sinyal dengan urutan cek **TP2 → TP1 → SL → Floating**. High/low dihitung dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j bila data sejak-sesi tidak tersedia. Bila sesi terakhir gagal dievaluasi (tanpa sinyal / fetch gagal), recap **mundur ke sesi lebih lama yang valid**.
+- **Evaluasi sebelum briefing**: pada run berikutnya, bot membaca **sesi terakhir sebelum sesi sekarang** (termasuk sesi pagi yang sama), mengambil **candle M15 kronologis** tiap pair dari Binance (jendela dibatasi `EVAL_MAX_HOURS` = 24 jam sejak sesi), lalu **walk candle-per-candle dalam urutan waktu** — TP menang bila tersentuh di candle yang tidak menyentuh SL sebelumnya; SL menang bila menyentuh keduanya di candle yang sama (urutan tak bisa dipastikan → konservatif SL). High/low diambil dari **kline M15 sejak sesi sinyal** (`get_klines_since`) — bukan ticker 24j rolling — sehingga pergerakan harga **sebelum** entry tidak ikut menentukan hasil; fallback ke ticker 24j (1 candle sintetis) bila data sejak-sesi tidak tersedia. Bila sesi terakhir gagal dievaluasi (tanpa sinyal / fetch gagal), recap **mundur ke sesi lebih lama yang valid**.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari seluruh sinyal yang dievaluasi (ditampilkan juga jumlah TP1/TP2/SL/Floating).
 - Recap dikirim sebagai **pesan Telegram terpisah** (History Review) sebelum blok `📊 DAY TRADING BRIEFING — MTF S&R + SMC + FIBO + EMA`:
 

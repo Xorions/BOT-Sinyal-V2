@@ -9,7 +9,9 @@ Dijalankan **2x sehari (13:30 & 19:00 WIB)** — jadwal dipicu dari luar oleh **
 Alur: kumpulkan data multi-sumber gratis → analisa **Multi-Timeframe** (Kompas H4/D1 → Zona H1 → Pelatuk M15) → skoring berbobot → evaluasi sinyal sesi sebelumnya → kirim Top-5 Day Trading Briefing ke Telegram.
 
 ```
-bot.py                     # Entry point: orkestrasi data MTF → skoring → kirim
+bot.py                     # Entry point: orkestrasi data MTF → skoring → kirim. Anti sinyal berulang di `_apply_cooldown` (cooldown re-entry level sama)
+backtest.py                # Backtest offline: walk M15 tanpa look-ahead → win rate/EV per jendela (3 jendela x 7 hari dipakai untuk tuning RRR/EMA20, Fix R5)
+_exp.py                    # Eksperimen tuning parameter (RRR/EMA) atas data histori
 config.py                  # Kredensial & parameter (semua bisa via .env)
 engine.py                  # Skoring MTF (kompas/zona/pelatuk) + format pesan HTML
 evaluation.py              # Riwayat sinyal + evaluasi/recap sesi sebelumnya
@@ -29,7 +31,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (160 kasus)
+tests/                     # pytest (198 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -53,6 +55,7 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 
 - **Aturan kompas (baku):** H4 bullish → **HANYA** izinkan sinyal BUY; H4 bearish → **HANYA** SELL (D1 fallback bila H4 netral).
 - **Validasi setup:** sinyal hanya BUY/SELL bila M15 searah kompas **dan** harga menyentuh zona SMC/S&D H1 (`engine._setup_valid`). Di luar itu → NEUTRAL.
+- **Trigger M15 diperketat (Fix R4)**: konfirmasi histogram MACD butuh `TRIG_MIN_BARS`=3 bar (45 menit) beruntun searah dengan margin ≥ `TRIG_MARGIN_RATIO` (20%) dari puncak histogram jendela terakhir (`_trigger_valid`); histogram sendirian TANPA struktur M15 searah (bounce 30-45 menit di tengah tren lawan) **tidak** valid. Cross MACD / BOS / CHoCH M15 tetap valid langsung.
 - Aksi: skor ≥ `BUY_THRESHOLD` (0.10) = BUY, ≤ `SELL_THRESHOLD` (-0.10) = SELL, else NEUTRAL.
 - Confidence: `clamp(25, 95, CONFIDENCE_BASE + |skor|*40)`.
 - **Konvensi RSI/funding/momentum = kontrarian**: overbought/euforia = negatif (antisipasi pullback). Momentum 24j mengikuti konvensi ini (Fix #6).
@@ -62,13 +65,17 @@ Normalisasi tiap kategori ke **-1.0..+1.0**, gabung berbobot (`config.py`):
 
 ### Risk-to-Reward Ratio (RRR) — aturan baku level SL/TP
 
-`engine._levels_mtf()` (via `engine._rr_targets()`) wajib menghasilkan **RRR minimal** sebelum sinyal diterima. Parameter di `config.py` (bisa via `.env`): `RRR_MIN` (1.5), `RRR_TP2` (3.0), `SL_BUFFER_PCT` (0.003).
+`engine._levels_mtf()` (via `engine._rr_targets()`) wajib menghasilkan **RRR minimal** sebelum sinyal diterima. Parameter di `config.py` (bisa via `.env`): `RRR_MIN` (0.7), `RRR_TP2` (1.4), `SL_BUFFER_PCT` (0.003), `SL_MIN_DIST_PCT` (0.017), `SL_ATR_MULT` (1.2).
+
+> **Fix R5 — RRR didekatkan (0.7/1.4, hasil backtest 3 jendela x 7 hari)**: TP1 minimal 0.7x jarak SL & TP2 1.4x SL. Target dekat = eksekusi cepat (day trade); win rate naik ~41% → ~60% (61.8/55.0/61.4% di 3 jendela independen), EV per trade tetap positif tipis. Jangan kembalikan ke 1.5/3.0 tanpa backtest ulang (`python backtest.py --days 7 --pairs 20 --step 15m --out backtest_report.txt`).
 
 - **SL** = zona Demand/Supply H1 terdekat + buffer `SL_BUFFER_PCT` (0.3%) di luar zona (BUY: Demand/Support di bawah; SELL: Supply/Resistance di atas). Tanpa zona → fallback statis.
-- **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **hanya bila** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). Bila target terdekat terlalu dekat (< 1:1.5), paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) **hanya bila tidak terhalang** zona Supply/Demand kuat (`_blocked_by_zone`).
+- **TP1** = target struktur H1 terdekat (swing high/low, zona Supply/Demand) **hanya bila** jarak TP1 (%) ≥ `RRR_MIN` x jarak SL (%). Bila target terdekat terlalu dekat (< 1:0.7), paksa TP1 = Entry ± (jarak SL x `RRR_MIN`) **hanya bila tidak terhalang** zona Supply/Demand kuat (`_blocked_by_zone`).
+- **SL dinamis ATR (Fix R4)**: jarak SL dipaksa minimal `max(SL_MIN_DIST_PCT, SL_ATR_MULT * ATR(H1)/price)` agar SL terlalu dekat tidak tersapu noise pasar (koin volatil dapat SL lebih lebar).
 - **Terhalang → reject**: `_rr_targets` mengembalikan `None` → `_levels_mtf` `None` → `assemble_signal` mengubah sinyal jadi **NEUTRAL** dan menambah alasan `[RR]`. Helper target: `_above_targets` (BUY) / `_below_targets` (SELL).
 - **TP2** = Entry ± (jarak SL x `RRR_TP2`).
-- **Urutan TP1/TP2 dijamin** (di `_rr_targets`): TP1 selalu target terdekat. Bila target struktur melewati proyeksi TP2 (1:3), TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`. Uji: `TestLevelsRRR::test_buy/sell_swaps_tp_when_target_beyond_tp2_projection`.
+- **Urutan TP1/TP2 dijamin** (di `_rr_targets`): TP1 selalu target terdekat. Bila target struktur melewati proyeksi TP2 (1:1.4), TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`. Uji: `TestLevelsRRR::test_buy/sell_swaps_tp_when_target_beyond_tp2_projection`.
+- **Filter EMA20 H1 (Fix R5)**: sinyal BUY/SELL **wajib alignment tren H1** — BUY hanya bila `price > EMA20(H1)`, SELL hanya bila `price < EMA20(H1)` (dicek di `assemble_signal` sebelum aksi final; bila EMA20 tidak tersedia, filter dilewati / graceful degradation). Pelanggaran → aksi jadi NEUTRAL + alasan `[EMA] Ditahan`. Alasan ini anti counter-trend SMC murni yang win rate-nya rendah (backtest: ~26% SELL, ~45% BUY → alignment EMA20 menaikkan ke ~62%).
 - Jangan menghapus cek RRR — ini penjaga minimal risk/reward; bila cek diubah, sesuaikan `tests/test_engine.py::TestLevelsRRR`.
 
 ## 3. Filter aset (aturan baku — jangan diubah tanpa alasan)
@@ -93,8 +100,9 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 ## 5. Evaluasi Sinyal & Riwayat (`evaluation.py`) — aturan baku
 
 - **`add_signals_today()`** dipanggil di `bot.py` **setelah pesan berhasil dikirim** — menyimpan sinyal terpilih sesi itu ke `data/history.json` (key sesi WIB `YYYY-MM-DD HH:MM`; kunci lama `YYYY-MM-DD` tetap didukung).
-- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (robust terhadap hari/sesi kosong), mengambil `(high, low, current)` via `fetch_fn` (dari `binance.get_klines_since` — kline M15 sejak sesi sinyal), lalu menentukan status. Bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch harga gagal), recap **mundur ke sesi lebih lama yang valid** (Fix #5).
-- **Presisi evaluasi**: `build_recap` meng-parse kunci sesi WIB ke datetime (`_session_since`) dan meneruskannya sebagai `since` ke `fetch_fn(pair, since)`. `bot._range_since()` menghitung high/low HANYA dari candle **setelah sesi sinyal** (bukan ticker 24j rolling yang bisa mencakup pergerakan harga SEBELUM entry). Fallback otomatis ke ticker 24j (`_ticker_range`) bila klines sejak-sesi gagal / kosong.
+- **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (robust terhadap hari/sesi kosong), mengambil **list candle M15 kronologis** via `fetch_fn` (dari `binance.get_klines_since` — kline M15 sejak sesi sinyal, `_range_since` di `bot.py`), lalu menentukan status. Evaluasi di-walk **candle-per-candle dalam urutan waktu** (`_evaluate_candles`): TP menang bila tersentuh di candle yang tak menyentuh SL di candle-candle sebelumnya; SL menang bila tersentuh di candle yang juga menyentuh TP (urutan tak bisa dipastikan → SL konservatif). Jendela dibatasi `EVAL_MAX_HOURS` (24 jam) sejak sesi sinyal (`_within_window`) — harga bergerak lebih lama dianggap di luar cakupan day trade. Bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch harga gagal), recap **mundur ke sesi lebih lama yang valid** (Fix #5).
+- **Anti sinyal berulang (Fix R4, `_apply_cooldown` di `bot.py`)**: bila base + arah + entry (toleransi `COOLDOWN_ENTRY_TOL_PCT` 0.5%) sudah disinyalkan pada `COOLDOWN_SESSIONS` sesi terakhir, sinyal diturunkan jadi NEUTRAL + alasan `[Cooldown]` (tetap tampil di WATCHLIST). Mencegah bot menyuruh re-entry level yang sama berulang sesi (mis. UTK 0.00795 diulang 7 sesi).
+- **Presisi evaluasi**: `build_recap` meng-parse kunci sesi WIB ke datetime (`_session_since`) dan meneruskannya sebagai `since` ke `fetch_fn(pair, since)`. `bot._range_since()` mengambil candle M15 **setelah sesi sinyal** (bukan ticker 24j rolling yang bisa mencakup pergerakan harga SEBELUM entry). Fallback otomatis ke ticker 24j (`_ticker_range` → 1 candle sintetis) bila klines sejak-sesi gagal / kosong.
 - Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
 - **Win rate** = % sinyal yang menyentuh TP1/TP2 dari **seluruh** sinyal yang dievaluasi (Floating ikut penyebut). Nilai SL/TP dari `history.json`.
 - **Format recap**: statistik di baris terpisah (`🏆 Win rate` → `💰 TP1` → `🎯 TP2` → `🛡️ SL` → `⏳ Floating`), lalu pemisah `───`, lalu tiap sinyal = `#BASE AKSI` + `🔑 Entry $.. → <emoji> STATUS` + `📋 Hit <STATUS> di $..` (floating: `📋 Harga saat ini $..`). Harga acuan disimpan sebagai `ref` oleh `_evaluate()`; `STATUS_EMOJI`: TP2=🎯, TP1=💰, SL=🛡️, FLOATING=⏳.
