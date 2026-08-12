@@ -859,5 +859,57 @@
       "tp2": 0.012099849999999999,
       "timestamp": "Wednesday, 12 Aug 2026, 13:37 WIB"
     }
+  ],
+  "2026-08-12 19:07": [
+    {
+      "symbol": "ATUSDT",
+      "base": "AT",
+      "action": "BUY",
+      "entry": 0.157,
+      "sl": 0.15199428571428572,
+      "tp1": 0.160504,
+      "tp2": 0.164008,
+      "timestamp": "Wednesday, 12 Aug 2026, 19:07 WIB"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "base": "BNB",
+      "action": "BUY",
+      "entry": 614.85,
+      "sl": 604.39755,
+      "tp1": 622.1667150000001,
+      "tp2": 629.48343,
+      "timestamp": "Wednesday, 12 Aug 2026, 19:07 WIB"
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "base": "PENGU",
+      "action": "BUY",
+      "entry": 0.006419,
+      "sl": 0.006309877,
+      "tp1": 0.0064953861,
+      "tp2": 0.0065717722,
+      "timestamp": "Wednesday, 12 Aug 2026, 19:07 WIB"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "base": "ETH",
+      "action": "BUY",
+      "entry": 1917.36,
+      "sl": 1884.76488,
+      "tp1": 1940.1765839999998,
+      "tp2": 1962.9931679999997,
+      "timestamp": "Wednesday, 12 Aug 2026, 19:07 WIB"
+    },
+    {
+      "symbol": "LINKUSDT",
+      "base": "LINK",
+      "action": "BUY",
+      "entry": 8.878,
+      "sl": 8.715774000000001,
+      "tp1": 8.991558199999998,
+      "tp2": 9.105116399999998,
+      "timestamp": "Wednesday, 12 Aug 2026, 19:07 WIB"
+    }
   ]
 }
