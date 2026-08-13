@@ -963,5 +963,57 @@
       "tp2": 223.72077600000003,
       "timestamp": "Thursday, 13 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-13 14:04": [
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "SELL",
+      "entry": 35.15,
+      "sl": 35.74755,
+      "tp1": 34.731715,
+      "tp2": 34.313430000000004,
+      "timestamp": "Thursday, 13 Aug 2026, 14:03 WIB"
+    },
+    {
+      "symbol": "RKWEBUSDT",
+      "base": "RKWEB",
+      "action": "SELL",
+      "entry": 27.37,
+      "sl": 27.83529,
+      "tp1": 27.044297,
+      "tp2": 26.718594000000003,
+      "timestamp": "Thursday, 13 Aug 2026, 14:03 WIB"
+    },
+    {
+      "symbol": "RBABAUSDT",
+      "base": "RBABA",
+      "action": "SELL",
+      "entry": 124.35,
+      "sl": 126.46395,
+      "tp1": 122.870235,
+      "tp2": 121.39047,
+      "timestamp": "Thursday, 13 Aug 2026, 14:03 WIB"
+    },
+    {
+      "symbol": "RALABUSDT",
+      "base": "RALAB",
+      "action": "SELL",
+      "entry": 320.25,
+      "sl": 325.69425,
+      "tp1": 316.439025,
+      "tp2": 312.62805,
+      "timestamp": "Thursday, 13 Aug 2026, 14:03 WIB"
+    },
+    {
+      "symbol": "RCAHUSDT",
+      "base": "RCAH",
+      "action": "SELL",
+      "entry": 233.39,
+      "sl": 237.35763,
+      "tp1": 230.61265899999998,
+      "tp2": 227.83531799999997,
+      "timestamp": "Thursday, 13 Aug 2026, 14:03 WIB"
+    }
   ]
 }
