@@ -113,6 +113,21 @@ WEIGHT_SENTIMENT: float = _env_float("WEIGHT_SENTIMENT", 0.02)
 # ditentukan oleh setup SMC/teknikal, sentimen hanya sebagai pelengkap.
 SENTIMENT_MAX: float = _env_float("SENTIMENT_MAX", 0.5)
 
+# --- Filter Trend Induk (BTC Market Regime) ---
+# BTC sebagai kompas makro: saat BTC bearish di salah satu timeframe yang
+# dipantau (struktur CHoCH / EMA 20<50), sinyal BUY dilarang (dump altcoin
+# biasanya lebih dalam dari BTC — audit 12-Aug-2026: PENGU -4.8% vs BTC -1.4%,
+# SL 1.7% tetap tersapu meski 2x ATR). Data BTC tidak tersedia -> filter
+# dilewati (graceful degradation). Sinyal BUY diturunkan jadi NEUTRAL (tetap
+# tampil di WATCHLIST) + alasan [BTC].
+BTC_REGIME_ENABLED: bool = os.getenv("BTC_REGIME_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
+# Timeframe yang dipantau untuk regime bearish BTC (bisa di-kustom via .env).
+BTC_REGIME_TIMEFRAMES: tuple = tuple(
+    tf.strip().lower()
+    for tf in os.getenv("BTC_REGIME_TIMEFRAMES", "15m,1h,4h,1d").split(",")
+    if tf.strip()
+)
+
 # --- Ambang data on-chain (whale transfer, dalam USD) ---
 WHALE_MIN_USD: float = _env_float("WHALE_MIN_USD", 5_000_000)
 WHALE_LOOKBACK_HOURS: int = _env_int("WHALE_LOOKBACK_HOURS", 24)

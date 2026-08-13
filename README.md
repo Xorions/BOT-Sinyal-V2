@@ -126,6 +126,7 @@ Alur perhitungan (`_levels_mtf` → `_rr_targets`):
 5. **TP2** = Entry ± (jarak SL x `RRR_TP2`).
 6. **Urutan TP dijamin** (`_rr_targets`): TP1 selalu target **terdekat**. Bila target struktur H1 melewati proyeksi TP2 (1:1.4), posisi TP1/TP2 **ditukar**. BUY: `Entry < TP1 < TP2`; SELL: `Entry > TP1 > TP2`.
 7. **Filter alignment EMA20 H1**: BUY hanya bila `price > EMA20(H1)`, SELL hanya bila `price < EMA20(H1)` — entry counter-trend SMC murni (menembus EMA20 melawan tren H1) ditolak jadi NEUTRAL dengan alasan `[EMA]` (anti sinyal win rate rendah).
+8. **Filter Trend Induk (BTC Market Regime)**: saat BTC bearish di salah satu timeframe yang dipantau (struktur CHoCH / EMA 20<50 pada `15m/1h/4h/1d`, default), **sinyal BUY dilarang** → diturunkan jadi NEUTRAL + alasan `[BTC]`. Regime dihitung sekali per scan (`engine.btc_regime`, data BTC dari Bitget; gagal → filter dilewati / graceful degradation). Dasar: audit 12-Aug-2026 — 3 BUY (PENGU/ETH/LINK) kena SL karena dump altcoin lebih dalam dari BTC (PENGU −4.8% vs BTC −1.4%) saat BTC H4/D1 bearish meski M15/H1 masih bullish. Parameter: `BTC_REGIME_ENABLED` (default `true`), `BTC_REGIME_TIMEFRAMES` (default `15m,1h,4h,1d`).
 
 > Nilai 0.7/1.4 hasil **backtest 3 jendela independen x 7 hari** (`backtest.py`): win rate naik ~41% → ~60% (61.8/55.0/61.4%) dan EV per trade tetap positif tipis. Target dekat = eksekusi cepat, sesuai day trading.
 

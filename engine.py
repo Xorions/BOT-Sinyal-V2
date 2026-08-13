@@ -30,6 +30,7 @@ from html import escape as _html_escape
 from typing import Dict, List, Optional
 
 from config import (
+    BTC_REGIME_TIMEFRAMES,
     BUY_THRESHOLD,
     CONFIDENCE_BASE,
     DISCLAIMER,
@@ -101,6 +102,68 @@ class Signal:
 
 
 # ---------------------------------------------------------------- kompas H4/D1
+def _regime_tf(price: float, candles: List[Dict[str, float]]) -> Optional[str]:
+    """Verdict regime BTC satu timeframe: "bearish" / "bullish" / "neutral".
+
+    Bearish bila struktur (CHoCH / LH+LL) ATAU EMA 20<50 di bawah harga
+    (downtrend), selama tidak ada sinyal kontradiktif kuat dari sisi sebaliknya.
+    """
+    if not candles or price is None or price <= 0:
+        return None
+    struct = detect_structure(candles)
+    ema_info = analyze_ema(candles, price)
+    s_bear = struct.get("trend") == "bearish"
+    s_bull = struct.get("trend") == "bullish"
+    e_bear = e_bull = False
+    if ema_info.get("ema_fast") is not None and ema_info.get("ema_slow") is not None:
+        e_bear = price < ema_info["ema_fast"] < ema_info["ema_slow"]
+        e_bull = price > ema_info["ema_fast"] > ema_info["ema_slow"]
+    if (s_bear and not e_bull) or (e_bear and not s_bull):
+        return "bearish"
+    if (s_bull and not e_bear) or (e_bull and not s_bear):
+        return "bullish"
+    return "neutral"
+
+
+def btc_regime(
+    price: Optional[float],
+    m15_candles: Optional[List[Dict[str, float]]] = None,
+    h1_candles: Optional[List[Dict[str, float]]] = None,
+    h4_candles: Optional[List[Dict[str, float]]] = None,
+    d1_candles: Optional[List[Dict[str, float]]] = None,
+    timeframes: tuple = BTC_REGIME_TIMEFRAMES,
+) -> Dict:
+    """[Trend Induk] Regime BTC lintas timeframe -> -1.0..+1.0 + label.
+
+    Setiap timeframe yang diminta dinilai `_regime_tf` (struktur CHoCH /
+    EMA 20-50). Regime "bearish" bila ADA SATU timeframe bearish — dipakai
+    untuk melarang sinyal BUY altcoin saat BTC melemah (dump altcoin > BTC).
+    Data TF kosong dilewati (graceful degradation): semua kosong -> neutral.
+    """
+    sources = {"15m": m15_candles, "1h": h1_candles, "4h": h4_candles, "1d": d1_candles}
+    verdicts: Dict[str, str] = {}
+    for tf in timeframes:
+        candles = sources.get(tf)
+        if candles:
+            verdict = _regime_tf(price, candles)
+            if verdict:
+                verdicts[tf] = verdict
+    n_bear = sum(1 for v in verdicts.values() if v == "bearish")
+    n_bull = sum(1 for v in verdicts.values() if v == "bullish")
+    if n_bear >= 1:
+        regime = "bearish"
+    elif n_bull >= 1:
+        regime = "bullish"
+    else:
+        regime = "neutral"
+    active = [f"{tf}:{v}" for tf, v in verdicts.items() if v in ("bearish", "bullish")]
+    return {
+        "regime": regime,
+        "verdicts": verdicts,
+        "reason": f"BTC {regime.upper()} (" + ", ".join(active) + ")" if active else f"BTC {regime.upper()}",
+    }
+
+
 def analyze_compass(
     h4_candles: List[Dict[str, float]],
     d1_candles: List[Dict[str, float]],
@@ -801,6 +864,7 @@ def assemble_signal(
     ls_ratio: Optional[float],
     whale_flow: Optional[Dict[str, float]],
     btc_stats: Optional[Dict],
+    btc_regime_info: Optional[Dict] = None,
 ) -> Signal:
     compass = analyze_compass(h4_candles, d1_candles, price=price)
     h1_map = map_h1_zones(h1_candles, price)
@@ -891,14 +955,26 @@ def assemble_signal(
     else:
         action = ACTION_NEUTRAL
 
+    # Filter Trend Induk (BTC Market Regime): saat BTC bearish di timeframe yang
+    # dipantau, sinyal BUY dilarang — dump altcoin hampir selalu lebih dalam dari
+    # BTC (audit 12-Aug-2026: PENGU -4.8% vs BTC -1.4%), sehingga SL ATR pun
+    # rawan tersapu. Sinyal diturunkan jadi NEUTRAL (tetap di WATCHLIST).
+    btc_blocked = False
+    if action == ACTION_BUY and btc_regime_info and btc_regime_info.get("regime") == "bearish":
+        btc_blocked = True
+        action = ACTION_NEUTRAL
+
     confidence = max(25, min(95, CONFIDENCE_BASE + int(abs(total) * 40)))
     rr_rejected = False
-    levels = _levels_mtf(price, h1_candles, h1_map, action)
-    if levels is None:
-        rr_rejected = True
-        intended = action
-        action = ACTION_NEUTRAL
-        levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=intended)
+    if btc_blocked:
+        levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=ACTION_BUY)
+    else:
+        levels = _levels_mtf(price, h1_candles, h1_map, action)
+        if levels is None:
+            rr_rejected = True
+            intended = action
+            action = ACTION_NEUTRAL
+            levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=intended)
     entry, sl, tp1, tp2 = levels
     breakdown = {
         "sr": round(sr, 2),
@@ -919,6 +995,12 @@ def assemble_signal(
         reasons.append(
             f"[EMA] Ditahan: harga di sisi berlawanan EMA20 H1 ({ema20:.4g}) — tren H1 "
             f"belum searah kompas (hanya momentum searah tren yang disinyalkan)"
+        )
+    if btc_blocked and btc_regime_info:
+        detail = btc_regime_info.get("reason") or "BTC bearish"
+        reasons.append(
+            f"[BTC] Regime induk {detail} — BUY diblokir: dump altcoin biasanya "
+            f"lebih dalam dari BTC, SL rawan tersapu saat BTC turun"
         )
 
     return Signal(

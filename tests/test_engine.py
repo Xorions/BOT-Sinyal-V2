@@ -19,6 +19,7 @@ from engine import (
     analyze_compass,
     analyze_trigger,
     assemble_signal,
+    btc_regime,
     format_message,
     map_h1_zones,
     rank_signals,
@@ -1316,3 +1317,78 @@ class TestScoreEma:
         score, reasons = score_ema(info, rsi_now=35.0, rsi_prev=32.0, compass_dir=ACTION_BUY)
         assert score == pytest.approx(0.30 + 0.30 + 0.40)
         assert not any("berlawanan arah kompas" in r for r in reasons)
+
+
+class TestBtcRegime:
+    """Filter Trend Induk (BTC Market Regime): BTC bearish -> BUY altcoin diblokir.
+
+    Audit 12-Aug-2026: saat sinyal PENGU/ETH/LINK lahir, BTC M15/H1 masih bullish
+    (BOS) tapi H4/D1 bearish — 3/3 sinyal BUY kena SL (dump altcoin > dump BTC).
+    Regime bearish = ADA SATU timeframe bearish (struktur CHoCH / EMA 20<50).
+    """
+
+    def test_any_bearish_tf_yields_bearish_regime(self):
+        # Mirror audit: M15/H1 bullish, H4/D1 bearish -> regime BEARISH (harus blokir).
+        bull = _candles_from_closes(_bullish_series())
+        bear = _candles_from_closes(_bearish_series())
+        reg = btc_regime(price=148.0, m15_candles=bull, h1_candles=bull, h4_candles=bear, d1_candles=bear)
+        assert reg["regime"] == "bearish"
+        assert reg["verdicts"]["4h"] == "bearish"
+        assert reg["verdicts"]["1d"] == "bearish"
+
+    def test_bearish_m15_alone_blocks(self):
+        # Aturan user: BTC bearish M15 -> dilarang BUY (tanpa perlu H4/D1).
+        reg = btc_regime(price=148.0, m15_candles=_candles_from_closes(_bearish_series()))
+        assert reg["regime"] == "bearish"
+
+    def test_no_bearish_tf_neutral_regime(self):
+        bull = _candles_from_closes(_bullish_series())
+        reg = btc_regime(price=102.0, m15_candles=bull, h1_candles=bull, h4_candles=bull, d1_candles=bull)
+        assert reg["regime"] == "bullish"
+
+    def test_missing_data_graceful_neutral(self):
+        reg = btc_regime(price=None)
+        assert reg["regime"] == "neutral"
+        assert reg["verdicts"] == {}
+
+    def test_buy_blocked_when_btc_bearish(self):
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        kwargs = dict(
+            symbol="PENGUUSDT", base="PENGU", price=price, pct_change_24h=3.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[], ls_ratio=None,
+            whale_flow=None, btc_stats=None,
+        )
+        base = assemble_signal(**kwargs)
+        assert base.action == ACTION_BUY
+        blocked = assemble_signal(
+            **kwargs,
+            btc_regime_info={"regime": "bearish", "reason": "BTC BEARISH (4h:bearish, 1d:bearish)"},
+        )
+        assert blocked.action == ACTION_NEUTRAL
+        assert blocked.entry == base.entry
+        assert any("[BTC]" in r and "diblokir" in r for r in blocked.reasons)
+
+    def test_buy_allowed_when_btc_not_bearish(self):
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        sig = assemble_signal(
+            symbol="PENGUUSDT", base="PENGU", price=price, pct_change_24h=3.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[], ls_ratio=None,
+            whale_flow=None, btc_stats=None,
+            btc_regime_info={"regime": "neutral", "reason": "BTC NEUTRAL"},
+        )
+        assert sig.action == ACTION_BUY
+        assert not any("diblokir" in r for r in sig.reasons)
+
+    def test_sell_not_blocked_by_btc_bearish(self):
+        # Filter hanya melarang BUY saat BTC bearish — SELL tetap diizinkan.
+        price, h4, d1, h1, m15 = _bearish_mtf()
+        sig = assemble_signal(
+            symbol="LINKUSDT", base="LINK", price=price, pct_change_24h=-3.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=80.0, funding_rates=[], ls_ratio=None,
+            whale_flow=None, btc_stats=None,
+            btc_regime_info={"regime": "bearish", "reason": "BTC BEARISH"},
+        )
+        assert sig.action == ACTION_SELL

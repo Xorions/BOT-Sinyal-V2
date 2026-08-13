@@ -26,6 +26,7 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
         pass
 
 from config import (
+    BTC_REGIME_ENABLED,
     COOLDOWN_ENTRY_TOL_PCT,
     COOLDOWN_SESSIONS,
     MIN_VOLUME_USD,
@@ -38,7 +39,14 @@ from data import cmc
 from data._client import DataSourceError
 from data.onchain import get_btc_stats, get_exchange_flow_eth
 from data.sentiment import get_fear_greed_current
-from engine import ACTION_BUY, ACTION_SELL, assemble_signal, format_message, rank_signals
+from engine import (
+    ACTION_BUY,
+    ACTION_SELL,
+    assemble_signal,
+    btc_regime,
+    format_message,
+    rank_signals,
+)
 from evaluation import add_signals_today, build_recap, load_history
 from telegram_sender import TelegramSendError, send_telegram
 
@@ -126,7 +134,7 @@ def _pick_pairs(tickers: Dict[str, Dict]) -> List[str]:
     return candidates[:min(TOP_COINS, 250)]
 
 
-def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale_flow: Optional[Dict], btc_stats: Optional[Dict], futures_ok: bool):
+def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale_flow: Optional[Dict], btc_stats: Optional[Dict], futures_ok: bool, btc_regime_info: Optional[Dict] = None):
     info = tickers[pair]
     # MTF Day Trading: kompas (D1/H4), pemetaan zona (H1), pelatuk (M15)
     d1 = bitget.get_klines(pair, bitget.INTERVAL_1D, bitget.MTF_LIMITS[bitget.INTERVAL_1D])
@@ -149,6 +157,7 @@ def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale
         ls_ratio=ls_ratio,
         whale_flow=whale_flow,
         btc_stats=btc_stats,
+        btc_regime_info=btc_regime_info,
     )
 
 
@@ -284,10 +293,29 @@ def run_scan() -> tuple:
     else:
         log.warning("BTC on-chain stats tidak tersedia — skor onchain dilewati.")
 
+    # Filter Trend Induk: regime BTC dihitung SEKALI per scan (hemat panggilan
+    # API), dipakai menolak BUY altcoin saat BTC bearish. Gagal -> None (filter
+    # dilewati, graceful degradation — jangan jadikan BTC wajib).
+    btc_regime_info = None
+    if BTC_REGIME_ENABLED:
+        try:
+            btc_price = tickers.get("BTCUSDT", {}).get("price")
+            btc_regime_info = btc_regime(
+                price=btc_price,
+                m15_candles=bitget.get_klines("BTCUSDT", bitget.INTERVAL_M15, bitget.MTF_LIMITS[bitget.INTERVAL_M15]),
+                h1_candles=bitget.get_klines("BTCUSDT", bitget.INTERVAL_1H, bitget.MTF_LIMITS[bitget.INTERVAL_1H]),
+                h4_candles=bitget.get_klines("BTCUSDT", bitget.INTERVAL_4H, bitget.MTF_LIMITS[bitget.INTERVAL_4H]),
+                d1_candles=bitget.get_klines("BTCUSDT", bitget.INTERVAL_1D, bitget.MTF_LIMITS[bitget.INTERVAL_1D]),
+            )
+            log.info("BTC regime: %s", btc_regime_info.get("regime"))
+        except DataSourceError as exc:
+            btc_regime_info = None
+            log.warning("BTC regime dilewati: %s", exc)
+
     signals = []
     for i, pair in enumerate(pairs, start=1):
         try:
-            sig = _fetch_candidate(pair, tickers, fg_value, whale_flow, btc_stats, futures_ok)
+            sig = _fetch_candidate(pair, tickers, fg_value, whale_flow, btc_stats, futures_ok, btc_regime_info)
             signals.append(sig)
             log.info("[%d/%d] %s -> %s (skor %+.2f)", i, len(pairs), sig.symbol, sig.action, sig.total_score)
         except DataSourceError as exc:
