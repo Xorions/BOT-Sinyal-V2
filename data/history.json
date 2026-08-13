@@ -1015,5 +1015,57 @@
       "tp2": 227.83531799999997,
       "timestamp": "Thursday, 13 Aug 2026, 14:03 WIB"
     }
+  ],
+  "2026-08-13 19:05": [
+    {
+      "symbol": "RWELLUSDT",
+      "base": "RWELL",
+      "action": "SELL",
+      "entry": 229.25,
+      "sl": 233.14725,
+      "tp1": 226.52192499999998,
+      "tp2": 223.79385,
+      "timestamp": "Thursday, 13 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTSLAUSDT",
+      "base": "RTSLA",
+      "action": "SELL",
+      "entry": 326.23,
+      "sl": 331.77591,
+      "tp1": 322.347863,
+      "tp2": 318.465726,
+      "timestamp": "Thursday, 13 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RALABUSDT",
+      "base": "RALAB",
+      "action": "SELL",
+      "entry": 317.75,
+      "sl": 324.52065,
+      "tp1": 313.010545,
+      "tp2": 308.27109,
+      "timestamp": "Thursday, 13 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RMSTRUSDT",
+      "base": "RMSTR",
+      "action": "SELL",
+      "entry": 94.95,
+      "sl": 96.56415,
+      "tp1": 93.82009500000001,
+      "tp2": 92.69019000000002,
+      "timestamp": "Thursday, 13 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RMCHPUSDT",
+      "base": "RMCHP",
+      "action": "SELL",
+      "entry": 79.29,
+      "sl": 80.63793000000001,
+      "tp1": 78.346449,
+      "tp2": 77.402898,
+      "timestamp": "Thursday, 13 Aug 2026, 19:04 WIB"
+    }
   ]
 }
