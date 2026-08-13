@@ -28,12 +28,14 @@ STATUS_TP2 = "TP2"
 STATUS_TP1 = "TP1"
 STATUS_SL = "SL"
 STATUS_FLOATING = "FLOATING"
+STATUS_EXPIRED = "EXPIRED"
 
 STATUS_EMOJI = {
     STATUS_TP2: "🎯",
     STATUS_TP1: "💰",
     STATUS_SL: "🛡️",
     STATUS_FLOATING: "⏳",
+    STATUS_EXPIRED: "⏰",
 }
 
 STATUS_LABEL = {
@@ -41,7 +43,13 @@ STATUS_LABEL = {
     STATUS_TP1: "TP1",
     STATUS_SL: "SL",
     STATUS_FLOATING: "FLOATING",
+    STATUS_EXPIRED: "EXPIRED",
 }
+
+# Toleransi waktu (jam) agar sinyal yang belum selesai dari sesi lama masih sempat
+# ditampilkan sebagai EXPIRED pada rekap 1-2 sesi SETELAH jendela EVAL_MAX_HOURS
+# lewat; sesi yang lebih tua dari itu dibuang dari antrean carry-over.
+CARRYOVER_GRACE_HOURS: float = 24.0
 
 
 def wib_now() -> datetime:
@@ -234,13 +242,18 @@ def _pnl_pct(sig: Dict, ref: Optional[float]) -> str:
     return f"{pct:+.2f}%"
 
 
-def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = None) -> List[Dict]:
+def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = None, now: Optional[datetime] = None) -> List[Dict]:
     """Isi 'status' + 'ref' (harga acuan) tiap sinyal.
 
     fetch_fn(pair, since) -> list candle M15 kronologis (dict {high, low, close,
     ts}) atau None. `since` = waktu sesi sinyal (WIB-aware); dipakai untuk
     membatasi jendela evaluasi (EVAL_MAX_HOURS) & diteruskan ke fetch_fn.
+    `now` (WIB-aware, default waktu kini) dipakai menentukan EXPIRED: sinyal yang
+    tidak menyentuh TP1/TP2/SL sampai melebihi EVAL_MAX_HOURS sejak sesinya
+    ditandai EXPIRED (bukan FLOATING) dan berhenti di-carry-over.
     """
+    now = now or wib_now()
+    cutoff = since + timedelta(hours=EVAL_MAX_HOURS) if since else None
     out: List[Dict] = []
     for sig in signals:
         if sig.get("action") not in (ACTION_BUY, ACTION_SELL):
@@ -255,13 +268,52 @@ def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = 
             continue
         candles = _within_window(candles, since)
         status, ref = _evaluate_candles(sig, candles)
+        if status == STATUS_FLOATING and cutoff is not None and now > cutoff:
+            status = STATUS_EXPIRED
         out.append({**sig, "status": status, "ref": ref})
     return out
 
 
 # ---------------------------------------------------------------- recap
-def _format_recap(date: str, evaluated: List[Dict]) -> str:
-    """Susun teks recap dari daftar sinyal yang sudah dievaluasi."""
+def _age_str(age: timedelta) -> str:
+    """Umur sinyal dalam teks pendek (mis. '5 jam', '1 hari 3 jam')."""
+    total_min = max(0, int(age.total_seconds() // 60))
+    hours = total_min // 60
+    if hours < 1:
+        return f"{total_min} menit"
+    if hours < 48:
+        return f"{hours} jam"
+    return f"{hours // 24} hari {hours % 24} jam"
+
+
+def _signal_lines(r: Dict, age_str: str = "") -> List[str]:
+    """Baris detail satu sinyal (dipakai seksi utama & carry-over)."""
+    status = r["status"]
+    label = STATUS_LABEL[status]
+    ref = r.get("ref")
+    ref_str = _esc(_fmt_price(ref)) if ref is not None else "n/a"
+    pnl = _esc(_pnl_pct(r, ref))
+    header = f"#{_esc(r['base'])} {r['action']}"
+    if age_str:
+        header += f" ({label} - {age_str})"
+    lines = [header]
+    lines.append(f"🔑 Entry {_esc(_fmt_price(r['entry']))} → {STATUS_EMOJI[status]} <b>{label}</b>")
+    if status == STATUS_FLOATING:
+        lines.append(f"📋 Harga saat ini {ref_str} ({pnl})")
+    elif status == STATUS_EXPIRED:
+        lines.append(f"📋 Melebihi EVAL_MAX_HOURS ({EVAL_MAX_HOURS:.0f} jam) tanpa TP/SL")
+    else:
+        lines.append(f"📋 Hit {label} di {ref_str} ({pnl})")
+    return lines
+
+
+def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dict]] = None, now: Optional[datetime] = None) -> str:
+    """Susun teks recap dari daftar sinyal yang sudah dievaluasi.
+
+    `carryover` (opsional): sinyal FLOATING/aktif dari sesi-sesi SEBELUM sesi
+    utama yang dibawa (carry-over) untuk dievaluasi ulang sampai TP/SL/EXPIRED —
+    ditampilkan sebagai seksi terpisah dengan umur sinyal tiap koin.
+    """
     tp2 = sum(1 for r in evaluated if r["status"] == STATUS_TP2)
     tp1 = sum(1 for r in evaluated if r["status"] == STATUS_TP1)
     sl = sum(1 for r in evaluated if r["status"] == STATUS_SL)
@@ -280,19 +332,31 @@ def _format_recap(date: str, evaluated: List[Dict]) -> str:
         "━━━━━━━━━━━━",
     ]
     for i, r in enumerate(evaluated):
-        status = r["status"]
-        label = STATUS_LABEL[status]
-        ref = r.get("ref")
-        ref_str = _esc(_fmt_price(ref)) if ref is not None else "n/a"
-        pnl = _esc(_pnl_pct(r, ref))
-        lines.append(f"#{_esc(r['base'])} {r['action']}")
-        lines.append(f"🔑 Entry {_esc(_fmt_price(r['entry']))} → {STATUS_EMOJI[status]} <b>{label}</b>")
-        if status == STATUS_FLOATING:
-            lines.append(f"📋 Harga saat ini {ref_str} ({pnl})")
-        else:
-            lines.append(f"📋 Hit {label} di {ref_str} ({pnl})")
+        lines.extend(_signal_lines(r))
         if i != len(evaluated) - 1:
             lines.append("───")
+
+    if carryover:
+        c_tp2 = sum(1 for r in carryover if r["status"] == STATUS_TP2)
+        c_tp1 = sum(1 for r in carryover if r["status"] == STATUS_TP1)
+        c_sl = sum(1 for r in carryover if r["status"] == STATUS_SL)
+        c_floating = sum(1 for r in carryover if r["status"] == STATUS_FLOATING)
+        c_expired = sum(1 for r in carryover if r["status"] == STATUS_EXPIRED)
+        lines.append("━━━━━━━━━━━━")
+        lines.append("⏳ <b>CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA</b>")
+        lines.append(
+            f"🧾 {len(carryover)} sinyal dibawa: 💰 TP1 {c_tp1} · 🎯 TP2 {c_tp2} "
+            f"· 🛡️ SL {c_sl} · ⏳ Floating {c_floating} · ⏰ Expired {c_expired}"
+        )
+        for i, r in enumerate(carryover):
+            age_str = ""
+            if now is not None and r.get("session"):
+                since = _session_since(r["session"])
+                if since is not None:
+                    age_str = _age_str(now - since)
+            lines.extend(_signal_lines(r, age_str))
+            if i != len(carryover) - 1:
+                lines.append("───")
     lines.append("━━━━━━━━━━━━")
     return "\n".join(lines)
 
@@ -307,17 +371,42 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     Fix #5: bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch
     harga gagal), evaluasi MUNDUR ke sesi lebih lama yang masih valid — bukan
     menghentikan recap di sesi yang gagal.
+
+    Carry-over: sinyal yang masih FLOATING di sesi-sesi sebelumnya TIDAK dihapus
+    dari antrean evaluasi — ikut dievaluasi ulang di rekap ini sebagai seksi
+    CARRY-OVER sampai menyentuh TP1/TP2/SL atau melebihi EVAL_MAX_HOURS (EXPIRED).
+    Sesi yang jendelanya lewat lebih dari CARRYOVER_GRACE_HOURS dibuang (status
+    EXPIRED-nya sudah pernah tampil di rekap sebelumnya).
     """
     now_key = now_key or today or session_now_str()
+    now_dt = _session_since(now_key) or wib_now()
     older_keys = sorted((k for k in history if k < now_key), reverse=True)
+
+    primary_date: Optional[str] = None
+    primary_results: Optional[List[Dict]] = None
+    carryover: List[Dict] = []
+
     for date in older_keys:
         signals = history[date]
         if not signals:
             continue
         since = _session_since(date)
-        results = evaluate_signals(signals, fetch_fn, since=since)
+        if since is None:
+            continue
+        if primary_results is not None:
+            cutoff = since + timedelta(hours=EVAL_MAX_HOURS)
+            if now_dt - cutoff > timedelta(hours=CARRYOVER_GRACE_HOURS):
+                continue
+        results = evaluate_signals(signals, fetch_fn, since=since, now=now_dt)
         evaluated = [r for r in results if r["status"]]
         if not evaluated:
             continue
-        return _format_recap(date, evaluated)
-    return None
+        if primary_results is None:
+            primary_date = date
+            primary_results = evaluated
+        else:
+            carryover.extend({**r, "session": date} for r in evaluated)
+
+    if primary_results is None:
+        return None
+    return _format_recap(primary_date, primary_results, carryover, now_dt)

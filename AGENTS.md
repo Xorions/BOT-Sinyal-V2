@@ -31,7 +31,7 @@ indicators/                # murni, tanpa I/O
   support_resistance.py    # find_swings, nearest_levels, pivot_points
   smc.py                   # detect_order_blocks, detect_fvg, detect_structure, EQH/EQL, Liquidity Sweep
   supply_demand.py         # detect_supply_demand, in_zone, nearest_demand/supply
-tests/                     # pytest (217 kasus)
+tests/                     # pytest (233 kasus)
 .github/workflows/daily.yml
 ```
 
@@ -103,6 +103,7 @@ Di `bot.py`, pasangan kandidat difilter lewat `_eligible_pair()` sebelum diskori
 
 - **`add_signals_today()`** dipanggil di `bot.py` **setelah pesan berhasil dikirim** — menyimpan sinyal terpilih sesi itu ke `data/history.json` (key sesi WIB `YYYY-MM-DD HH:MM`; kunci lama `YYYY-MM-DD` tetap didukung).
 - **`build_recap()`** dijalankan **sebelum** briefing baru dikirim: membaca **sesi terakhir sebelum sesi sekarang** (robust terhadap hari/sesi kosong), mengambil **list candle M15 kronologis** via `fetch_fn` (dari `bitget.get_klines_since` — kline M15 sejak sesi sinyal, `_range_since` di `bot.py`), lalu menentukan status. Evaluasi di-walk **candle-per-candle dalam urutan waktu** (`_evaluate_candles`): TP menang bila tersentuh di candle yang tak menyentuh SL di candle-candle sebelumnya; SL menang bila tersentuh di candle yang juga menyentuh TP (urutan tak bisa dipastikan → SL konservatif). Jendela dibatasi `EVAL_MAX_HOURS` (24 jam) sejak sesi sinyal (`_within_window`) — harga bergerak lebih lama dianggap di luar cakupan day trade. Bila sesi terakhir tidak dapat dievaluasi (tanpa sinyal / semua fetch harga gagal), recap **mundur ke sesi lebih lama yang valid** (Fix #5).
+- **Carry-over sinyal FLOATING (Fix carry-over)**: sinyal yang masih FLOATING di sesi-sesi sebelumnya **tidak dihapus** dari antrean evaluasi — `build_recap` mengevaluasi ulang semua sesi di dalam jendela `EVAL_MAX_HOURS` (+ toleransi `CARRYOVER_GRACE_HOURS` 24 jam) dan menampilkannya sebagai seksi **`CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA`** di bawah rekap sesi utama. Tiap koin carry-over dicantumkan status terbarunya + umur sinyal (`FLOATING - 5 jam`). Sinyal dibawa terus sampai menyentuh TP1/TP2/SL (status diperbarui, mis. `SL - 17 jam`) atau melebihi `EVAL_MAX_HOURS` → status **`EXPIRED`** (⏰, muncul 1-2 sesi lewat `CARRYOVER_GRACE_HOURS`, lalu dibuang dari antrean). Umur sinyal dihitung dari kunci sesi asal (`_age_str`).
 - **Anti sinyal berulang (Fix R4, `_apply_cooldown` di `bot.py`)**: bila base + arah + entry (toleransi `COOLDOWN_ENTRY_TOL_PCT` 0.5%) sudah disinyalkan pada `COOLDOWN_SESSIONS` sesi terakhir, sinyal diturunkan jadi NEUTRAL + alasan `[Cooldown]` (tetap tampil di WATCHLIST). Mencegah bot menyuruh re-entry level yang sama berulang sesi (mis. UTK 0.00795 diulang 7 sesi).
 - **Presisi evaluasi**: `build_recap` meng-parse kunci sesi WIB ke datetime (`_session_since`) dan meneruskannya sebagai `since` ke `fetch_fn(pair, since)`. `bot._range_since()` mengambil candle M15 **setelah sesi sinyal** (bukan ticker 24j rolling yang bisa mencakup pergerakan harga SEBELUM entry). Fallback otomatis ke ticker 24j (`_ticker_range` → 1 candle sintetis) bila klines sejak-sesi gagal / kosong.
 - Urutan cek status (`evaluate_signal`): **TP2 → TP1 → SL → Floating** (TP lebih dulu; lihat catatan kontrarian). BUY pakai `high` untuk TP dan `low` untuk SL; SELL kebalikannya.
