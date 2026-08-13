@@ -928,10 +928,10 @@ class TestFormat:
         assert "DAY TRADING BRIEFING" in message
         assert "BTC" in message
         assert "BUY" in message or "SELL" in message or "NEUTRAL" in message
-        assert "+ [H4]" in message
-        assert "+ [H1]" in message
-        assert "+ [M15]" in message
-        assert "💸 Momentum 24j" in message
+        assert "• Trend (H4)" in message
+        assert "• Zona/SMC (H1)" in message
+        assert "• M15" in message
+        assert "💹 24j:" in message
 
     def test_signal_lines_include_level_pct_buy(self):
         sig = Signal(
@@ -942,7 +942,7 @@ class TestFormat:
         assert "🛡️ SL: <b>$96.00</b> (-4.00%)" in message
         assert "🎯 TP1: <b>$106.00</b> (+6.00%)" in message
         assert "🎯 TP2: <b>$112.00</b> (+12.00%)" in message
-        assert "━━━━━━━━━━━━" in message
+        assert "────" in message
 
     def test_signal_lines_include_level_pct_sell(self):
         sig = Signal(

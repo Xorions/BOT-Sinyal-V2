@@ -1281,25 +1281,66 @@ def _group_reason_lines(reasons: List[str]) -> List[str]:
     return out
 
 
+_SUMMARY_TF_LABELS = {"H4": "Trend (H4)", "D1": "Trend (D1)", "H1": "Zona/SMC (H1)", "M15": "M15"}
+_SUMMARY_TF_ORDER = ("H4", "D1", "H1", "M15")
+_SUMMARY_MAX_BULLETS = 4
+_SUMMARY_MAX_ITEMS = 3
+
+
+def _summary_bullets(reasons: List[str]) -> List[str]:
+    """Ringkas alasan per koin jadi maks `_SUMMARY_MAX_BULLETS` bullet.
+
+    Alasan `[TF]` digabung per timeframe menjadi SATU baris (dedup, maks
+    `_SUMMARY_MAX_ITEMS` item per baris) — SMC/Trend/Konfirmasi M15 tervisual
+    tanpa memuat belasan bullet mentah. Tag lain (mis. `[RR]`/`[EMA]` pada
+    watchlist) dikumpulkan di bullet "Lainnya". Alasan tanpa tag (mis.
+    Momentum 24j) tidak dicetak — sudah tersedia di baris `💹 24j` blok koin.
+    """
+    groups: Dict[str, List[str]] = {}
+    others: List[str] = []
+    for reason in reasons:
+        if reason.startswith("["):
+            end = reason.find("]")
+            tf = reason[1:end] if end > 0 else ""
+            item = reason[end + 1:].strip() if end > 0 else reason
+            if tf in _SUMMARY_TF_LABELS:
+                groups.setdefault(tf, []).append(item)
+            elif item:
+                others.append(item)
+    out: List[str] = []
+    for tf in _SUMMARY_TF_ORDER:
+        if tf not in groups or len(out) >= _SUMMARY_MAX_BULLETS:
+            continue
+        dedup: List[str] = []
+        for item, count in Counter(groups[tf]).items():
+            dedup.append(f"{item} (x{count})" if count > 1 else item)
+        merged = "; ".join(dedup[:_SUMMARY_MAX_ITEMS])
+        if merged:
+            out.append(f"   • {_SUMMARY_TF_LABELS[tf]}: {_esc(merged)}")
+    if others and len(out) < _SUMMARY_MAX_BULLETS:
+        dedup = []
+        for item, count in Counter(others).items():
+            dedup.append(f"{item} (x{count})" if count > 1 else item)
+        merged = "; ".join(dedup[:_SUMMARY_MAX_ITEMS])
+        if merged:
+            out.append(f"   • Lainnya: {_esc(merged)}")
+    return out
+
+
 def _signal_lines(sig: Signal) -> List[str]:
-    b = sig.breakdown
     reason_lines = []
     if sig.reasons:
         reason_lines.append("📝 " + _esc(sig.reasons[0]))
-        reason_lines.extend(_group_reason_lines(sig.reasons[1:]))
+        reason_lines.extend(_summary_bullets(sig.reasons[1:]))
     else:
         reason_lines.append("📝 —")
     lines = [
         f"<b>#{_esc(sig.base)} ({_esc(sig.symbol)})</b> — {sig.action} · Confidence {sig.confidence}%",
-        f"🔑 Entry: <b>{_esc(_fmt_price(sig.entry))}</b>",
-        f"🛡️ SL: <b>{_esc(_fmt_price(sig.sl))}</b> ({_level_pct(sig.entry, sig.sl, sig.action):+.2f}%)",
-        f"🎯 TP1: <b>{_esc(_fmt_price(sig.tp1))}</b> ({_level_pct(sig.entry, sig.tp1, sig.action):+.2f}%)",
-        f"🎯 TP2: <b>{_esc(_fmt_price(sig.tp2))}</b> ({_level_pct(sig.entry, sig.tp2, sig.action):+.2f}%)",
-        f"💹 24j: {sig.pct_change_24h:+.2f}%",
+        f"🔑 Entry: <b>{_esc(_fmt_price(sig.entry))}</b> · 🛡️ SL: <b>{_esc(_fmt_price(sig.sl))}</b> ({_level_pct(sig.entry, sig.sl, sig.action):+.2f}%) · 🎯 TP1: <b>{_esc(_fmt_price(sig.tp1))}</b> ({_level_pct(sig.entry, sig.tp1, sig.action):+.2f}%) · 🎯 TP2: <b>{_esc(_fmt_price(sig.tp2))}</b> ({_level_pct(sig.entry, sig.tp2, sig.action):+.2f}%)",
+        f"💹 24j: {sig.pct_change_24h:+.2f}% · 📊 Skor: <b>{sig.total_score:+.2f}</b>",
         *reason_lines,
-        f"📊 Skor: <b>{sig.total_score:+.2f}</b>  (SR {b['sr']:+.2f} · SMC {b['smc']:+.2f} · Fibo {b['fibo']:+.2f} · EMA {b['ema']:+.2f} · Tek {b['teknikal']:+.2f} · Onch {b['onchain']:+.2f} · Sent {b['sentimen']:+.2f})",
         "",
-        "━━━━━━━━━━━━",
+        "────",
         "",
     ]
     return lines

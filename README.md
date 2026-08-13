@@ -142,7 +142,7 @@ Di `bot._eligible_pair()`:
 
 ## Format pesan Telegram
 
-`engine.format_message()` — baris paling atas = **alert header** `🚨 NEW SIGNAL ALERTS 🚨`, lalu judul briefing (S&R + SMC + FIBO + EMA). Sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`. Alasan `📝` dicetak dengan baris pertama (headline zona SMC/S&D H1) tanpa dash; alasan selanjutnya **dikelompokkan per timeframe** — tag `+ [H4]`/`+ [H1]`/`+ [M15]` hanya ditulis 1x sebagai header grup, sub-alasan diindentasi `- ` (dengan 7 spasi) di bawah grup yang sama. **Deduplikasi alasan**: skor SMC **berbasis kehadiran** — FVG dan Liquidity Sweep dinilai **sekali per tipe** (banyak FVG searah = +0.25 sekali), sehingga alasan tidak lagi tercetak berulang-ulang; ringkasan `(xN)` tetap ada sebagai jaring pengaman untuk alasan duplikat lain. Baris momentum dipisahkan emoji `💸` tepat sebelum `📊 Skor`:
+`engine.format_message()` — baris paling atas = **alert header** `🚨 NEW SIGNAL ALERTS 🚨`, lalu judul briefing (S&R + SMC + FIBO + EMA). Sinyal dikelompokkan per header, tiap sinyal memakai `#hashtag`. Parameter Entry/SL/TP1/TP2 + Confidence disusun **satu baris scannable** (`🔑 Entry · 🛡️ SL · 🎯 TP1 · 🎯 TP2`), diikuti baris meta `💹 24j · 📊 Skor` (breakdown skor detail `(SR … · SMC …)` **tidak** dicetak). Analisis diringkas jadi maks 4 bullet per koin — alasan `[H4]`/`[H1]`/`[M15]` digabung per timeframe (`• Trend (H4)`, `• Zona/SMC (H1)`, `• M15`), dedup, maks 3 item per baris; alasan tag lain (mis. `[RR]`/`[EMA]`) masuk bullet `• Lainnya`. Baris momentum `💸` tidak lagi dicetak (redundan dengan `💹 24j`). Pemisah antar koin memakai garis tipis `────`:
 
 ```
 🚨 NEW SIGNAL ALERTS 🚨
@@ -154,45 +154,24 @@ Di `bot._eligible_pair()`:
 📈 SINYAL LONG (BUY)
 
 #BTC (BTCUSDT) — BUY · Confidence 73%
-🔑 Entry: $65,263
-🛡️ SL: $64,064
-🎯 TP1: $70,484
-🎯 TP2: $75,705
-💹 24j: +1.92%
+🔑 Entry: $65,263 · 🛡️ SL: $64,064 (-1.84%) · 🎯 TP1: $70,484 (+8.00%) · 🎯 TP2: $75,705 (+16.00%)
+💹 24j: +1.92% · 📊 Skor: +0.38
 📝 Demand Zone & Bullish OB H1 Tersentuh
-    + [H4] Tren utama Bullish (higher high)
-    + [H1] 
-       - Harga masuk Demand Zone
-       - Bullish OB di bawah harga
-       - FVG bullish tervalidasi di bawah harga
-       - Liquidity Sweep tereksekusi (EQL tersapu)
-       - Support dekat (0.4%)
-       - Resistance dekat (1.2%)
-    + [M15] MACD Golden Cross & RSI Rebound
-💸 Momentum 24j +1.9% | Fear&Greed 29
-📊 Skor: +0.38  (SR +0.35 · SMC +1.00 · Fibo +0.45 · EMA +0.60 · Tek +0.30 · Onch +0.00 · Sent +0.40)
-
-───
+   • Trend (H4): Tren utama Bullish (higher high)
+   • Zona/SMC (H1): Harga masuk Demand Zone; Bullish OB di bawah harga; FVG bullish tervalidasi di bawah harga
+   • M15: MACD Golden Cross & RSI Rebound
+────
 
 📉 SINYAL SHORT (SELL)
 
 #XRP (XRPUSDT) — SELL · Confidence 59%
-🔑 Entry: $1.03
-🛡️ SL: $1.07
-🎯 TP1: $0.948520
-🎯 TP2: $0.866040
-💹 24j: -2.31%
+🔑 Entry: $1.03 · 🛡️ SL: $1.07 (-3.88%) · 🎯 TP1: $0.948520 (+7.91%) · 🎯 TP2: $0.866040 (+15.92%)
+💹 24j: -2.31% · 📊 Skor: -0.21
 📝 Supply Zone & Bearish OB H1 Tersentuh
-    + [H4] Tren utama Bearish (CHoCH skala besar)
-    + [H1] 
-       - Harga masuk Supply Zone
-       - Bearish OB di atas harga
-       - FVG tervalidasi di atas harga
-    + [M15] MACD Death Cross & RSI Melemah
-💸 Momentum 24j -2.3% | Fear&Greed 29
-📊 Skor: -0.21  (SR -0.35 · SMC -0.85 · Fibo +0.00 · EMA -0.30 · Tek -0.30 · Onch +0.00 · Sent +0.40)
-
-───
+   • Trend (H4): Tren utama Bearish (CHoCH skala besar)
+   • Zona/SMC (H1): Harga masuk Supply Zone; Bearish OB di atas harga; FVG tervalidasi di atas harga
+   • M15: MACD Death Cross & RSI Melemah
+────
 
 ⚠️ Disclaimer: Sinyal berbasis indikator otomatis & data publik. Bukan saran finansial. Selalu lakukan riset sendiri (DYOR).
 ```

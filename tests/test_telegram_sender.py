@@ -8,18 +8,14 @@ LIMIT = 4000
 def _coin_block(base: str, symbol: str) -> list:
     return [
         f"<b>#{base} ({symbol})</b> — BUY · Confidence 70%",
-        "🔑 Entry: <b>$1.00</b>",
-        "🛡️ SL: <b>$0.90</b> (-10.00%)",
-        "🎯 TP1: <b>$1.10</b> (+10.00%)",
-        "🎯 TP2: <b>$1.20</b> (+20.00%)",
-        "💹 24j: +5.20%",
+        "🔑 Entry: <b>$1.00</b> · 🛡️ SL: <b>$0.90</b> (-10.00%) · 🎯 TP1: <b>$1.10</b> (+10.00%) · 🎯 TP2: <b>$1.20</b> (+20.00%)",
+        "💹 24j: +5.20% · 📊 Skor: <b>+0.42</b>",
         "📝 Demand Zone H1 Tersentuh",
-        "    + [H4] Tren utama Bullish",
-        "    + [H1] Harga masuk Demand Zone",
-        "    + [M15] RSI Rebound",
-        "📊 Skor: <b>+0.42</b>  (SR +0.35 · SMC +0.20 · Fibo +0.00 · EMA +0.00 · Tek +0.20 · Onch +0.00 · Sent +0.00)",
+        "   • Trend (H4): Tren utama Bullish",
+        "   • Zona/SMC (H1): Harga masuk Demand Zone",
+        "   • M15: RSI Rebound",
         "",
-        "━━━━━━━━━━━━",
+        "────",
         "",
     ]
 
@@ -87,7 +83,7 @@ class TestSplitSignalBlocks:
         for i in range(10):
             title = f"<b>#COIN{i} (COIN{i}USDT)</b>"
             start = text.index(title)
-            end = text.index("━━━━━━━━━━━━", start) + len("━━━━━━━━━━━━")
+            end = text.index("────", start) + len("────")
             block = text[start:end]
             containing = [c for c in chunks if block in c]
             assert len(containing) == 1, f"koin COIN{i} terpotong antar chunk"
@@ -104,7 +100,7 @@ class TestSplitSignalBlocks:
         last = chunks[-1]
         assert "⚠️ Disclaimer" in last
         assert last.rfind("⚠️ Disclaimer") > last.rfind("#COIN")
-        assert last.rfind("⚠️ Disclaimer") > last.rfind("━━━━━━━━━━━━")
+        assert last.rfind("⚠️ Disclaimer") > last.rfind("────")
         # Disclaimer ada di akhir chunk terakhir (tidak terpotong ke chunk lain)
         assert last.rstrip().endswith("data publik.")
 
