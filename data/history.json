@@ -1119,5 +1119,57 @@
       "tp2": 225.756012,
       "timestamp": "Friday, 14 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-14 19:06": [
+    {
+      "symbol": "RPGUSDT",
+      "base": "RPG",
+      "action": "SELL",
+      "entry": 144.15,
+      "sl": 146.60055,
+      "tp1": 142.434615,
+      "tp2": 140.71923,
+      "timestamp": "Friday, 14 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCBUSDT",
+      "base": "RCB",
+      "action": "SELL",
+      "entry": 343.0,
+      "sl": 348.831,
+      "tp1": 338.9183,
+      "tp2": 334.8366,
+      "timestamp": "Friday, 14 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSQQQUSDT",
+      "base": "RSQQQ",
+      "action": "SELL",
+      "entry": 35.8,
+      "sl": 36.4086,
+      "tp1": 35.373979999999996,
+      "tp2": 34.947959999999995,
+      "timestamp": "Friday, 14 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RAMZNUSDT",
+      "base": "RAMZN",
+      "action": "SELL",
+      "entry": 265.01,
+      "sl": 269.51517,
+      "tp1": 261.856381,
+      "tp2": 258.70276199999995,
+      "timestamp": "Friday, 14 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RTPRUSDT",
+      "base": "RTPR",
+      "action": "SELL",
+      "entry": 127.55,
+      "sl": 130.49531499999998,
+      "tp1": 125.4882795,
+      "tp2": 123.42655900000003,
+      "timestamp": "Friday, 14 Aug 2026, 19:06 WIB"
+    }
   ]
 }
