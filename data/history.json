@@ -1067,5 +1067,57 @@
       "tp2": 77.402898,
       "timestamp": "Thursday, 13 Aug 2026, 19:04 WIB"
     }
+  ],
+  "2026-08-14 13:35": [
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "SELL",
+      "entry": 34.72,
+      "sl": 35.31024,
+      "tp1": 34.306832,
+      "tp2": 33.893663999999994,
+      "timestamp": "Friday, 14 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCDNSUSDT",
+      "base": "RCDNS",
+      "action": "SELL",
+      "entry": 324.85,
+      "sl": 330.37245,
+      "tp1": 320.98428500000006,
+      "tp2": 317.11857000000003,
+      "timestamp": "Friday, 14 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMCKUSDT",
+      "base": "RMCK",
+      "action": "SELL",
+      "entry": 859.26,
+      "sl": 873.86742,
+      "tp1": 849.034806,
+      "tp2": 838.8096119999999,
+      "timestamp": "Friday, 14 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "SELL",
+      "entry": 35.74,
+      "sl": 36.34758,
+      "tp1": 35.314694,
+      "tp2": 34.889388000000004,
+      "timestamp": "Friday, 14 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNXPIUSDT",
+      "base": "RNXPI",
+      "action": "SELL",
+      "entry": 231.26,
+      "sl": 235.19142,
+      "tp1": 228.508006,
+      "tp2": 225.756012,
+      "timestamp": "Friday, 14 Aug 2026, 13:35 WIB"
+    }
   ]
 }
