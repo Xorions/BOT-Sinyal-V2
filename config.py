@@ -52,6 +52,16 @@ BUY_THRESHOLD: float = _env_float("BUY_THRESHOLD", 0.10)
 SELL_THRESHOLD: float = _env_float("SELL_THRESHOLD", -0.10)
 CONFIDENCE_BASE: int = _env_int("CONFIDENCE_BASE", 55)
 
+# --- Filter kualitas sinyal (target win rate; default mati = 0) ---
+# 1) Sinyal berarah dengan confidence di bawah ambang ini diturunkan jadi
+#    NEUTRAL + alasan [Conf]. Dasar: bucket backtest (backtest_report.txt
+#    12-Aug-2026) — conf 60-69 = 43% WR, 70-79 = 60%, 80-89 = 67%.
+CONFIDENCE_MIN: int = _env_int("CONFIDENCE_MIN", 0)
+# 2) Koin dengan ATR H1 / harga melebihi ambang ini DILEWATI dari scan.
+#    Koin super volatil sering kena SL dulu sebelum TP (backtest per-pair:
+#    token ber-ATR rendah 73-100% WR vs altcoin volatil 38-50%).
+MAX_ATR_REL: float = _env_float("MAX_ATR_REL", 0.0)
+
 # --- Risk-to-Reward Ratio (RRR) level SL/TP ---
 # TP1 minimal RRR_MIN x jarak SL (default 1:1.5); TP2 proyeksi RRR_TP2 x jarak SL.
 # Fix R5 (tuning backtest 3 jendela x 7 hari): TP1 didekatkan ke 0.7x SL & TP2 ke

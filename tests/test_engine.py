@@ -1392,3 +1392,59 @@ class TestBtcRegime:
             btc_regime_info={"regime": "bearish", "reason": "BTC BEARISH"},
         )
         assert sig.action == ACTION_SELL
+
+
+class TestConfidenceMin:
+    """Filter kualitas (Fix 14-Aug-2026): CONFIDENCE_MIN.
+
+    Sinyal berarah dengan confidence di bawah ambang diturunkan jadi NEUTRAL +
+    alasan [Conf]. Dasar bucket backtest: conf 60-69 = 43% WR (biang kerok)
+    vs 70-79 = 60% dan 80-89 = 67%. Ambang 0 = filter mati (default).
+    """
+
+    def _bull_kwargs(self):
+        price, h4, d1, h1, m15 = _bullish_mtf()
+        return dict(
+            symbol="PENGUUSDT", base="PENGU", price=price, pct_change_24h=3.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=29.0, funding_rates=[], ls_ratio=None,
+            whale_flow=None, btc_stats=None,
+        )
+
+    def test_off_by_default_no_effect(self):
+        sig = assemble_signal(**self._bull_kwargs())
+        assert sig.action == ACTION_BUY
+        assert not any("[Conf]" in r for r in sig.reasons)
+
+    def test_buy_downgraded_when_confidence_below_min(self, monkeypatch):
+        # Setup bullish kuat (conf 72) + ambang 80 -> NEUTRAL + alasan [Conf].
+        base = assemble_signal(**self._bull_kwargs())
+        assert base.action == ACTION_BUY
+        monkeypatch.setattr("engine.CONFIDENCE_MIN", 80)
+        blocked = assemble_signal(**self._bull_kwargs())
+        assert blocked.action == ACTION_NEUTRAL
+        assert blocked.entry == base.entry
+        assert any("[Conf]" in r for r in blocked.reasons)
+
+    def test_sell_downgraded_when_confidence_below_min(self, monkeypatch):
+        # Setup bearish kuat (conf 68) + ambang 70 -> NEUTRAL + alasan [Conf].
+        price, h4, d1, h1, m15 = _bearish_mtf()
+        kwargs = dict(
+            symbol="LINKUSDT", base="LINK", price=price, pct_change_24h=-3.0,
+            h4_candles=h4, d1_candles=d1, h1_candles=h1, m15_candles=m15,
+            fg_value=80.0, funding_rates=[], ls_ratio=None,
+            whale_flow=None, btc_stats=None,
+        )
+        base = assemble_signal(**kwargs)
+        assert base.action == ACTION_SELL
+        monkeypatch.setattr("engine.CONFIDENCE_MIN", 70)
+        blocked = assemble_signal(**kwargs)
+        assert blocked.action == ACTION_NEUTRAL
+        assert any("[Conf]" in r for r in blocked.reasons)
+
+    def test_signal_kept_when_confidence_above_min(self, monkeypatch):
+        # Setup bullish kuat (conf 72) + ambang 70 -> tetap BUY.
+        monkeypatch.setattr("engine.CONFIDENCE_MIN", 70)
+        sig = assemble_signal(**self._bull_kwargs())
+        assert sig.action == ACTION_BUY
+        assert not any("[Conf]" in r for r in sig.reasons)

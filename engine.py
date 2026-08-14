@@ -33,6 +33,7 @@ from config import (
     BTC_REGIME_TIMEFRAMES,
     BUY_THRESHOLD,
     CONFIDENCE_BASE,
+    CONFIDENCE_MIN,
     DISCLAIMER,
     RRR_MIN,
     RRR_TP2,
@@ -965,9 +966,26 @@ def assemble_signal(
         action = ACTION_NEUTRAL
 
     confidence = max(25, min(95, CONFIDENCE_BASE + int(abs(total) * 40)))
+
+    # Filter kualitas (Fix 14-Aug-2026): sinyal berarah dengan confidence di
+    # bawah CONFIDENCE_MIN diturunkan jadi NEUTRAL. Dasar bucket backtest:
+    # conf 60-69 = 43% WR vs 70-79 = 60% / 80-89 = 67% — sinyal lemah justru
+    # paling sering kena SL. CONFIDENCE_MIN = 0 -> filter mati.
+    conf_rejected = False
+    conf_intended = action
+    if (
+        CONFIDENCE_MIN > 0
+        and action in (ACTION_BUY, ACTION_SELL)
+        and confidence < CONFIDENCE_MIN
+    ):
+        conf_rejected = True
+        action = ACTION_NEUTRAL
+
     rr_rejected = False
     if btc_blocked:
         levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=ACTION_BUY)
+    elif conf_rejected:
+        levels = _levels_mtf(price, h1_candles, h1_map, ACTION_NEUTRAL, intended=conf_intended)
     else:
         levels = _levels_mtf(price, h1_candles, h1_map, action)
         if levels is None:
@@ -991,6 +1009,11 @@ def assemble_signal(
     )
     if rr_rejected:
         reasons.append("[RR] Ditolak: Risk:Reward < 1:0.7 — target H1 terlalu dekat dengan Entry")
+    if conf_rejected:
+        reasons.append(
+            f"[Conf] Ditahan: confidence {confidence} < CONFIDENCE_MIN ({CONFIDENCE_MIN}) — "
+            f"setup terlalu lemah untuk sinyal berarah"
+        )
     if ema_reject and ema20 is not None:
         reasons.append(
             f"[EMA] Ditahan: harga di sisi berlawanan EMA20 H1 ({ema20:.4g}) — tren H1 "

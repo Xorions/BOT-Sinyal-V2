@@ -26,12 +26,14 @@ from config import (  # noqa: E402
     COOLDOWN_ENTRY_TOL_PCT,
     COOLDOWN_SESSIONS,
     EVAL_MAX_HOURS,
+    MAX_ATR_REL,
     MIN_VOLUME_USD,
 )
 from data import bitget  # noqa: E402
 from engine import (  # noqa: E402
     ACTION_BUY,
     ACTION_SELL,
+    _atr,
     assemble_signal,
 )
 
@@ -184,6 +186,15 @@ def run_backtest(pairs: List[str], days: int, step_min: int, verbose: bool = Fal
             if sig.action not in (ACTION_BUY, ACTION_SELL):
                 continue
             stats["generated"] += 1
+
+            # Filter volatilitas (Fix 14-Aug-2026, mencerminkan bot.py): koin
+            # dengan ATR H1 relatif melebihi MAX_ATR_REL dilewati (0 = mati).
+            if MAX_ATR_REL > 0:
+                atr = _atr(h1_now, 14) if h1_now else None
+                atr_rel = atr / price if atr else 0.0
+                if atr_rel > MAX_ATR_REL:
+                    stats["filtered"] += 1
+                    continue
 
             # anti sinyal berulang (cooldown re-entry level yang sama)
             day_key = datetime.fromtimestamp(ts / 1000, WIB).strftime("%Y-%m-%d")
@@ -338,11 +349,13 @@ def main() -> int:
     parser.add_argument("--step", default="15m", choices=["15m", "30m", "1h", "4h"], help="frekuensi scan sinyal")
     parser.add_argument("--out", default=None, help="simpan laporan ke file")
     parser.add_argument("--verbose", action="store_true", help="cetak tiap sinyal")
+    parser.add_argument("--offset-days", type=int, default=0,
+                        help="geser jendela mundur N hari (validasi multi-jendela, default 0)")
     args = parser.parse_args()
 
     global _EVAL_START_MS, _EVAL_NOW_MS
-    _EVAL_NOW_MS = int(datetime.now(WIB).timestamp() * 1000)
-    _EVAL_START_MS = int((datetime.now(WIB) - timedelta(days=args.days)).timestamp() * 1000)
+    _EVAL_NOW_MS = int((datetime.now(WIB) - timedelta(days=args.offset_days)).timestamp() * 1000)
+    _EVAL_START_MS = int((datetime.now(WIB) - timedelta(days=args.offset_days + args.days)).timestamp() * 1000)
 
     step_min = {"15m": MIN15_MS, "30m": 2 * MIN15_MS, "1h": HOUR_MS, "4h": 4 * HOUR_MS}[args.step]
 

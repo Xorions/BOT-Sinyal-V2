@@ -29,6 +29,7 @@ from config import (
     BTC_REGIME_ENABLED,
     COOLDOWN_ENTRY_TOL_PCT,
     COOLDOWN_SESSIONS,
+    MAX_ATR_REL,
     MIN_VOLUME_USD,
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
@@ -42,6 +43,7 @@ from data.sentiment import get_fear_greed_current
 from engine import (
     ACTION_BUY,
     ACTION_SELL,
+    _atr,
     assemble_signal,
     btc_regime,
     format_message,
@@ -141,6 +143,16 @@ def _fetch_candidate(pair: str, tickers: Dict[str, Dict], fg_value: float, whale
     h4 = bitget.get_klines(pair, bitget.INTERVAL_4H, bitget.MTF_LIMITS[bitget.INTERVAL_4H])
     h1 = bitget.get_klines(pair, bitget.INTERVAL_1H, bitget.MTF_LIMITS[bitget.INTERVAL_1H])
     m15 = bitget.get_klines(pair, bitget.INTERVAL_M15, bitget.MTF_LIMITS[bitget.INTERVAL_M15])
+    # Filter volatilitas (Fix 14-Aug-2026): koin dengan ATR H1 relatif terlalu
+    # tinggi dilewati — SL min 1.7% rawan tersapu noise sebelum TP (backtest:
+    # token ber-ATR rendah 73-100% WR vs altcoin volatil 38-50%).
+    if MAX_ATR_REL > 0:
+        atr = _atr(h1, 14) if h1 else None
+        atr_rel = atr / info["price"] if atr else 0.0
+        if atr_rel > MAX_ATR_REL:
+            raise DataSourceError(
+                f"{pair}: ATR H1 {atr_rel:.2%} > MAX_ATR_REL {MAX_ATR_REL:.2%} — koin terlalu volatil"
+            )
     funding = bitget.get_funding_rate(pair, 8) if futures_ok else []
     ls_ratio = bitget.get_long_short_ratio(pair, 1) if futures_ok else None
     return assemble_signal(

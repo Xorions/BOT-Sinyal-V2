@@ -310,9 +310,11 @@ def _signal_lines(r: Dict, age_str: str = "") -> List[str]:
 def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dict]] = None, now: Optional[datetime] = None) -> str:
     """Susun teks recap dari daftar sinyal yang sudah dievaluasi.
 
-    `carryover` (opsional): sinyal FLOATING/aktif dari sesi-sesi SEBELUM sesi
-    utama yang dibawa (carry-over) untuk dievaluasi ulang sampai TP/SL/EXPIRED —
-    ditampilkan sebagai seksi terpisah dengan umur sinyal tiap koin.
+    `carryover` (opsional): sinyal FLOATING dari sesi-sesi SEBELUM sesi utama
+    yang dibawa (carry-over) untuk dievaluasi ulang sampai TP/SL/EXPIRED —
+    ditampilkan sebagai seksi terpisah dengan umur sinyal tiap koin. Hanya
+    sinyal berstatus FLOATING yang dibawa (Fix duplikasi): status final
+    (TP1/TP2/SL/EXPIRED) langsung keluar dari antrean carry-over.
     """
     tp2 = sum(1 for r in evaluated if r["status"] == STATUS_TP2)
     tp1 = sum(1 for r in evaluated if r["status"] == STATUS_TP1)
@@ -337,17 +339,9 @@ def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dic
             lines.append("───")
 
     if carryover:
-        c_tp2 = sum(1 for r in carryover if r["status"] == STATUS_TP2)
-        c_tp1 = sum(1 for r in carryover if r["status"] == STATUS_TP1)
-        c_sl = sum(1 for r in carryover if r["status"] == STATUS_SL)
-        c_floating = sum(1 for r in carryover if r["status"] == STATUS_FLOATING)
-        c_expired = sum(1 for r in carryover if r["status"] == STATUS_EXPIRED)
         lines.append("━━━━━━━━━━━━")
         lines.append("⏳ <b>CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA</b>")
-        lines.append(
-            f"🧾 {len(carryover)} sinyal dibawa: 💰 TP1 {c_tp1} · 🎯 TP2 {c_tp2} "
-            f"· 🛡️ SL {c_sl} · ⏳ Floating {c_floating} · ⏰ Expired {c_expired}"
-        )
+        lines.append(f"🧾 {len(carryover)} sinyal ⏳ FLOATING dibawa dari sesi sebelumnya")
         for i, r in enumerate(carryover):
             age_str = ""
             if now is not None and r.get("session"):
@@ -377,6 +371,14 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     CARRY-OVER sampai menyentuh TP1/TP2/SL atau melebihi EVAL_MAX_HOURS (EXPIRED).
     Sesi yang jendelanya lewat lebih dari CARRYOVER_GRACE_HOURS dibuang (status
     EXPIRED-nya sudah pernah tampil di rekap sebelumnya).
+
+    Fix duplikasi & penumpukan (14-Aug-2026):
+    - Carry-over HANYA berisi sinyal berstatus FLOATING — sinyal yang sudah
+      mencapai status final (TP1/TP2/SL/EXPIRED) LANGSUNG keluar dari antrean
+      di sesi berikutnya (tidak diseret berulang kali).
+    - Deduplikasi per symbol/base: bila koin sama muncul di beberapa sesi
+      (mis. RFXI 2 entry), hanya 1 sinyal TERBARU (sesi paling akhir) yang
+      ditampilkan agar chat Telegram tidak penuh duplikasi.
     """
     now_key = now_key or today or session_now_str()
     now_dt = _session_since(now_key) or wib_now()
@@ -385,6 +387,9 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     primary_date: Optional[str] = None
     primary_results: Optional[List[Dict]] = None
     carryover: List[Dict] = []
+    # symbol(base) yang SUDAH tampil -> index di carryover (nilai < 0 = milik
+    # sesi utama, tidak boleh ditambahkan lagi ke carry-over).
+    carry_seen: Dict[str, int] = {}
 
     for date in older_keys:
         signals = history[date]
@@ -404,8 +409,20 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
         if primary_results is None:
             primary_date = date
             primary_results = evaluated
-        else:
-            carryover.extend({**r, "session": date} for r in evaluated)
+            for r in evaluated:
+                carry_seen.setdefault(r["base"], -1)
+            continue
+        for r in evaluated:
+            # Strict filter: hanya FLOATING yang dibawa; status final dibuang.
+            if r["status"] != STATUS_FLOATING:
+                continue
+            entry = {**r, "session": date}
+            # Dedupe per symbol: simpan hanya yang TERBARU (older_keys diurut
+            # terbalik, jadi kemunculan pertama = sesi paling akhir).
+            if entry["base"] in carry_seen:
+                continue
+            carry_seen[entry["base"]] = len(carryover)
+            carryover.append(entry)
 
     if primary_results is None:
         return None
