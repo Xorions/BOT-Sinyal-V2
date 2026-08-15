@@ -237,8 +237,9 @@ class TestCarryOver:
         assert "Entry $35.13" not in carry
 
     def test_carry_over_excludes_symbol_already_in_primary_session(self):
-        # Koin yang sudah tampil di sesi utama (primary) tidak boleh diduplikasi
-        # ke seksi CARRY-OVER walau muncul lagi di sesi lebih lama.
+        # Koin yang sama (RFXI) muncul di sesi primary (terbaru) & sesi lebih
+        # lama, keduanya FLOATING -> carry-over hanya menampilkan 1 sinyal
+        # TERBARU (dari sesi primary), versi lama tidak diduplikasi.
         history = {
             "2026-08-07 19:00": [_sig(entry=35.13, sl=34.10, tp1=106.0, tp2=107.0, symbol="RFXIUSDT", base="RFXI")],
             "2026-08-08 07:00": [_sig(entry=35.16, sl=34.13, tp1=106.0, tp2=107.0, symbol="RFXIUSDT", base="RFXI")],
@@ -249,6 +250,6 @@ class TestCarryOver:
 
         recap = build_recap(history, fetch, now_key="2026-08-08 13:30")
         assert recap is not None
-        assert "CARRY-OVER" not in recap
+        assert "CARRY-OVER" in recap
         assert recap.count("#RFXI") == 1
         assert "Entry $35.16" in recap  # hanya yang terbaru (sesi primary)

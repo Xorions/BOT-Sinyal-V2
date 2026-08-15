@@ -259,3 +259,170 @@ class TestBuildRecap:
         history = {"2026-08-06 13:30": [_sig()]}
         build_recap(history, fetch, now_key="2026-08-07 13:30")
         assert captured["since"] == datetime(2026, 8, 6, 13, 30, tzinfo=WIB)
+
+
+class TestSessionSeparation:
+    """Pemisahan sesi evaluasi vs sinyal baru (Fix 15-Aug-2026).
+
+    Rekap sesi berjalan (mis. 19:06) HANYA mengevaluasi sinyal dari sesi
+    SEBELUMNYA (mis. 13:35) + antrean Carry-Over FLOATING. Sinyal yang BARU
+    SAJA dibuat pada sesi 19:06 tersebut TIDAK dievaluasi prematur (belum
+    punya umur/progress harga) — baru dievaluasi pada sesi berikutnya.
+    """
+
+    def _floating_fetch(self, pair, since=None):
+        return [{"high": 105.0, "low": 95.0, "close": 102.0}]
+
+    def test_fresh_session_t_signals_not_evaluated_prematurely(self):
+        # Sinyal sesi 19:06 baru berumur 4 menit saat rekap 19:10 -> dilewati;
+        # rekap hanya mengevaluasi sesi sebelumnya 13:35.
+        history = {
+            "2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")],
+            "2026-08-15 19:06": [_sig(symbol="SOLUSDT", base="SOL")],
+        }
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:10")
+        assert recap is not None
+        assert "15 Aug 2026 13:35" in recap     # sesi sebelumnya = primary
+        assert "15 Aug 2026 19:06" not in recap
+        assert "#SOL" not in recap              # sinyal baru tidak dievaluasi
+        assert "#RFXI" in recap                 # sinyal T-1 tetap dievaluasi
+
+    def test_fresh_session_t_preserved_in_carryover_flow(self):
+        # Sesi T-1 (13:35) floating dibawa ke Carry-Over meski ada sesi baru T
+        # (19:06) yang tidak boleh dievaluasi.
+        history = {
+            "2026-08-15 13:35": [
+                _sig(symbol="RFXIUSDT", base="RFXI"),
+                _sig(symbol="RCDNSUSDT", base="RCDNS"),
+            ],
+            "2026-08-15 19:06": [_sig(symbol="SOLUSDT", base="SOL")],
+        }
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:10")
+        assert recap is not None
+        assert "CARRY-OVER" in recap
+        assert "#RFXI" in recap and "#RCDNS" in recap
+        assert "#SOL" not in recap
+
+    def test_only_fresh_session_returns_none(self):
+        history = {"2026-08-15 19:06": [_sig(symbol="SOLUSDT", base="SOL")]}
+        assert build_recap(history, self._floating_fetch, now_key="2026-08-15 19:10") is None
+
+    def test_current_session_key_itself_never_evaluated(self):
+        # Kunci sesi yang SAMA dengan sesi berjalan (19:06) bukan "sesi
+        # sebelumnya" — sinyalnya tidak ikut dievaluasi rekap ini.
+        history = {
+            "2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")],
+            "2026-08-15 19:06": [_sig(symbol="SOLUSDT", base="SOL")],
+        }
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:06")
+        assert recap is not None
+        assert "13:35" in recap
+        assert "#SOL" not in recap
+
+    def test_mature_previous_session_still_evaluated(self):
+        # Sesi T-1 yang sudah berumur (5,5 jam) tetap dievaluasi di sesi T.
+        history = {"2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")]}
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:06")
+        assert recap is not None
+        assert "15 Aug 2026 13:35" in recap
+        assert "#RFXI" in recap
+
+    def test_previous_session_signals_skips_fresh_session(self):
+        from evaluation import previous_session_signals
+
+        history = {
+            "2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")],
+            "2026-08-15 19:06": [_sig(symbol="SOLUSDT", base="SOL")],
+        }
+        date, sigs = previous_session_signals(history, now_key="2026-08-15 19:10")
+        assert date == "2026-08-15 13:35"
+        assert sigs[0]["base"] == "RFXI"
+
+
+class TestCarryOverContinuity:
+    """Continuity sinyal FLOATING (Fix 15-Aug-2026).
+
+    Semua sinyal FLOATING dari sesi sebelumnya (T-1) otomatis masuk daftar
+    Carry-Over untuk sesi berjalan (T) selama belum tersentuh TP1/TP2/SL/
+    EXPIRED — posisi aktif tidak pernah hilang dari tracking antar sesi.
+    """
+
+    def _floating_fetch(self, pair, since=None):
+        return [{"high": 105.0, "low": 95.0, "close": 102.0}]
+
+    def test_previous_session_floating_auto_enters_carryover(self):
+        # RFXI, RCDNS, RMCK, RIBIT, RNXPI dari sesi 13:35 semuanya FLOATING
+        # -> otomatis masuk Carry-Over untuk sesi 19:06 (masing-masing sekali).
+        history = {
+            "2026-08-15 13:35": [
+                _sig(symbol="RFXIUSDT", base="RFXI"),
+                _sig(symbol="RCDNSUSDT", base="RCDNS"),
+                _sig(symbol="RMCKUSDT", base="RMCK"),
+                _sig(symbol="RIBITUSDT", base="RIBIT"),
+                _sig(symbol="RNXPIUSDT", base="RNXPI"),
+            ]
+        }
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:06")
+        assert recap is not None
+        assert "CARRY-OVER" in recap
+        assert "🧾 5 sinyal ⏳ FLOATING dibawa dari sesi sebelumnya" in recap
+        for base in ("RFXI", "RCDNS", "RMCK", "RIBIT", "RNXPI"):
+            assert recap.count(f"#{base}") == 1  # tidak duplikat di seksi utama
+
+    def test_resolved_signals_exit_queue_only_floating_carried(self):
+        # Yang sudah menyentuh SL (status final) TIDAK masuk Carry-Over;
+        # hanya yang FLOATING yang dibawa (continuity).
+        history = {
+            "2026-08-15 13:35": [
+                _sig(symbol="RFXIUSDT", base="RFXI"),
+                _sig(symbol="LITUSDT", base="LIT", entry=50.0, sl=45.0, tp1=55.0, tp2=60.0),
+            ]
+        }
+
+        def fetch(pair, since=None):
+            return {
+                "RFXIUSDT": [{"high": 105.0, "low": 95.0, "close": 102.0}],  # FLOATING
+                "LITUSDT": [{"high": 54.0, "low": 44.0, "close": 52.0}],     # SL
+            }[pair]
+
+        recap = build_recap(history, fetch, now_key="2026-08-15 19:06")
+        assert recap is not None
+        assert "🧾 1 sinyal ⏳ FLOATING dibawa dari sesi sebelumnya" in recap
+        main_part = recap.split("CARRY-OVER")[0]
+        assert "#RFXI" not in main_part            # floating tidak tampil di seksi utama
+        assert "#LIT" in main_part and "SL" in main_part  # final tetap di seksi utama
+        assert recap.count("#RFXI") == 1           # di seksi carry-over, sekali saja
+
+    def test_floating_kept_carried_until_tp1_in_next_session(self):
+        # Continuity: RFXI floating di sesi T-1, di sesi T+1 menyentuh TP1
+        # -> status final, keluar dari Carry-Over (tidak diseret terus).
+        history = {
+            "2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")],
+            "2026-08-15 19:06": [_sig(symbol="LITUSDT", base="LIT", entry=50.0, sl=45.0, tp1=55.0, tp2=60.0)],
+        }
+
+        def fetch(pair, since=None):
+            return {
+                "RFXIUSDT": [{"high": 111.0, "low": 95.0, "close": 110.0}],  # TP1
+                "LITUSDT": [{"high": 121.0, "low": 95.0, "close": 115.0}],   # TP2
+            }[pair]
+
+        recap = build_recap(history, fetch, now_key="2026-08-16 13:30")
+        assert recap is not None
+        assert "CARRY-OVER" not in recap
+        assert "#RFXI" not in recap
+        assert "#LIT" in recap and "TP2" in recap
+
+    def test_floating_from_older_sessions_also_carried(self):
+        # Continuity antar beberapa sesi: floating dari sesi lebih lama (masih
+        # dalam jendela EVAL_MAX_HOURS 24 jam) tetap dievaluasi & dibawa,
+        # sesi terbaru tampil lebih dulu.
+        history = {
+            "2026-08-15 07:00": [_sig(symbol="XYZUSDT", base="XYZ")],
+            "2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")],
+        }
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:06")
+        assert recap is not None
+        assert "🧾 2 sinyal ⏳ FLOATING dibawa dari sesi sebelumnya" in recap
+        assert "#RFXI" in recap and "#XYZ" in recap
+        assert recap.index("#RFXI") < recap.index("#XYZ")  # terbaru dulu

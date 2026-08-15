@@ -8,6 +8,11 @@
   terakhir tiap pair (high/low/current) dari Bitget, menentukan status tiap
   sinyal (TP2 / TP1 / SL / Floating), menghitung win rate, lalu menyusun teks
   ringkasan evaluasi yang dikirim sebagai pesan Telegram terpisah (History Review).
+- Pemisahan sesi (Fix 15-Aug-2026): rekap sesi berjalan HANYA mengevaluasi
+  sinyal dari sesi SEBELUMNYA + antrean Carry-Over FLOATING — sinyal yang baru
+  saja dibuat pada sesi berjalan (belum berumur MIN_SESSION_AGE_HOURS) tidak
+  dievaluasi prematur, dan sinyal FLOATING sesi sebelumnya otomatis dibawa
+  (carry-over) sampai menyentuh TP1/TP2/SL/EXPIRED.
 """
 
 import json
@@ -50,6 +55,13 @@ STATUS_LABEL = {
 # ditampilkan sebagai EXPIRED pada rekap 1-2 sesi SETELAH jendela EVAL_MAX_HOURS
 # lewat; sesi yang lebih tua dari itu dibuang dari antrean carry-over.
 CARRYOVER_GRACE_HOURS: float = 24.0
+
+# Umur minimal sesi (jam) sebelum boleh dievaluasi (Pemisahan Sesi, Fix 15-Aug-2026):
+# sinyal yang BARU SAJA dibuat pada sesi berjalan (mis. 19:06) belum punya
+# umur/progress harga — dilarang dievaluasi prematur oleh rekap sesi yang sama.
+# Lebih kecil dari jarak antar sesi (13:30 -> 19:00 = 5,5 jam), jadi sesi
+# sebelumnya selalu lolos; lebih besar dari re-run dalam sesi berjalan.
+MIN_SESSION_AGE_HOURS: float = 3.0
 
 
 def wib_now() -> datetime:
@@ -126,13 +138,20 @@ def previous_session_signals(history: Dict[str, List[Dict]], now_key: Optional[s
 
     Kunci sesi (`YYYY-MM-DD HH:MM`) & kunci tanggal lama (`YYYY-MM-DD`) campur
     dibandingkan leksikografis — urutan waktu tetap benar.
+
+    Fix pemisahan sesi: sesi yang belum berumur MIN_SESSION_AGE_HOURS (masih
+    bagian dari sesi berjalan, sinyalnya baru dibuat) dianggap belum "sesi
+    sebelumnya" dan dilewati.
     """
     now_key = now_key or session_now_str()
+    now_dt = _session_since(now_key) or wib_now()
     older = sorted(k for k in history if k < now_key)
-    if not older:
-        return None, []
-    date = older[-1]
-    return date, history[date]
+    for date in reversed(older):
+        since = _session_since(date)
+        if since is None or not _is_mature(since, now_dt):
+            continue
+        return date, history[date]
+    return None, []
 
 
 def _session_since(key: Optional[str]) -> Optional[datetime]:
@@ -152,6 +171,19 @@ def _session_since(key: Optional[str]) -> Optional[datetime]:
 
 
 # ---------------------------------------------------------------- evaluasi
+def _is_mature(since: Optional[datetime], now_dt: Optional[datetime] = None, min_age_hours: float = MIN_SESSION_AGE_HOURS) -> bool:
+    """True bila sesi sudah cukup umur untuk dievaluasi (min MIN_SESSION_AGE_HOURS).
+
+    Sinyal yang BARU SAJA dibuat pada sesi berjalan belum punya umur/progress
+    harga — dilarang dievaluasi prematur oleh rekap sesi yang sama. Sesi dengan
+    kunci tak dikenal (since=None) dianggap belum mature.
+    """
+    if since is None:
+        return False
+    now_dt = now_dt or wib_now()
+    return now_dt - since >= timedelta(hours=min_age_hours)
+
+
 def _within_window(candles: List[Dict], since: Optional[datetime], max_hours: float = EVAL_MAX_HOURS) -> List[Dict]:
     """Potong candle ke jendela `since`..`since+max_hours` (Fix R4).
 
@@ -315,6 +347,10 @@ def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dic
     ditampilkan sebagai seksi terpisah dengan umur sinyal tiap koin. Hanya
     sinyal berstatus FLOATING yang dibawa (Fix duplikasi): status final
     (TP1/TP2/SL/EXPIRED) langsung keluar dari antrean carry-over.
+
+    Fix continuity (15-Aug-2026): sinyal FLOATING dari sesi utama juga otomatis
+    masuk antrean carry-over — seksi utama hanya menampilkan status final
+    (TP2/TP1/SL/EXPIRED), posisi aktif ditampilkan sekali di seksi CARRY-OVER.
     """
     tp2 = sum(1 for r in evaluated if r["status"] == STATUS_TP2)
     tp1 = sum(1 for r in evaluated if r["status"] == STATUS_TP1)
@@ -331,12 +367,14 @@ def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dic
         f"🎯 TP2: {tp2}",
         f"🛡️ SL: {sl}",
         f"⏳ Floating: {floating}",
-        "━━━━━━━━━━━━",
     ]
-    for i, r in enumerate(evaluated):
-        lines.extend(_signal_lines(r))
-        if i != len(evaluated) - 1:
-            lines.append("───")
+    resolved = [r for r in evaluated if r["status"] != STATUS_FLOATING]
+    if resolved:
+        lines.append("━━━━━━━━━━━━")
+        for i, r in enumerate(resolved):
+            lines.extend(_signal_lines(r))
+            if i != len(resolved) - 1:
+                lines.append("───")
 
     if carryover:
         lines.append("━━━━━━━━━━━━")
@@ -372,6 +410,15 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     Sesi yang jendelanya lewat lebih dari CARRYOVER_GRACE_HOURS dibuang (status
     EXPIRED-nya sudah pernah tampil di rekap sebelumnya).
 
+    Fix pemisahan sesi & continuity (15-Aug-2026):
+    - Pemisahan sesi: rekap sesi berjalan (mis. 19:06) HANYA mengevaluasi sesi
+      yang sudah berumur MIN_SESSION_AGE_HOURS (sesi sebelumnya, mis. 13:35) —
+      sinyal yang BARU SAJA dibuat pada sesi 19:06 tersebut TIDAK dievaluasi
+      prematur (belum punya umur/progress harga).
+    - Continuity: sinyal FLOATING dari sesi utama otomatis masuk antrean
+      carry-over untuk sesi berikutnya selama belum tersentuh TP1/TP2/SL/
+      EXPIRED — posisi aktif tidak pernah hilang dari tracking antar sesi.
+
     Fix duplikasi & penumpukan (14-Aug-2026):
     - Carry-over HANYA berisi sinyal berstatus FLOATING — sinyal yang sudah
       mencapai status final (TP1/TP2/SL/EXPIRED) LANGSUNG keluar dari antrean
@@ -388,7 +435,7 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
     primary_results: Optional[List[Dict]] = None
     carryover: List[Dict] = []
     # symbol(base) yang SUDAH tampil -> index di carryover (nilai < 0 = milik
-    # sesi utama, tidak boleh ditambahkan lagi ke carry-over).
+    # sesi utama dengan status final, tidak boleh ditambahkan lagi ke carry-over).
     carry_seen: Dict[str, int] = {}
 
     for date in older_keys:
@@ -397,6 +444,10 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
             continue
         since = _session_since(date)
         if since is None:
+            continue
+        # Pemisahan sesi: sinyal yang baru dibuat pada sesi berjalan belum punya
+        # umur/progress harga — dilewati, baru dievaluasi pada sesi berikutnya.
+        if not _is_mature(since, now_dt):
             continue
         if primary_results is not None:
             cutoff = since + timedelta(hours=EVAL_MAX_HOURS)
@@ -409,8 +460,16 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
         if primary_results is None:
             primary_date = date
             primary_results = evaluated
+            # Continuity: FLOATING dari sesi utama otomatis masuk antrean
+            # carry-over (dibawa ke sesi berikutnya sampai TP/SL/EXPIRED);
+            # status final (TP1/TP2/SL/EXPIRED) langsung menutup posisi.
             for r in evaluated:
-                carry_seen.setdefault(r["base"], -1)
+                if r["status"] == STATUS_FLOATING:
+                    entry = {**r, "session": date}
+                    carry_seen[entry["base"]] = len(carryover)
+                    carryover.append(entry)
+                else:
+                    carry_seen.setdefault(r["base"], -1)
             continue
         for r in evaluated:
             # Strict filter: hanya FLOATING yang dibawa; status final dibuang.
