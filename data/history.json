@@ -1171,5 +1171,37 @@
       "tp2": 123.42655900000003,
       "timestamp": "Friday, 14 Aug 2026, 19:06 WIB"
     }
+  ],
+  "2026-08-15 13:36": [
+    {
+      "symbol": "RSHWUSDT",
+      "base": "RSHW",
+      "action": "SELL",
+      "entry": 357.96,
+      "sl": 364.04532,
+      "tp1": 353.700276,
+      "tp2": 349.44055199999997,
+      "timestamp": "Saturday, 15 Aug 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RLLYUSDT",
+      "base": "RLLY",
+      "action": "SELL",
+      "entry": 1180.13,
+      "sl": 1200.1922100000002,
+      "tp1": 1166.0864530000001,
+      "tp2": 1152.0429060000001,
+      "timestamp": "Saturday, 15 Aug 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RTPRUSDT",
+      "base": "RTPR",
+      "action": "SELL",
+      "entry": 128.71,
+      "sl": 130.89807000000002,
+      "tp1": 127.178351,
+      "tp2": 125.64670199999999,
+      "timestamp": "Saturday, 15 Aug 2026, 13:36 WIB"
+    }
   ]
 }
