@@ -191,12 +191,9 @@ Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blo
 
 ```
 📊 EVALUASI SINYAL SESI SEBELUMNYA — 07 Aug 2026 13:30
-🏆 Win rate: 60% (3/5)
-💰 TP1: 1
-🎯 TP2: 2
-🛡️ SL: 1
-⏳ Floating: 1
-───
+🏆 Win rate: 60% (3/5) | 💰 TP1: 1 | 🎯 TP2: 2 | 🛡️ SL: 1 | ⏳ Floating: 1
+━━━━━━━━━━━━
+📋 SEKSI 1 — SESI UTAMA
 
 #BTC BUY
 🔑 Entry $104,000 → 🎯 TP2
@@ -207,9 +204,16 @@ Pesan briefing & recap yang panjangnya melebihi 4000 karakter dipotong **per blo
 📋 Hit SL di $1.070000
 
 #LIT BUY
+🔑 Entry $0.82 → 💰 TP1
+📋 Hit TP1 di $0.90
+━━━━━━━━━━━━
+⏳ SEKSI 2 — CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA
+🧾 1 sinyal ⏳ FLOATING dibawa dari sesi sebelumnya
+
+#LIT BUY (FLOATING - 5 jam)
 🔑 Entry $0.74 → ⏳ FLOATING
 📋 Harga saat ini $0.752000
-───
+━━━━━━━━━━━━
 ```
 
 Bila belum ada riwayat (sesi pertama) atau semua sesi gagal diambil datanya, recap dilewati tanpa menggagalkan scan.

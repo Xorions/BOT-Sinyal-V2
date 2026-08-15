@@ -351,6 +351,14 @@ def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dic
     Fix continuity (15-Aug-2026): sinyal FLOATING dari sesi utama juga otomatis
     masuk antrean carry-over — seksi utama hanya menampilkan status final
     (TP2/TP1/SL/EXPIRED), posisi aktif ditampilkan sekali di seksi CARRY-OVER.
+
+    Format (Fix 16-Aug-2026):
+    - Statistik horizontal 1 baris: `🏆 Win rate ... | 💰 TP1 | 🎯 TP2 | 🛡️ SL | ⏳ Floating`.
+    - Seksi 1 `SEKSI 1 — SESI UTAMA`: status final sinyal sesi sebelumnya yang
+      baru dievaluasi; bila tak ada sinyal selesai tampil catatan singkat.
+    - Seksi 2 `SEKSI 2 — CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA`:
+      posisi FLOATING yang dibawa antar sesi. Pembatas garis dipertahankan
+      walau seksi utama kosong, agar carry-over selalu terpisah rapi.
     """
     tp2 = sum(1 for r in evaluated if r["status"] == STATUS_TP2)
     tp1 = sum(1 for r in evaluated if r["status"] == STATUS_TP1)
@@ -362,23 +370,25 @@ def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dic
 
     lines = [
         f"<b>📊 EVALUASI SINYAL SESI SEBELUMNYA — {_esc(_display_key(date))}</b>",
-        f"🏆 Win rate: <b>{win_rate}%</b> ({won}/{total})",
-        f"💰 TP1: {tp1}",
-        f"🎯 TP2: {tp2}",
-        f"🛡️ SL: {sl}",
-        f"⏳ Floating: {floating}",
+        f"🏆 Win rate: <b>{win_rate}%</b> ({won}/{total}) | 💰 TP1: {tp1} | 🎯 TP2: {tp2} | 🛡️ SL: {sl} | ⏳ Floating: {floating}",
     ]
     resolved = [r for r in evaluated if r["status"] != STATUS_FLOATING]
+
+    # Seksi 1 — Sesi Utama: sinyal sesi sebelumnya yang baru di-evaluasi (status final).
+    lines.append("━━━━━━━━━━━━")
+    lines.append("📋 <b>SEKSI 1 — SESI UTAMA</b>")
     if resolved:
-        lines.append("━━━━━━━━━━━━")
         for i, r in enumerate(resolved):
             lines.extend(_signal_lines(r))
             if i != len(resolved) - 1:
                 lines.append("───")
+    else:
+        lines.append("Tidak ada sinyal selesai di sesi utama — semua posisi masih aktif.")
 
+    # Seksi 2 — Carry-Over: posisi FLOATING yang dibawa dari sesi sebelumnya.
     if carryover:
         lines.append("━━━━━━━━━━━━")
-        lines.append("⏳ <b>CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA</b>")
+        lines.append("⏳ <b>SEKSI 2 — CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA</b>")
         lines.append(f"🧾 {len(carryover)} sinyal ⏳ FLOATING dibawa dari sesi sebelumnya")
         for i, r in enumerate(carryover):
             age_str = ""

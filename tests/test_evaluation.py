@@ -183,11 +183,8 @@ class TestBuildRecap:
         assert recap is not None
         assert "EVALUASI SINYAL SESI SEBELUMNYA" in recap
         assert "06 Aug 2026 13:30" in recap
-        assert "💰 TP1: 1" in recap
-        assert "🎯 TP2: 1" in recap
-        assert "🛡️ SL: 1" in recap
-        assert "⏳ Floating: 0" in recap
-        assert "67%" in recap
+        assert "🏆 Win rate: <b>67%</b> (2/3) | 💰 TP1: 1 | 🎯 TP2: 1 | 🛡️ SL: 1 | ⏳ Floating: 0" in recap
+        assert "SEKSI 1 — SESI UTAMA" in recap
         assert "🔑 Entry" in recap
         assert "📋 Hit" in recap
         assert "#BTC" in recap and "TP2" in recap
@@ -202,8 +199,11 @@ class TestBuildRecap:
         assert "📋 Hit SL di $45.00 (-10.00%)" in recap
         assert "📋 Hit TP1 di $0.900000 (+10.00%)" in recap
         lines = recap.splitlines()
-        assert lines[6] == "━━━━━━━━━━━━"
-        assert lines[10] == "───"
+        assert lines[1] == "🏆 Win rate: <b>67%</b> (2/3) | 💰 TP1: 1 | 🎯 TP2: 1 | 🛡️ SL: 1 | ⏳ Floating: 0"
+        assert lines[2] == "━━━━━━━━━━━━"
+        assert lines[3] == "📋 <b>SEKSI 1 — SESI UTAMA</b>"
+        assert lines[7] == "───"
+        assert lines[11] == "───"
         assert lines[-1] == "━━━━━━━━━━━━"
 
     def test_recap_floating_includes_pnl(self):
@@ -412,6 +412,26 @@ class TestCarryOverContinuity:
         assert "CARRY-OVER" not in recap
         assert "#RFXI" not in recap
         assert "#LIT" in recap and "TP2" in recap
+
+    def test_carryover_separated_when_main_section_empty(self):
+        # Semua sinyal sesi utama FLOATING -> seksi utama kosong; seksi
+        # CARRY-OVER tetap tampil terpisah rapi dengan pembatas garis.
+        history = {
+            "2026-08-15 13:35": [
+                _sig(symbol="RFXIUSDT", base="RFXI"),
+                _sig(symbol="RCDNSUSDT", base="RCDNS"),
+            ]
+        }
+        recap = build_recap(history, self._floating_fetch, now_key="2026-08-15 19:06")
+        assert recap is not None
+        lines = recap.splitlines()
+        assert "SEKSI 1 — SESI UTAMA" in recap
+        assert "Tidak ada sinyal selesai di sesi utama" in recap
+        assert "SEKSI 2 — CARRY-OVER — POSISI AKTIF DARI SESI SEBELUMNYA" in recap
+        carry_idx = next(i for i, l in enumerate(lines) if "SEKSI 2 — CARRY-OVER" in l)
+        assert lines[carry_idx - 1] == "━━━━━━━━━━━━"
+        assert lines[carry_idx + 1] == "🧾 2 sinyal ⏳ FLOATING dibawa dari sesi sebelumnya"
+        assert "#RFXI" in recap and "#RCDNS" in recap
 
     def test_floating_from_older_sessions_also_carried(self):
         # Continuity antar beberapa sesi: floating dari sesi lebih lama (masih
