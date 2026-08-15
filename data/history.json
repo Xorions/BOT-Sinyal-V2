@@ -1203,5 +1203,17 @@
       "tp2": 125.64670199999999,
       "timestamp": "Saturday, 15 Aug 2026, 13:36 WIB"
     }
+  ],
+  "2026-08-15 19:06": [
+    {
+      "symbol": "RAMATUSDT",
+      "base": "RAMAT",
+      "action": "SELL",
+      "entry": 506.59,
+      "sl": 515.2020299999999,
+      "tp1": 500.561579,
+      "tp2": 494.53315800000007,
+      "timestamp": "Saturday, 15 Aug 2026, 19:05 WIB"
+    }
   ]
 }
