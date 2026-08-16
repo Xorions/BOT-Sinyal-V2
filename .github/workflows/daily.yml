@@ -39,6 +39,10 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Encoding eksplisit UTF-8 (Fix mojibake 16-Aug-2026): emoji di pesan
+          # Telegram diproses tanpa distorsi.
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
           # Opsional:
           # CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
           # ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}

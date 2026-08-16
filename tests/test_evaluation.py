@@ -260,6 +260,17 @@ class TestBuildRecap:
         build_recap(history, fetch, now_key="2026-08-07 13:30")
         assert captured["since"] == datetime(2026, 8, 6, 13, 30, tzinfo=WIB)
 
+    def test_recap_utf8_emoji_clean(self):
+        # Fix mojibake (16-Aug-2026): teks recap bebas karakter corrupt — emoji
+        # Unicode (📊🏆💰🎯🛡️⏳📋🔑) muncul utuh, tanpa U+FFFD, dan dapat
+        # di-encode/decode UTF-8 strict tanpa kehilangan data.
+        recap = build_recap(self.HISTORY, self._fetch, now_key="2026-08-07 13:30")
+        assert recap is not None
+        for emoji in ("📊", "🏆", "💰", "🎯", "🛡️", "⏳", "📋", "🔑", "━━━"):
+            assert emoji in recap
+        assert "\ufffd" not in recap
+        assert recap.encode("utf-8", errors="strict").decode("utf-8") == recap
+
 
 class TestSessionSeparation:
     """Pemisahan sesi evaluasi vs sinyal baru (Fix 15-Aug-2026).

@@ -9,11 +9,17 @@ Uji lokal tanpa Telegram:  python bot.py
 """
 
 import logging
+import os
 import sys
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
+# Encoding eksplisit UTF-8 (Fix mojibake 16-Aug-2026): pastikan seluruh teks
+# (stdout/stderr, file, subproses) diproses sebagai UTF-8 agar emoji seperti
+# 📊 🏆 💰 🎯 🛡️ ⏳ 📋 tidak terdistorsi menjadi karakter aneh.
+os.environ.setdefault("PYTHONUTF8", "1")
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8")
