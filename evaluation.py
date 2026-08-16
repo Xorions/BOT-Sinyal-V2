@@ -12,7 +12,8 @@
   sinyal dari sesi SEBELUMNYA + antrean Carry-Over FLOATING — sinyal yang baru
   saja dibuat pada sesi berjalan (belum berumur MIN_SESSION_AGE_HOURS) tidak
   dievaluasi prematur, dan sinyal FLOATING sesi sebelumnya otomatis dibawa
-  (carry-over) sampai menyentuh TP1/TP2/SL/EXPIRED.
+  (carry-over) sampai benar-benar menyentuh TP1/TP2/SL — TANPA batas waktu
+  (Fix 16-Aug-2026: tidak ada lagi auto-expire EXPIRED setelah EVAL_MAX_HOURS).
 """
 
 import json
@@ -20,7 +21,6 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
-from config import EVAL_MAX_HOURS
 from engine import ACTION_BUY, ACTION_SELL, Signal, _esc, _fmt_price
 
 HISTORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -50,11 +50,6 @@ STATUS_LABEL = {
     STATUS_FLOATING: "FLOATING",
     STATUS_EXPIRED: "EXPIRED",
 }
-
-# Toleransi waktu (jam) agar sinyal yang belum selesai dari sesi lama masih sempat
-# ditampilkan sebagai EXPIRED pada rekap 1-2 sesi SETELAH jendela EVAL_MAX_HOURS
-# lewat; sesi yang lebih tua dari itu dibuang dari antrean carry-over.
-CARRYOVER_GRACE_HOURS: float = 24.0
 
 # Umur minimal sesi (jam) sebelum boleh dievaluasi (Pemisahan Sesi, Fix 15-Aug-2026):
 # sinyal yang BARU SAJA dibuat pada sesi berjalan (mis. 19:06) belum punya
@@ -184,20 +179,6 @@ def _is_mature(since: Optional[datetime], now_dt: Optional[datetime] = None, min
     return now_dt - since >= timedelta(hours=min_age_hours)
 
 
-def _within_window(candles: List[Dict], since: Optional[datetime], max_hours: float = EVAL_MAX_HOURS) -> List[Dict]:
-    """Potong candle ke jendela `since`..`since+max_hours` (Fix R4).
-
-    Candle tanpa `ts` (mis. fallback ticker 24j) selalu dipertahankan.
-    Membatasi jendela evaluasi agar SL/TP yang tersentuh JAUH setelah sesi
-    (bukan bagian dari niat day trade) tidak ikut dihitung.
-    """
-    if not since or not max_hours:
-        return candles
-    cutoff = since + timedelta(hours=max_hours)
-    cutoff_ms = int(cutoff.timestamp() * 1000)
-    return [c for c in candles if c.get("ts") is None or c["ts"] <= cutoff_ms]
-
-
 def _evaluate_candles(sig: Dict, candles: List[Dict]):
     """(status, harga acuan) berdasar urutan candle M15 (kronologis).
 
@@ -274,18 +255,19 @@ def _pnl_pct(sig: Dict, ref: Optional[float]) -> str:
     return f"{pct:+.2f}%"
 
 
-def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = None, now: Optional[datetime] = None) -> List[Dict]:
+def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = None) -> List[Dict]:
     """Isi 'status' + 'ref' (harga acuan) tiap sinyal.
 
     fetch_fn(pair, since) -> list candle M15 kronologis (dict {high, low, close,
-    ts}) atau None. `since` = waktu sesi sinyal (WIB-aware); dipakai untuk
-    membatasi jendela evaluasi (EVAL_MAX_HOURS) & diteruskan ke fetch_fn.
-    `now` (WIB-aware, default waktu kini) dipakai menentukan EXPIRED: sinyal yang
-    tidak menyentuh TP1/TP2/SL sampai melebihi EVAL_MAX_HOURS sejak sesinya
-    ditandai EXPIRED (bukan FLOATING) dan berhenti di-carry-over.
+    ts}) atau None. `since` = waktu sesi sinyal (WIB-aware); diteruskan ke
+    fetch_fn agar high/low hanya dihitung dari candle SETELAH sesi sinyal.
+
+    Fix 16-Aug-2026 (hapus expiry 24 jam): TIDAK ada lagi auto-expire —
+    sinyal FLOATING tidak pernah ditandai EXPIRED dan terus dievaluasi pada
+    rekap-rekap berikutnya (carry-over) tanpa batas waktu, sampai harga
+    benar-benar menyentuh TP1/TP2/SL. Seluruh candle yang dikembalikan
+    fetch_fn ikut dievaluasi (tidak dipotong jendela EVAL_MAX_HOURS).
     """
-    now = now or wib_now()
-    cutoff = since + timedelta(hours=EVAL_MAX_HOURS) if since else None
     out: List[Dict] = []
     for sig in signals:
         if sig.get("action") not in (ACTION_BUY, ACTION_SELL):
@@ -298,10 +280,7 @@ def evaluate_signals(signals: List[Dict], fetch_fn, since: Optional[datetime] = 
         if not candles:
             out.append({**sig, "status": None})
             continue
-        candles = _within_window(candles, since)
         status, ref = _evaluate_candles(sig, candles)
-        if status == STATUS_FLOATING and cutoff is not None and now > cutoff:
-            status = STATUS_EXPIRED
         out.append({**sig, "status": status, "ref": ref})
     return out
 
@@ -332,8 +311,6 @@ def _signal_lines(r: Dict, age_str: str = "") -> List[str]:
     lines.append(f"🔑 Entry {_esc(_fmt_price(r['entry']))} → {STATUS_EMOJI[status]} <b>{label}</b>")
     if status == STATUS_FLOATING:
         lines.append(f"📋 Harga saat ini {ref_str} ({pnl})")
-    elif status == STATUS_EXPIRED:
-        lines.append(f"📋 Melebihi EVAL_MAX_HOURS ({EVAL_MAX_HOURS:.0f} jam) tanpa TP/SL")
     else:
         lines.append(f"📋 Hit {label} di {ref_str} ({pnl})")
     return lines
@@ -343,14 +320,18 @@ def _format_recap(date: str, evaluated: List[Dict], carryover: Optional[List[Dic
     """Susun teks recap dari daftar sinyal yang sudah dievaluasi.
 
     `carryover` (opsional): sinyal FLOATING dari sesi-sesi SEBELUM sesi utama
-    yang dibawa (carry-over) untuk dievaluasi ulang sampai TP/SL/EXPIRED —
+    yang dibawa (carry-over) untuk dievaluasi ulang sampai TP/SL tersentuh —
     ditampilkan sebagai seksi terpisah dengan umur sinyal tiap koin. Hanya
     sinyal berstatus FLOATING yang dibawa (Fix duplikasi): status final
-    (TP1/TP2/SL/EXPIRED) langsung keluar dari antrean carry-over.
+    (TP1/TP2/SL) langsung keluar dari antrean carry-over.
 
     Fix continuity (15-Aug-2026): sinyal FLOATING dari sesi utama juga otomatis
     masuk antrean carry-over — seksi utama hanya menampilkan status final
-    (TP2/TP1/SL/EXPIRED), posisi aktif ditampilkan sekali di seksi CARRY-OVER.
+    (TP2/TP1/SL), posisi aktif ditampilkan sekali di seksi CARRY-OVER.
+
+    Fix no-expiry (16-Aug-2026): sinyal FLOATING dibawa TANPA batas waktu
+    (tidak ada lagi EXPIRED setelah EVAL_MAX_HOURS) sampai harga benar-benar
+    menyentuh TP1/TP2/SL.
 
     Format (Fix 16-Aug-2026):
     - Statistik horizontal 1 baris: `🏆 Win rate ... | 💰 TP1 | 🎯 TP2 | 🛡️ SL | ⏳ Floating`.
@@ -416,9 +397,9 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
 
     Carry-over: sinyal yang masih FLOATING di sesi-sesi sebelumnya TIDAK dihapus
     dari antrean evaluasi — ikut dievaluasi ulang di rekap ini sebagai seksi
-    CARRY-OVER sampai menyentuh TP1/TP2/SL atau melebihi EVAL_MAX_HOURS (EXPIRED).
-    Sesi yang jendelanya lewat lebih dari CARRYOVER_GRACE_HOURS dibuang (status
-    EXPIRED-nya sudah pernah tampil di rekap sebelumnya).
+    CARRY-OVER sampai benar-benar menyentuh TP1/TP2/SL. Fix 16-Aug-2026: TANPA
+    batas waktu (auto-expire EXPIRED dihapus) — sinyal FLOATING terus di-carry-
+    over tanpa batas waktu, berapa pun umurnya, hingga harga menyentuh TP1/TP2/SL.
 
     Fix pemisahan sesi & continuity (15-Aug-2026):
     - Pemisahan sesi: rekap sesi berjalan (mis. 19:06) HANYA mengevaluasi sesi
@@ -426,12 +407,13 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
       sinyal yang BARU SAJA dibuat pada sesi 19:06 tersebut TIDAK dievaluasi
       prematur (belum punya umur/progress harga).
     - Continuity: sinyal FLOATING dari sesi utama otomatis masuk antrean
-      carry-over untuk sesi berikutnya selama belum tersentuh TP1/TP2/SL/
-      EXPIRED — posisi aktif tidak pernah hilang dari tracking antar sesi.
+      carry-over untuk sesi berikutnya selama belum tersentuh TP1/TP2/SL —
+      posisi aktif tidak pernah hilang dari tracking antar sesi (tanpa batas
+      waktu, Fix 16-Aug-2026).
 
     Fix duplikasi & penumpukan (14-Aug-2026):
     - Carry-over HANYA berisi sinyal berstatus FLOATING — sinyal yang sudah
-      mencapai status final (TP1/TP2/SL/EXPIRED) LANGSUNG keluar dari antrean
+      mencapai status final (TP1/TP2/SL) LANGSUNG keluar dari antrean
       di sesi berikutnya (tidak diseret berulang kali).
     - Deduplikasi per symbol/base: bila koin sama muncul di beberapa sesi
       (mis. RFXI 2 entry), hanya 1 sinyal TERBARU (sesi paling akhir) yang
@@ -459,11 +441,9 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
         # umur/progress harga — dilewati, baru dievaluasi pada sesi berikutnya.
         if not _is_mature(since, now_dt):
             continue
-        if primary_results is not None:
-            cutoff = since + timedelta(hours=EVAL_MAX_HOURS)
-            if now_dt - cutoff > timedelta(hours=CARRYOVER_GRACE_HOURS):
-                continue
-        results = evaluate_signals(signals, fetch_fn, since=since, now=now_dt)
+        # Fix 16-Aug-2026: tanpa batas waktu — sesi yang lebih lama tetap
+        # dievaluasi & FLOATING-nya terus di-carry-over sampai TP1/TP2/SL.
+        results = evaluate_signals(signals, fetch_fn, since=since)
         evaluated = [r for r in results if r["status"]]
         if not evaluated:
             continue
@@ -471,8 +451,8 @@ def build_recap(history: Dict[str, List[Dict]], fetch_fn, today: Optional[str] =
             primary_date = date
             primary_results = evaluated
             # Continuity: FLOATING dari sesi utama otomatis masuk antrean
-            # carry-over (dibawa ke sesi berikutnya sampai TP/SL/EXPIRED);
-            # status final (TP1/TP2/SL/EXPIRED) langsung menutup posisi.
+            # carry-over (dibawa ke sesi berikutnya tanpa batas waktu sampai
+            # TP1/TP2/SL tersentuh); status final langsung menutup posisi.
             for r in evaluated:
                 if r["status"] == STATUS_FLOATING:
                     entry = {**r, "session": date}

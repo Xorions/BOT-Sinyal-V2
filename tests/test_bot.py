@@ -72,8 +72,9 @@ class TestCarryOver:
     """Carry-over = HANYA sinyal FLOATING (Fix duplikasi 14-Aug-2026).
 
     Sinyal FLOATING dari sesi terdahulu dibawa ke rekap sesi berikutnya dan
-    dievaluasi ulang sampai menyentuh TP1/TP2/SL atau melebihi EVAL_MAX_HOURS.
-    Begitu mencapai status final (TP1/TP2/SL/EXPIRED) LANGSUNG keluar dari
+    dievaluasi ulang sampai benar-benar menyentuh TP1/TP2/SL — TANPA batas
+    waktu (Fix 16-Aug-2026: auto-expire EXPIRED dihapus).
+    Begitu mencapai status final (TP1/TP2/SL) LANGSUNG keluar dari
     antrean carry-over di sesi berikutnya (tidak diseret berulang kali), dan
     koin yang sama hanya tampil SEKALI (yang paling baru).
     """
@@ -150,9 +151,10 @@ class TestCarryOver:
         assert "#RFXI" not in recap
         assert "#LIT" in recap and "TP2" in recap
 
-    def test_carry_over_signal_expired_after_eval_max_hours(self):
-        # RFXI tak menyentuh TP/SL dan jendela EVAL_MAX_HOURS (24 jam) sudah
-        # lewat -> status EXPIRED = FINAL: langsung keluar dari carry-over.
+    def test_carry_over_floating_kept_without_expiry(self):
+        # RFXI tak menyentuh TP/SL meski jendela 24 jam sudah lewat (29,5 jam)
+        # -> TIDAK lagi EXPIRED: tetap FLOATING dan terus di-carry-over tanpa
+        # batas waktu sampai harga benar-benar menyentuh TP1/TP2/SL.
         history = {
             "2026-08-06 13:30": [_sig(symbol="RFXIUSDT", base="RFXI")],
             "2026-08-07 13:30": [_sig(entry=50.0, sl=45.0, tp1=55.0, tp2=60.0, symbol="LITUSDT", base="LIT")],
@@ -160,20 +162,21 @@ class TestCarryOver:
 
         def fetch(pair, since=None):
             return {
-                "RFXIUSDT": [{"high": 105.0, "low": 95.0, "close": 102.0}],  # FLOATING -> EXPIRED
+                "RFXIUSDT": [{"high": 105.0, "low": 95.0, "close": 102.0}],  # FLOATING (tak pernah EXPIRED)
                 "LITUSDT": [{"high": 121.0, "low": 95.0, "close": 115.0}],
             }[pair]
 
-        # now = 07 19:00 -> RFXI berumur 29,5 jam > EVAL_MAX_HOURS 24.
+        # now = 07 19:00 -> RFXI berumur 29,5 jam (lewat EVAL_MAX_HOURS 24).
         recap = build_recap(history, fetch, now_key="2026-08-07 19:00")
         assert recap is not None
-        assert "CARRY-OVER" not in recap
-        assert "#RFXI" not in recap
+        assert "CARRY-OVER" in recap
+        assert "#RFXI BUY (FLOATING - 29 jam)" in recap
         assert "#LIT" in recap and "TP2" in recap
 
-    def test_carry_over_dropped_when_past_window_and_grace(self):
-        # Sesi yang lewat jendela EVAL_MAX_HOURS + CARRYOVER_GRACE_HOURS tidak
-        # ikut antrean carry-over lagi (status akhirnya sudah pernah ditampilkan).
+    def test_carry_over_floating_kept_beyond_grace_period(self):
+        # Fix 16-Aug-2026: sesi yang lewat jendela 24 jam + grace (3 hari) TIDAK
+        # lagi dibuang — FLOATING-nya tetap masuk antrean carry-over tanpa batas
+        # waktu sampai menyentuh TP1/TP2/SL.
         history = {
             "2026-08-05 13:30": [_sig(symbol="RFXIUSDT", base="RFXI")],
             "2026-08-08 13:30": [_sig(entry=50.0, sl=45.0, tp1=55.0, tp2=60.0, symbol="LITUSDT", base="LIT")],
@@ -187,13 +190,13 @@ class TestCarryOver:
 
         recap = build_recap(history, fetch, now_key="2026-08-08 19:00")
         assert recap is not None
-        assert "CARRY-OVER" not in recap
-        assert "#RFXI" not in recap
+        assert "CARRY-OVER" in recap
+        assert "#RFXI" in recap
         assert "#LIT" in recap
 
-    def test_floating_carry_over_kept_evaluating_until_expired(self):
+    def test_floating_carry_over_kept_evaluating_without_expiry(self):
         # Simulasi 3 sesi: RFXI floating -> floating lagi di sesi berikutnya
-        # (tetap dibawa) -> akhirnya EXPIRED (status final) di sesi berikutnya.
+        # (tetap dibawa) -> tetap dibawa tanpa batas waktu (tak pernah EXPIRED).
         def fetch(pair, since=None):
             return [{"high": 105.0, "low": 95.0, "close": 102.0}]
 
@@ -207,15 +210,15 @@ class TestCarryOver:
         assert "CARRY-OVER" in recap_1
         assert "#RFXI BUY (FLOATING - 24 jam)" in recap_1
 
-        recap_2 = build_recap(history, fetch, now_key="2026-08-06 19:00")  # RFXI 29,5 jam: EXPIRED -> keluar
+        recap_2 = build_recap(history, fetch, now_key="2026-08-06 19:00")  # RFXI 29,5 jam: tetap FLOATING -> dibawa
         assert recap_2 is not None
-        assert "CARRY-OVER" not in recap_2
-        assert "#RFXI" not in recap_2
+        assert "CARRY-OVER" in recap_2
+        assert "#RFXI BUY (FLOATING - 29 jam)" in recap_2
 
-        recap_3 = build_recap(history, fetch, now_key="2026-08-08 19:00")  # lewat grace: dibuang
+        recap_3 = build_recap(history, fetch, now_key="2026-08-08 19:00")  # RFXI 3 hari: tetap dibawa tanpa batas
         assert recap_3 is not None
-        assert "CARRY-OVER" not in recap_3
-        assert "#RFXI" not in recap_3
+        assert "CARRY-OVER" in recap_3
+        assert "#RFXI BUY (FLOATING - 3 hari 5 jam)" in recap_3
 
     def test_carry_over_dedupe_same_symbol_keeps_newest(self):
         # Koin sama (RFXI) muncul di 2 sesi berbeda & keduanya FLOATING

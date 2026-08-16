@@ -343,8 +343,9 @@ class TestCarryOverContinuity:
     """Continuity sinyal FLOATING (Fix 15-Aug-2026).
 
     Semua sinyal FLOATING dari sesi sebelumnya (T-1) otomatis masuk daftar
-    Carry-Over untuk sesi berjalan (T) selama belum tersentuh TP1/TP2/SL/
-    EXPIRED — posisi aktif tidak pernah hilang dari tracking antar sesi.
+    Carry-Over untuk sesi berjalan (T) selama belum tersentuh TP1/TP2/SL —
+    posisi aktif tidak pernah hilang dari tracking antar sesi. Fix
+    16-Aug-2026: tanpa batas waktu (auto-expire EXPIRED dihapus).
     """
 
     def _floating_fetch(self, pair, since=None):
@@ -434,9 +435,9 @@ class TestCarryOverContinuity:
         assert "#RFXI" in recap and "#RCDNS" in recap
 
     def test_floating_from_older_sessions_also_carried(self):
-        # Continuity antar beberapa sesi: floating dari sesi lebih lama (masih
-        # dalam jendela EVAL_MAX_HOURS 24 jam) tetap dievaluasi & dibawa,
-        # sesi terbaru tampil lebih dulu.
+        # Continuity antar beberapa sesi: floating dari sesi lebih lama (tanpa
+        # batas waktu — tidak ada lagi jendela EVAL_MAX_HOURS 24 jam) tetap
+        # dievaluasi & dibawa, sesi terbaru tampil lebih dulu.
         history = {
             "2026-08-15 07:00": [_sig(symbol="XYZUSDT", base="XYZ")],
             "2026-08-15 13:35": [_sig(symbol="RFXIUSDT", base="RFXI")],
