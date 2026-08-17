@@ -1300,5 +1300,57 @@
       "tp2": 481.04207399999996,
       "timestamp": "Monday, 17 Aug 2026, 13:34 WIB"
     }
+  ],
+  "2026-08-17 19:12": [
+    {
+      "symbol": "RSMRUSDT",
+      "base": "RSMR",
+      "action": "SELL",
+      "entry": 9.44,
+      "sl": 9.60048,
+      "tp1": 9.327664,
+      "tp2": 9.215328,
+      "timestamp": "Monday, 17 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RRBLXUSDT",
+      "base": "RRBLX",
+      "action": "BUY",
+      "entry": 38.28,
+      "sl": 37.62924,
+      "tp1": 38.735532,
+      "tp2": 39.191064,
+      "timestamp": "Monday, 17 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "BUY",
+      "entry": 78.42,
+      "sl": 77.08686,
+      "tp1": 79.353198,
+      "tp2": 80.286396,
+      "timestamp": "Monday, 17 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "ROKLOUSDT",
+      "base": "ROKLO",
+      "action": "SELL",
+      "entry": 44.78,
+      "sl": 45.54126,
+      "tp1": 44.247118,
+      "tp2": 43.714236,
+      "timestamp": "Monday, 17 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPGUSDT",
+      "base": "RPG",
+      "action": "SELL",
+      "entry": 143.84,
+      "sl": 146.28528,
+      "tp1": 142.128304,
+      "tp2": 140.416608,
+      "timestamp": "Monday, 17 Aug 2026, 19:05 WIB"
+    }
   ]
 }
