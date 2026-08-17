@@ -1248,5 +1248,57 @@
       "tp2": 125.64670199999999,
       "timestamp": "Sunday, 16 Aug 2026, 19:05 WIB"
     }
+  ],
+  "2026-08-17 13:40": [
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "BUY",
+      "entry": 734.81,
+      "sl": 722.31823,
+      "tp1": 743.5542389999999,
+      "tp2": 752.2984779999999,
+      "timestamp": "Monday, 17 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RNVDAUSDT",
+      "base": "RNVDA",
+      "action": "BUY",
+      "entry": 225.98,
+      "sl": 222.13834,
+      "tp1": 228.66916199999997,
+      "tp2": 231.35832399999998,
+      "timestamp": "Monday, 17 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RFLHYUSDT",
+      "base": "RFLHY",
+      "action": "BUY",
+      "entry": 24.19,
+      "sl": 23.77877,
+      "tp1": 24.477861,
+      "tp2": 24.765722,
+      "timestamp": "Monday, 17 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RINTCUSDT",
+      "base": "RINTC",
+      "action": "BUY",
+      "entry": 104.76,
+      "sl": 102.97908000000001,
+      "tp1": 106.006644,
+      "tp2": 107.253288,
+      "timestamp": "Monday, 17 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RMSFTUSDT",
+      "base": "RMSFT",
+      "action": "SELL",
+      "entry": 492.77,
+      "sl": 501.14709,
+      "tp1": 486.90603699999997,
+      "tp2": 481.04207399999996,
+      "timestamp": "Monday, 17 Aug 2026, 13:34 WIB"
+    }
   ]
 }
