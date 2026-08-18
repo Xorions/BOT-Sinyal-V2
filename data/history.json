@@ -1352,5 +1352,57 @@
       "tp2": 140.416608,
       "timestamp": "Monday, 17 Aug 2026, 19:05 WIB"
     }
+  ],
+  "2026-08-18 13:42": [
+    {
+      "symbol": "RMDTUSDT",
+      "base": "RMDT",
+      "action": "BUY",
+      "entry": 90.94,
+      "sl": 89.39402,
+      "tp1": 92.022186,
+      "tp2": 93.104372,
+      "timestamp": "Tuesday, 18 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHCAUSDT",
+      "base": "RHCA",
+      "action": "SELL",
+      "entry": 405.05,
+      "sl": 411.93585,
+      "tp1": 400.22990500000003,
+      "tp2": 395.40981,
+      "timestamp": "Tuesday, 18 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWELLUSDT",
+      "base": "RWELL",
+      "action": "BUY",
+      "entry": 236.25,
+      "sl": 232.23375,
+      "tp1": 239.061375,
+      "tp2": 241.87275000000002,
+      "timestamp": "Tuesday, 18 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHDUSDT",
+      "base": "RHD",
+      "action": "SELL",
+      "entry": 338.81,
+      "sl": 344.56977,
+      "tp1": 334.778161,
+      "tp2": 330.746322,
+      "timestamp": "Tuesday, 18 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCAHUSDT",
+      "base": "RCAH",
+      "action": "BUY",
+      "entry": 236.0,
+      "sl": 231.988,
+      "tp1": 238.8084,
+      "tp2": 241.6168,
+      "timestamp": "Tuesday, 18 Aug 2026, 13:35 WIB"
+    }
   ]
 }
