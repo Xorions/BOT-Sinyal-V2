@@ -1508,5 +1508,57 @@
       "tp2": 265.28235,
       "timestamp": "Wednesday, 19 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-19 19:10": [
+    {
+      "symbol": "RTSLAUSDT",
+      "base": "RTSLA",
+      "action": "SELL",
+      "entry": 335.77,
+      "sl": 341.47809,
+      "tp1": 331.77433699999995,
+      "tp2": 327.77867399999997,
+      "timestamp": "Wednesday, 19 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RSCHDUSDT",
+      "base": "RSCHD",
+      "action": "BUY",
+      "entry": 34.74,
+      "sl": 34.14942,
+      "tp1": 35.153406000000004,
+      "tp2": 35.566812000000006,
+      "timestamp": "Wednesday, 19 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RBMYUSDT",
+      "base": "RBMY",
+      "action": "BUY",
+      "entry": 66.31,
+      "sl": 65.18273,
+      "tp1": 67.09908899999999,
+      "tp2": 67.888178,
+      "timestamp": "Wednesday, 19 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "SELL",
+      "entry": 716.4,
+      "sl": 728.5788,
+      "tp1": 707.87484,
+      "tp2": 699.3496799999999,
+      "timestamp": "Wednesday, 19 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RABBVUSDT",
+      "base": "RABBV",
+      "action": "BUY",
+      "entry": 259.89,
+      "sl": 255.47187,
+      "tp1": 262.982691,
+      "tp2": 266.075382,
+      "timestamp": "Wednesday, 19 Aug 2026, 19:04 WIB"
+    }
   ]
 }
