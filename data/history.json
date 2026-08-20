@@ -1612,5 +1612,57 @@
       "tp2": 348.79626,
       "timestamp": "Thursday, 20 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-20 19:15": [
+    {
+      "symbol": "RDIAUSDT",
+      "base": "RDIA",
+      "action": "SELL",
+      "entry": 531.24,
+      "sl": 540.27108,
+      "tp1": 524.9182440000001,
+      "tp2": 518.596488,
+      "timestamp": "Thursday, 20 Aug 2026, 19:08 WIB"
+    },
+    {
+      "symbol": "RSHOPUSDT",
+      "base": "RSHOP",
+      "action": "SELL",
+      "entry": 146.12,
+      "sl": 148.60404,
+      "tp1": 144.38117200000002,
+      "tp2": 142.642344,
+      "timestamp": "Thursday, 20 Aug 2026, 19:08 WIB"
+    },
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "SELL",
+      "entry": 712.31,
+      "sl": 724.41927,
+      "tp1": 703.8335109999999,
+      "tp2": 695.3570219999999,
+      "timestamp": "Thursday, 20 Aug 2026, 19:08 WIB"
+    },
+    {
+      "symbol": "RADIUSDT",
+      "base": "RADI",
+      "action": "SELL",
+      "entry": 375.78,
+      "sl": 382.16826,
+      "tp1": 371.30821799999995,
+      "tp2": 366.836436,
+      "timestamp": "Thursday, 20 Aug 2026, 19:08 WIB"
+    },
+    {
+      "symbol": "RHWMUSDT",
+      "base": "RHWM",
+      "action": "SELL",
+      "entry": 282.25,
+      "sl": 287.04825,
+      "tp1": 278.891225,
+      "tp2": 275.53245,
+      "timestamp": "Thursday, 20 Aug 2026, 19:08 WIB"
+    }
   ]
 }
