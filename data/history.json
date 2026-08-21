@@ -1716,5 +1716,57 @@
       "tp2": 69.671394,
       "timestamp": "Friday, 21 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-21 19:12": [
+    {
+      "symbol": "RTPRUSDT",
+      "base": "RTPR",
+      "action": "SELL",
+      "entry": 129.5,
+      "sl": 131.7015,
+      "tp1": 127.95894999999999,
+      "tp2": 126.41789999999999,
+      "timestamp": "Friday, 21 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMSIUSDT",
+      "base": "RMSI",
+      "action": "BUY",
+      "entry": 475.91,
+      "sl": 467.81953000000004,
+      "tp1": 482.395,
+      "tp2": 487.236658,
+      "timestamp": "Friday, 21 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBLKUSDT",
+      "base": "RBLK",
+      "action": "SELL",
+      "entry": 1137.5,
+      "sl": 1156.8375,
+      "tp1": 1123.96375,
+      "tp2": 1110.4274999999998,
+      "timestamp": "Friday, 21 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RUNHUSDT",
+      "base": "RUNH",
+      "action": "SELL",
+      "entry": 384.88,
+      "sl": 391.42296,
+      "tp1": 380.299928,
+      "tp2": 375.719856,
+      "timestamp": "Friday, 21 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSPOTUSDT",
+      "base": "RSPOT",
+      "action": "BUY",
+      "entry": 537.45,
+      "sl": 528.31335,
+      "tp1": 543.8456550000001,
+      "tp2": 550.2413100000001,
+      "timestamp": "Friday, 21 Aug 2026, 19:05 WIB"
+    }
   ]
 }
