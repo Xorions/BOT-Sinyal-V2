@@ -1664,5 +1664,57 @@
       "tp2": 275.53245,
       "timestamp": "Thursday, 20 Aug 2026, 19:08 WIB"
     }
+  ],
+  "2026-08-21 13:41": [
+    {
+      "symbol": "RECLUSDT",
+      "base": "RECL",
+      "action": "BUY",
+      "entry": 282.95,
+      "sl": 278.13984999999997,
+      "tp1": 286.317105,
+      "tp2": 289.68421,
+      "timestamp": "Friday, 21 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RDUKUSDT",
+      "base": "RDUK",
+      "action": "SELL",
+      "entry": 122.7,
+      "sl": 124.7859,
+      "tp1": 121.23987000000001,
+      "tp2": 119.77974,
+      "timestamp": "Friday, 21 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RPGUSDT",
+      "base": "RPG",
+      "action": "SELL",
+      "entry": 142.96,
+      "sl": 145.39032,
+      "tp1": 141.258776,
+      "tp2": 139.55755200000002,
+      "timestamp": "Friday, 21 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNEMUSDT",
+      "base": "RNEM",
+      "action": "BUY",
+      "entry": 129.08,
+      "sl": 126.87622599999999,
+      "tp1": 130.62264180000003,
+      "tp2": 132.16528360000004,
+      "timestamp": "Friday, 21 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWMBUSDT",
+      "base": "RWMB",
+      "action": "SELL",
+      "entry": 71.37,
+      "sl": 72.58329,
+      "tp1": 70.520697,
+      "tp2": 69.671394,
+      "timestamp": "Friday, 21 Aug 2026, 13:35 WIB"
+    }
   ]
 }
