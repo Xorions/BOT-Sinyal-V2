@@ -1820,5 +1820,57 @@
       "tp2": 71.01855,
       "timestamp": "Saturday, 22 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-22 19:10": [
+    {
+      "symbol": "RTQQQUSDT",
+      "base": "RTQQQ",
+      "action": "SELL",
+      "entry": 70.66,
+      "sl": 71.86122,
+      "tp1": 69.81914599999999,
+      "tp2": 68.97829199999998,
+      "timestamp": "Saturday, 22 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTANUSDT",
+      "base": "RTAN",
+      "action": "SELL",
+      "entry": 49.36,
+      "sl": 50.52612499999999,
+      "tp1": 48.543712500000005,
+      "tp2": 47.72742500000001,
+      "timestamp": "Saturday, 22 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RAMATUSDT",
+      "base": "RAMAT",
+      "action": "SELL",
+      "entry": 491.02,
+      "sl": 499.36733999999996,
+      "tp1": 485.176862,
+      "tp2": 479.333724,
+      "timestamp": "Saturday, 22 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RHIGUSDT",
+      "base": "RHIG",
+      "action": "SELL",
+      "entry": 135.96,
+      "sl": 138.27132,
+      "tp1": 134.34207600000002,
+      "tp2": 132.724152,
+      "timestamp": "Saturday, 22 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RPNCUSDT",
+      "base": "RPNC",
+      "action": "SELL",
+      "entry": 243.22,
+      "sl": 247.35474,
+      "tp1": 240.325682,
+      "tp2": 237.431364,
+      "timestamp": "Saturday, 22 Aug 2026, 19:04 WIB"
+    }
   ]
 }
