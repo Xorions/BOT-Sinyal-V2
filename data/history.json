@@ -1768,5 +1768,57 @@
       "tp2": 550.2413100000001,
       "timestamp": "Friday, 21 Aug 2026, 19:05 WIB"
     }
+  ],
+  "2026-08-22 13:42": [
+    {
+      "symbol": "RQCOMUSDT",
+      "base": "RQCOM",
+      "action": "SELL",
+      "entry": 160.3,
+      "sl": 163.0251,
+      "tp1": 158.39243000000002,
+      "tp2": 156.48486000000003,
+      "timestamp": "Saturday, 22 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNOKUSDT",
+      "base": "RNOK",
+      "action": "SELL",
+      "entry": 10.16,
+      "sl": 10.33272,
+      "tp1": 10.039096,
+      "tp2": 9.918192,
+      "timestamp": "Saturday, 22 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAAPLUSDT",
+      "base": "RAAPL",
+      "action": "SELL",
+      "entry": 308.88,
+      "sl": 314.13096,
+      "tp1": 305.204328,
+      "tp2": 301.52865599999996,
+      "timestamp": "Saturday, 22 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHWMUSDT",
+      "base": "RHWM",
+      "action": "SELL",
+      "entry": 272.16,
+      "sl": 276.78672,
+      "tp1": 268.92129600000004,
+      "tp2": 265.68259200000006,
+      "timestamp": "Saturday, 22 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RRKLBUSDT",
+      "base": "RRKLB",
+      "action": "SELL",
+      "entry": 72.75,
+      "sl": 73.98675,
+      "tp1": 71.884275,
+      "tp2": 71.01855,
+      "timestamp": "Saturday, 22 Aug 2026, 13:35 WIB"
+    }
   ]
 }
