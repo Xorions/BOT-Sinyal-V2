@@ -1894,5 +1894,57 @@
       "tp2": 549.6786960000001,
       "timestamp": "Sunday, 23 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-23 19:12": [
+    {
+      "symbol": "RACNUSDT",
+      "base": "RACN",
+      "action": "BUY",
+      "entry": 185.53,
+      "sl": 182.37599,
+      "tp1": 187.737807,
+      "tp2": 189.945614,
+      "timestamp": "Sunday, 23 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDISUSDT",
+      "base": "RDIS",
+      "action": "BUY",
+      "entry": 107.73,
+      "sl": 105.89859,
+      "tp1": 109.011987,
+      "tp2": 110.293974,
+      "timestamp": "Sunday, 23 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPGRUSDT",
+      "base": "RPGR",
+      "action": "BUY",
+      "entry": 220.28,
+      "sl": 216.53524,
+      "tp1": 222.90133200000002,
+      "tp2": 225.52266400000002,
+      "timestamp": "Sunday, 23 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RIEMGUSDT",
+      "base": "RIEMG",
+      "action": "BUY",
+      "entry": 81.9,
+      "sl": 80.5077,
+      "tp1": 82.87461,
+      "tp2": 83.84922000000002,
+      "timestamp": "Sunday, 23 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RINTUUSDT",
+      "base": "RINTU",
+      "action": "BUY",
+      "entry": 367.56,
+      "sl": 361.31148,
+      "tp1": 371.933964,
+      "tp2": 376.307928,
+      "timestamp": "Sunday, 23 Aug 2026, 19:05 WIB"
+    }
   ]
 }
