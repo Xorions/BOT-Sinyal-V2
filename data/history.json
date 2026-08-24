@@ -1998,5 +1998,57 @@
       "tp2": 0.41409254000000006,
       "timestamp": "Monday, 24 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-24 19:10": [
+    {
+      "symbol": "HYPEUSDT",
+      "base": "HYPE",
+      "action": "BUY",
+      "entry": 79.925,
+      "sl": 78.020235,
+      "tp1": 81.2583355,
+      "tp2": 82.59167099999999,
+      "timestamp": "Monday, 24 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RHOODUSDT",
+      "base": "RHOOD",
+      "action": "BUY",
+      "entry": 107.75,
+      "sl": 105.91825,
+      "tp1": 109.032225,
+      "tp2": 110.31445,
+      "timestamp": "Monday, 24 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "base": "DOGE",
+      "action": "BUY",
+      "entry": 0.09209,
+      "sl": 0.09042028571428572,
+      "tp1": 0.0932588,
+      "tp2": 0.09442760000000001,
+      "timestamp": "Monday, 24 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RPPLTUSDT",
+      "base": "RPPLT",
+      "action": "BUY",
+      "entry": 17.06,
+      "sl": 16.76998,
+      "tp1": 17.263014,
+      "tp2": 17.466027999999998,
+      "timestamp": "Monday, 24 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RCOPXUSDT",
+      "base": "RCOPX",
+      "action": "BUY",
+      "entry": 95.3,
+      "sl": 93.6799,
+      "tp1": 96.43406999999999,
+      "tp2": 97.56813999999999,
+      "timestamp": "Monday, 24 Aug 2026, 19:04 WIB"
+    }
   ]
 }
