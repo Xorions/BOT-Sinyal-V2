@@ -1946,5 +1946,57 @@
       "tp2": 376.307928,
       "timestamp": "Sunday, 23 Aug 2026, 19:05 WIB"
     }
+  ],
+  "2026-08-24 13:42": [
+    {
+      "symbol": "XPLUSDT",
+      "base": "XPL",
+      "action": "BUY",
+      "entry": 0.1005,
+      "sl": 0.09747857142857143,
+      "tp1": 0.10405,
+      "tp2": 0.10473000000000002,
+      "timestamp": "Monday, 24 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RQQQMUSDT",
+      "base": "RQQQM",
+      "action": "SELL",
+      "entry": 291.5,
+      "sl": 296.45550000000003,
+      "tp1": 288.03114999999997,
+      "tp2": 284.56229999999994,
+      "timestamp": "Monday, 24 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "UPCUSDT",
+      "base": "UPC",
+      "action": "SELL",
+      "entry": 0.151,
+      "sl": 0.153567,
+      "tp1": 0.14920309999999998,
+      "tp2": 0.1474062,
+      "timestamp": "Monday, 24 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "ZROUSDT",
+      "base": "ZRO",
+      "action": "BUY",
+      "entry": 1.183,
+      "sl": 1.1469142857142858,
+      "tp1": 1.2082600000000001,
+      "tp2": 1.23352,
+      "timestamp": "Monday, 24 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "WLDUSDT",
+      "base": "WLD",
+      "action": "BUY",
+      "entry": 0.3986,
+      "sl": 0.3875339,
+      "tp1": 0.40634627,
+      "tp2": 0.41409254000000006,
+      "timestamp": "Monday, 24 Aug 2026, 13:35 WIB"
+    }
   ]
 }
