@@ -2050,5 +2050,57 @@
       "tp2": 97.56813999999999,
       "timestamp": "Monday, 24 Aug 2026, 19:04 WIB"
     }
+  ],
+  "2026-08-25 13:42": [
+    {
+      "symbol": "RGLDUSDT",
+      "base": "RGLD",
+      "action": "BUY",
+      "entry": 426.42,
+      "sl": 419.17086,
+      "tp1": 431.49439800000005,
+      "tp2": 436.568796,
+      "timestamp": "Tuesday, 25 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMDLZUSDT",
+      "base": "RMDLZ",
+      "action": "BUY",
+      "entry": 64.7,
+      "sl": 63.600100000000005,
+      "tp1": 65.46993,
+      "tp2": 66.23986,
+      "timestamp": "Tuesday, 25 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTLTUSDT",
+      "base": "RTLT",
+      "action": "BUY",
+      "entry": 82.65,
+      "sl": 81.24495,
+      "tp1": 83.63353500000001,
+      "tp2": 84.61707000000001,
+      "timestamp": "Tuesday, 25 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RLINUSDT",
+      "base": "RLIN",
+      "action": "BUY",
+      "entry": 491.55,
+      "sl": 483.19365,
+      "tp1": 497.399445,
+      "tp2": 503.24889,
+      "timestamp": "Tuesday, 25 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RREGNUSDT",
+      "base": "RREGN",
+      "action": "BUY",
+      "entry": 835.12,
+      "sl": 820.92296,
+      "tp1": 845.0579280000001,
+      "tp2": 854.995856,
+      "timestamp": "Tuesday, 25 Aug 2026, 13:35 WIB"
+    }
   ]
 }
