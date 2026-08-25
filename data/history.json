@@ -2102,5 +2102,57 @@
       "tp2": 854.995856,
       "timestamp": "Tuesday, 25 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-25 19:12": [
+    {
+      "symbol": "RPLTRUSDT",
+      "base": "RPLTR",
+      "action": "SELL",
+      "entry": 175.48,
+      "sl": 178.46316,
+      "tp1": 173.391788,
+      "tp2": 171.303576,
+      "timestamp": "Tuesday, 25 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIBMUSDT",
+      "base": "RIBM",
+      "action": "SELL",
+      "entry": 231.2,
+      "sl": 235.13039999999998,
+      "tp1": 228.44871999999998,
+      "tp2": 225.69744,
+      "timestamp": "Tuesday, 25 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RRTXUSDT",
+      "base": "RRTX",
+      "action": "SELL",
+      "entry": 209.1,
+      "sl": 212.6547,
+      "tp1": 206.61171,
+      "tp2": 204.12342,
+      "timestamp": "Tuesday, 25 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RNTAPUSDT",
+      "base": "RNTAP",
+      "action": "SELL",
+      "entry": 187.63,
+      "sl": 190.81971,
+      "tp1": 185.397203,
+      "tp2": 183.164406,
+      "timestamp": "Tuesday, 25 Aug 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RVLOUSDT",
+      "base": "RVLO",
+      "action": "SELL",
+      "entry": 341.39,
+      "sl": 347.19363,
+      "tp1": 337.327459,
+      "tp2": 333.26491799999997,
+      "timestamp": "Tuesday, 25 Aug 2026, 19:06 WIB"
+    }
   ]
 }
