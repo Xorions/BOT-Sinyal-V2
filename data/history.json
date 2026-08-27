@@ -2310,5 +2310,57 @@
       "tp2": 326.451042,
       "timestamp": "Thursday, 27 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-27 19:11": [
+    {
+      "symbol": "RDKSUSDT",
+      "base": "RDKS",
+      "action": "SELL",
+      "entry": 129.32,
+      "sl": 131.51844,
+      "tp1": 126.24218399999998,
+      "tp2": 125.46,
+      "timestamp": "Thursday, 27 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTJXUSDT",
+      "base": "RTJX",
+      "action": "SELL",
+      "entry": 136.65,
+      "sl": 138.97969199999997,
+      "tp1": 135.01921560000002,
+      "tp2": 133.38843120000004,
+      "timestamp": "Thursday, 27 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RROSTUSDT",
+      "base": "RROST",
+      "action": "SELL",
+      "entry": 233.7,
+      "sl": 237.6729,
+      "tp1": 230.91896999999997,
+      "tp2": 228.13794,
+      "timestamp": "Thursday, 27 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "BUY",
+      "entry": 276.0,
+      "sl": 271.308,
+      "tp1": 279.2844,
+      "tp2": 282.5688,
+      "timestamp": "Thursday, 27 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTSLAUSDT",
+      "base": "RTSLA",
+      "action": "SELL",
+      "entry": 346.23,
+      "sl": 352.11591000000004,
+      "tp1": 342.109863,
+      "tp2": 337.98972599999996,
+      "timestamp": "Thursday, 27 Aug 2026, 19:04 WIB"
+    }
   ]
 }
