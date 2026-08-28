@@ -2362,5 +2362,57 @@
       "tp2": 337.98972599999996,
       "timestamp": "Thursday, 27 Aug 2026, 19:04 WIB"
     }
+  ],
+  "2026-08-28 13:41": [
+    {
+      "symbol": "RREGNUSDT",
+      "base": "RREGN",
+      "action": "SELL",
+      "entry": 809.5,
+      "sl": 823.2615,
+      "tp1": 799.8669500000001,
+      "tp2": 790.2339000000001,
+      "timestamp": "Friday, 28 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RJNJUSDT",
+      "base": "RJNJ",
+      "action": "SELL",
+      "entry": 266.1,
+      "sl": 270.62370000000004,
+      "tp1": 262.93341,
+      "tp2": 259.76682,
+      "timestamp": "Friday, 28 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RASMLUSDT",
+      "base": "RASML",
+      "action": "SELL",
+      "entry": 1729.0,
+      "sl": 1758.393,
+      "tp1": 1708.4249,
+      "tp2": 1687.8498,
+      "timestamp": "Friday, 28 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RAALUSDT",
+      "base": "RAAL",
+      "action": "SELL",
+      "entry": 13.76,
+      "sl": 13.99392,
+      "tp1": 13.596256,
+      "tp2": 13.432512000000001,
+      "timestamp": "Friday, 28 Aug 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RBPUSDT",
+      "base": "RBP",
+      "action": "SELL",
+      "entry": 42.04,
+      "sl": 42.75468,
+      "tp1": 41.539724,
+      "tp2": 41.039448,
+      "timestamp": "Friday, 28 Aug 2026, 13:34 WIB"
+    }
   ]
 }
