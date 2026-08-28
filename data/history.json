@@ -2414,5 +2414,57 @@
       "tp2": 41.039448,
       "timestamp": "Friday, 28 Aug 2026, 13:34 WIB"
     }
+  ],
+  "2026-08-28 19:11": [
+    {
+      "symbol": "RCVXUSDT",
+      "base": "RCVX",
+      "action": "SELL",
+      "entry": 199.49,
+      "sl": 202.88133000000002,
+      "tp1": 197.116069,
+      "tp2": 194.74213799999998,
+      "timestamp": "Friday, 28 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPEPUSDT",
+      "base": "RPEP",
+      "action": "SELL",
+      "entry": 140.54,
+      "sl": 142.92918,
+      "tp1": 138.867574,
+      "tp2": 137.195148,
+      "timestamp": "Friday, 28 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPHUSDT",
+      "base": "RPH",
+      "action": "SELL",
+      "entry": 993.34,
+      "sl": 1010.2267800000001,
+      "tp1": 981.519254,
+      "tp2": 969.698508,
+      "timestamp": "Friday, 28 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RKOUSDT",
+      "base": "RKO",
+      "action": "SELL",
+      "entry": 89.57,
+      "sl": 91.09268999999999,
+      "tp1": 88.504117,
+      "tp2": 87.438234,
+      "timestamp": "Friday, 28 Aug 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RTMUSUSDT",
+      "base": "RTMUS",
+      "action": "SELL",
+      "entry": 177.0,
+      "sl": 180.00900000000001,
+      "tp1": 174.8937,
+      "tp2": 172.7874,
+      "timestamp": "Friday, 28 Aug 2026, 19:05 WIB"
+    }
   ]
 }
