@@ -2518,5 +2518,17 @@
       "tp2": 121.37821700000002,
       "timestamp": "Saturday, 29 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-29 19:11": [
+    {
+      "symbol": "RFIXUSDT",
+      "base": "RFIX",
+      "action": "SELL",
+      "entry": 1520.28,
+      "sl": 1551.4062979999999,
+      "tp1": 1498.4915914,
+      "tp2": 1476.7031828000001,
+      "timestamp": "Saturday, 29 Aug 2026, 19:05 WIB"
+    }
   ]
 }
