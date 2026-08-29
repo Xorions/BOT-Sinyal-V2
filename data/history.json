@@ -2466,5 +2466,57 @@
       "tp2": 172.7874,
       "timestamp": "Friday, 28 Aug 2026, 19:05 WIB"
     }
+  ],
+  "2026-08-29 13:42": [
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "SELL",
+      "entry": 35.42,
+      "sl": 36.02214,
+      "tp1": 34.998502,
+      "tp2": 34.577004,
+      "timestamp": "Saturday, 29 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSMCIUSDT",
+      "base": "RSMCI",
+      "action": "SELL",
+      "entry": 37.05,
+      "sl": 37.679849999999995,
+      "tp1": 36.609105,
+      "tp2": 36.16821,
+      "timestamp": "Saturday, 29 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHCAUSDT",
+      "base": "RHCA",
+      "action": "SELL",
+      "entry": 417.77,
+      "sl": 426.15965499999993,
+      "tp1": 411.8972415,
+      "tp2": 406.02448300000003,
+      "timestamp": "Saturday, 29 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RBMYUSDT",
+      "base": "RBMY",
+      "action": "SELL",
+      "entry": 66.45,
+      "sl": 67.57965,
+      "tp1": 65.659245,
+      "tp2": 64.86849000000001,
+      "timestamp": "Saturday, 29 Aug 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNEMUSDT",
+      "base": "RNEM",
+      "action": "SELL",
+      "entry": 127.58,
+      "sl": 132.00984499999998,
+      "tp1": 124.47910850000001,
+      "tp2": 121.37821700000002,
+      "timestamp": "Saturday, 29 Aug 2026, 13:35 WIB"
+    }
   ]
 }
