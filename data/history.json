@@ -2530,5 +2530,57 @@
       "tp2": 1476.7031828000001,
       "timestamp": "Saturday, 29 Aug 2026, 19:05 WIB"
     }
+  ],
+  "2026-08-30 13:43": [
+    {
+      "symbol": "REOGUSDT",
+      "base": "REOG",
+      "action": "SELL",
+      "entry": 143.81,
+      "sl": 146.25477,
+      "tp1": 142.098661,
+      "tp2": 140.38732199999998,
+      "timestamp": "Sunday, 30 Aug 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RPHUSDT",
+      "base": "RPH",
+      "action": "SELL",
+      "entry": 989.84,
+      "sl": 1006.66728,
+      "tp1": 978.060904,
+      "tp2": 966.2818080000001,
+      "timestamp": "Sunday, 30 Aug 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RXELUSDT",
+      "base": "RXEL",
+      "action": "SELL",
+      "entry": 75.84,
+      "sl": 77.12928000000001,
+      "tp1": 74.937504,
+      "tp2": 74.03500799999999,
+      "timestamp": "Sunday, 30 Aug 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RAEPUSDT",
+      "base": "RAEP",
+      "action": "SELL",
+      "entry": 121.84,
+      "sl": 123.91128,
+      "tp1": 120.39010400000001,
+      "tp2": 118.940208,
+      "timestamp": "Sunday, 30 Aug 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RCCJUSDT",
+      "base": "RCCJ",
+      "action": "SELL",
+      "entry": 99.92,
+      "sl": 102.82755999999999,
+      "tp1": 97.884708,
+      "tp2": 95.84941600000002,
+      "timestamp": "Sunday, 30 Aug 2026, 13:36 WIB"
+    }
   ]
 }
