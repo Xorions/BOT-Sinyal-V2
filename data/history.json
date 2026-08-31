@@ -2686,5 +2686,57 @@
       "tp2": 228.77247,
       "timestamp": "Monday, 31 Aug 2026, 13:35 WIB"
     }
+  ],
+  "2026-08-31 19:11": [
+    {
+      "symbol": "RNOKUSDT",
+      "base": "RNOK",
+      "action": "SELL",
+      "entry": 10.16,
+      "sl": 10.33272,
+      "tp1": 10.039096,
+      "tp2": 9.918192,
+      "timestamp": "Monday, 31 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTSMUSDT",
+      "base": "RTSM",
+      "action": "SELL",
+      "entry": 417.08,
+      "sl": 424.17035999999996,
+      "tp1": 412.11674800000003,
+      "tp2": 407.153496,
+      "timestamp": "Monday, 31 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RGFSUSDT",
+      "base": "RGFS",
+      "action": "SELL",
+      "entry": 44.76,
+      "sl": 45.52092,
+      "tp1": 44.227356,
+      "tp2": 43.694712,
+      "timestamp": "Monday, 31 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTERUSDT",
+      "base": "RTER",
+      "action": "SELL",
+      "entry": 354.32,
+      "sl": 360.34344,
+      "tp1": 350.103592,
+      "tp2": 345.887184,
+      "timestamp": "Monday, 31 Aug 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RLOWUSDT",
+      "base": "RLOW",
+      "action": "SELL",
+      "entry": 207.75,
+      "sl": 211.28175,
+      "tp1": 205.27777500000002,
+      "tp2": 202.80555,
+      "timestamp": "Monday, 31 Aug 2026, 19:04 WIB"
+    }
   ]
 }
