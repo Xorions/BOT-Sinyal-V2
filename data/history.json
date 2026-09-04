@@ -3050,5 +3050,57 @@
       "tp2": 137.28300599999997,
       "timestamp": "Thursday, 03 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-04 13:42": [
+    {
+      "symbol": "REWZUSDT",
+      "base": "REWZ",
+      "action": "BUY",
+      "entry": 38.16,
+      "sl": 37.51128,
+      "tp1": 38.614104,
+      "tp2": 39.06820799999999,
+      "timestamp": "Friday, 04 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNXPIUSDT",
+      "base": "RNXPI",
+      "action": "BUY",
+      "entry": 227.66,
+      "sl": 223.78978,
+      "tp1": 230.36915399999998,
+      "tp2": 233.078308,
+      "timestamp": "Friday, 04 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCOFUSDT",
+      "base": "RCOF",
+      "action": "BUY",
+      "entry": 221.54,
+      "sl": 217.77382,
+      "tp1": 224.176326,
+      "tp2": 226.81265199999999,
+      "timestamp": "Friday, 04 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWMTUSDT",
+      "base": "RWMT",
+      "action": "BUY",
+      "entry": 108.49,
+      "sl": 106.64567,
+      "tp1": 109.781031,
+      "tp2": 111.07206199999999,
+      "timestamp": "Friday, 04 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RRDDTUSDT",
+      "base": "RRDDT",
+      "action": "BUY",
+      "entry": 156.52,
+      "sl": 153.85916,
+      "tp1": 158.38258800000003,
+      "tp2": 160.24517600000001,
+      "timestamp": "Friday, 04 Sep 2026, 13:35 WIB"
+    }
   ]
 }
