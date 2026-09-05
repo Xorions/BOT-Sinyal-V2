@@ -3154,5 +3154,57 @@
       "tp2": 45.861876,
       "timestamp": "Friday, 04 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-05 13:42": [
+    {
+      "symbol": "RTJXUSDT",
+      "base": "RTJX",
+      "action": "SELL",
+      "entry": 131.64,
+      "sl": 133.87787999999998,
+      "tp1": 130.073484,
+      "tp2": 128.506968,
+      "timestamp": "Saturday, 05 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSQQQUSDT",
+      "base": "RSQQQ",
+      "action": "SELL",
+      "entry": 38.26,
+      "sl": 38.910419999999995,
+      "tp1": 37.804706,
+      "tp2": 37.349412,
+      "timestamp": "Saturday, 05 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "REOGUSDT",
+      "base": "REOG",
+      "action": "SELL",
+      "entry": 144.91,
+      "sl": 147.37347,
+      "tp1": 143.18557099999998,
+      "tp2": 141.461142,
+      "timestamp": "Saturday, 05 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWELLUSDT",
+      "base": "RWELL",
+      "action": "SELL",
+      "entry": 235.56,
+      "sl": 239.56452000000002,
+      "tp1": 232.756836,
+      "tp2": 229.95367199999998,
+      "timestamp": "Saturday, 05 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "SELL",
+      "entry": 78.3,
+      "sl": 79.6311,
+      "tp1": 77.36823,
+      "tp2": 76.43645999999998,
+      "timestamp": "Saturday, 05 Sep 2026, 13:35 WIB"
+    }
   ]
 }
