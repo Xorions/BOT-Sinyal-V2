@@ -3207,5 +3207,57 @@
       "timestamp": "Saturday, 05 Sep 2026, 13:35 WIB"
     }
   ],
-  "2026-09-05 19:11": []
+  "2026-09-05 19:11": [],
+  "2026-09-06 13:42": [
+    {
+      "symbol": "RCOFUSDT",
+      "base": "RCOF",
+      "action": "BUY",
+      "entry": 219.7,
+      "sl": 215.96509999999998,
+      "tp1": 222.31443,
+      "tp2": 224.92886000000001,
+      "timestamp": "Sunday, 06 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RBSXUSDT",
+      "base": "RBSX",
+      "action": "SELL",
+      "entry": 47.19,
+      "sl": 47.99223,
+      "tp1": 46.628439,
+      "tp2": 46.066877999999996,
+      "timestamp": "Sunday, 06 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIVVUSDT",
+      "base": "RIVV",
+      "action": "BUY",
+      "entry": 777.31,
+      "sl": 764.0957299999999,
+      "tp1": 786.559989,
+      "tp2": 795.809978,
+      "timestamp": "Sunday, 06 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RVTIUSDT",
+      "base": "RVTI",
+      "action": "BUY",
+      "entry": 381.13,
+      "sl": 374.65079,
+      "tp1": 385.66544700000003,
+      "tp2": 390.200894,
+      "timestamp": "Sunday, 06 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "BUY",
+      "entry": 35.97,
+      "sl": 35.358509999999995,
+      "tp1": 36.398043,
+      "tp2": 36.826086000000004,
+      "timestamp": "Sunday, 06 Sep 2026, 13:35 WIB"
+    }
+  ]
 }
