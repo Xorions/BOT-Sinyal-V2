@@ -3259,5 +3259,57 @@
       "tp2": 36.826086000000004,
       "timestamp": "Sunday, 06 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-06 19:13": [
+    {
+      "symbol": "RTJXUSDT",
+      "base": "RTJX",
+      "action": "SELL",
+      "entry": 131.64,
+      "sl": 133.87787999999998,
+      "tp1": 130.073484,
+      "tp2": 128.506968,
+      "timestamp": "Sunday, 06 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RPPLUSDT",
+      "base": "RPPL",
+      "action": "BUY",
+      "entry": 35.11,
+      "sl": 34.51313,
+      "tp1": 35.527809000000005,
+      "tp2": 35.945618,
+      "timestamp": "Sunday, 06 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCLSUSDT",
+      "base": "RCLS",
+      "action": "BUY",
+      "entry": 312.56,
+      "sl": 307.24648,
+      "tp1": 316.27946399999996,
+      "tp2": 319.998928,
+      "timestamp": "Sunday, 06 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "REOGUSDT",
+      "base": "REOG",
+      "action": "SELL",
+      "entry": 144.91,
+      "sl": 147.37347,
+      "tp1": 143.18557099999998,
+      "tp2": 141.461142,
+      "timestamp": "Sunday, 06 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RJNJUSDT",
+      "base": "RJNJ",
+      "action": "BUY",
+      "entry": 278.51,
+      "sl": 273.77533,
+      "tp1": 281.82426899999996,
+      "tp2": 285.138538,
+      "timestamp": "Sunday, 06 Sep 2026, 19:06 WIB"
+    }
   ]
 }
