@@ -3333,5 +3333,17 @@
       "tp2": 76.43645999999998,
       "timestamp": "Monday, 07 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-07 19:11": [
+    {
+      "symbol": "RBSXUSDT",
+      "base": "RBSX",
+      "action": "SELL",
+      "entry": 47.19,
+      "sl": 47.99223,
+      "tp1": 46.628439,
+      "tp2": 46.066877999999996,
+      "timestamp": "Monday, 07 Sep 2026, 19:04 WIB"
+    }
   ]
 }
