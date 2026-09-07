@@ -3311,5 +3311,27 @@
       "tp2": 285.138538,
       "timestamp": "Sunday, 06 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-07 13:42": [
+    {
+      "symbol": "RWELLUSDT",
+      "base": "RWELL",
+      "action": "SELL",
+      "entry": 235.56,
+      "sl": 239.56452000000002,
+      "tp1": 232.756836,
+      "tp2": 229.95367199999998,
+      "timestamp": "Monday, 07 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "SELL",
+      "entry": 78.3,
+      "sl": 79.6311,
+      "tp1": 77.36823,
+      "tp2": 76.43645999999998,
+      "timestamp": "Monday, 07 Sep 2026, 13:35 WIB"
+    }
   ]
 }
