@@ -3397,5 +3397,57 @@
       "tp2": 38.5599,
       "timestamp": "Tuesday, 08 Sep 2026, 13:34 WIB"
     }
+  ],
+  "2026-09-08 19:13": [
+    {
+      "symbol": "XRPUSDT",
+      "base": "XRP",
+      "action": "SELL",
+      "entry": 1.3936,
+      "sl": 1.4172912,
+      "tp1": 1.37701616,
+      "tp2": 1.36043232,
+      "timestamp": "Tuesday, 08 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "base": "HYPE",
+      "action": "SELL",
+      "entry": 83.073,
+      "sl": 84.60706199999998,
+      "tp1": 81.99915659999999,
+      "tp2": 80.9253132,
+      "timestamp": "Tuesday, 08 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RXBIUSDT",
+      "base": "RXBI",
+      "action": "SELL",
+      "entry": 162.11,
+      "sl": 164.86587,
+      "tp1": 160.18089100000003,
+      "tp2": 158.25178200000002,
+      "timestamp": "Tuesday, 08 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RPDDUSDT",
+      "base": "RPDD",
+      "action": "SELL",
+      "entry": 81.7,
+      "sl": 83.08890000000001,
+      "tp1": 80.72776999999999,
+      "tp2": 79.75554,
+      "timestamp": "Tuesday, 08 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMCDUSDT",
+      "base": "RMCD",
+      "action": "SELL",
+      "entry": 254.93,
+      "sl": 259.26381000000003,
+      "tp1": 251.896333,
+      "tp2": 248.86266599999996,
+      "timestamp": "Tuesday, 08 Sep 2026, 19:06 WIB"
+    }
   ]
 }
