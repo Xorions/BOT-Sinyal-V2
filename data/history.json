@@ -3345,5 +3345,57 @@
       "tp2": 46.066877999999996,
       "timestamp": "Monday, 07 Sep 2026, 19:04 WIB"
     }
+  ],
+  "2026-09-08 13:41": [
+    {
+      "symbol": "RTSLAUSDT",
+      "base": "RTSLA",
+      "action": "SELL",
+      "entry": 354.75,
+      "sl": 360.78075,
+      "tp1": 350.528475,
+      "tp2": 346.30695,
+      "timestamp": "Tuesday, 08 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RMSFTUSDT",
+      "base": "RMSFT",
+      "action": "SELL",
+      "entry": 496.44,
+      "sl": 504.87948,
+      "tp1": 490.532364,
+      "tp2": 484.624728,
+      "timestamp": "Tuesday, 08 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RCLOAUSDT",
+      "base": "RCLOA",
+      "action": "SELL",
+      "entry": 51.81,
+      "sl": 52.69077,
+      "tp1": 51.193461000000006,
+      "tp2": 50.576922,
+      "timestamp": "Tuesday, 08 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "XAUTUSDT",
+      "base": "XAUT",
+      "action": "SELL",
+      "entry": 4398.96,
+      "sl": 4473.74232,
+      "tp1": 4346.612376,
+      "tp2": 4294.264752,
+      "timestamp": "Tuesday, 08 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RCUBEUSDT",
+      "base": "RCUBE",
+      "action": "SELL",
+      "entry": 39.5,
+      "sl": 40.1715,
+      "tp1": 39.02995,
+      "tp2": 38.5599,
+      "timestamp": "Tuesday, 08 Sep 2026, 13:34 WIB"
+    }
   ]
 }
