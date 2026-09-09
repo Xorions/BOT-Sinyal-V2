@@ -3501,5 +3501,57 @@
       "tp2": 200.34552599999998,
       "timestamp": "Wednesday, 09 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-09 19:13": [
+    {
+      "symbol": "RDIAUSDT",
+      "base": "RDIA",
+      "action": "SELL",
+      "entry": 524.71,
+      "sl": 533.63007,
+      "tp1": 518.465951,
+      "tp2": 512.221902,
+      "timestamp": "Wednesday, 09 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSPYUSDT",
+      "base": "RSPY",
+      "action": "SELL",
+      "entry": 763.35,
+      "sl": 776.32695,
+      "tp1": 754.2661350000001,
+      "tp2": 745.18227,
+      "timestamp": "Wednesday, 09 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "SELL",
+      "entry": 714.89,
+      "sl": 727.04313,
+      "tp1": 706.382809,
+      "tp2": 697.8756179999999,
+      "timestamp": "Wednesday, 09 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RBABAUSDT",
+      "base": "RBABA",
+      "action": "SELL",
+      "entry": 111.74,
+      "sl": 113.63958,
+      "tp1": 110.410294,
+      "tp2": 109.08058799999999,
+      "timestamp": "Wednesday, 09 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RUBERUSDT",
+      "base": "RUBER",
+      "action": "SELL",
+      "entry": 73.55,
+      "sl": 74.80035,
+      "tp1": 72.674755,
+      "tp2": 71.79951,
+      "timestamp": "Wednesday, 09 Sep 2026, 19:06 WIB"
+    }
   ]
 }
