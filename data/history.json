@@ -3553,5 +3553,57 @@
       "tp2": 71.79951,
       "timestamp": "Wednesday, 09 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-10 13:43": [
+    {
+      "symbol": "RELVUSDT",
+      "base": "RELV",
+      "action": "SELL",
+      "entry": 396.9,
+      "sl": 403.6473,
+      "tp1": 392.17688999999996,
+      "tp2": 387.45378,
+      "timestamp": "Thursday, 10 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSOXSUSDT",
+      "base": "RSOXS",
+      "action": "SELL",
+      "entry": 43.69,
+      "sl": 44.43273,
+      "tp1": 43.170089,
+      "tp2": 42.650178,
+      "timestamp": "Thursday, 10 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "SELL",
+      "entry": 76.39,
+      "sl": 77.68863,
+      "tp1": 75.480959,
+      "tp2": 74.571918,
+      "timestamp": "Thursday, 10 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIEFAUSDT",
+      "base": "RIEFA",
+      "action": "SELL",
+      "entry": 98.63,
+      "sl": 100.30671,
+      "tp1": 97.45630299999999,
+      "tp2": 96.282606,
+      "timestamp": "Thursday, 10 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNXPIUSDT",
+      "base": "RNXPI",
+      "action": "SELL",
+      "entry": 221.69,
+      "sl": 225.45873,
+      "tp1": 219.051889,
+      "tp2": 216.41377799999998,
+      "timestamp": "Thursday, 10 Sep 2026, 13:35 WIB"
+    }
   ]
 }
