@@ -3605,5 +3605,57 @@
       "tp2": 216.41377799999998,
       "timestamp": "Thursday, 10 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-10 19:11": [
+    {
+      "symbol": "RWMTUSDT",
+      "base": "RWMT",
+      "action": "SELL",
+      "entry": 105.95,
+      "sl": 107.75115000000001,
+      "tp1": 104.689195,
+      "tp2": 103.42839,
+      "timestamp": "Thursday, 10 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVOOUSDT",
+      "base": "RVOO",
+      "action": "SELL",
+      "entry": 699.99,
+      "sl": 711.88983,
+      "tp1": 691.660119,
+      "tp2": 683.3302380000001,
+      "timestamp": "Thursday, 10 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVTIUSDT",
+      "base": "RVTI",
+      "action": "SELL",
+      "entry": 375.38,
+      "sl": 381.76146,
+      "tp1": 370.912978,
+      "tp2": 366.44595599999997,
+      "timestamp": "Thursday, 10 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAALUSDT",
+      "base": "RAAL",
+      "action": "SELL",
+      "entry": 12.87,
+      "sl": 13.08879,
+      "tp1": 12.716847,
+      "tp2": 12.563693999999998,
+      "timestamp": "Thursday, 10 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBKNGUSDT",
+      "base": "RBKNG",
+      "action": "SELL",
+      "entry": 173.7,
+      "sl": 176.6529,
+      "tp1": 171.63297,
+      "tp2": 169.56593999999998,
+      "timestamp": "Thursday, 10 Sep 2026, 19:05 WIB"
+    }
   ]
 }
