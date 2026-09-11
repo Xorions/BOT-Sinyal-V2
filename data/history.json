@@ -3709,5 +3709,57 @@
       "tp2": 122.493576,
       "timestamp": "Friday, 11 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-11 19:11": [
+    {
+      "symbol": "RIAUUSDT",
+      "base": "RIAU",
+      "action": "SELL",
+      "entry": 81.45,
+      "sl": 82.83465,
+      "tp1": 80.48074500000001,
+      "tp2": 79.51149000000001,
+      "timestamp": "Friday, 11 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RIGVUSDT",
+      "base": "RIGV",
+      "action": "SELL",
+      "entry": 101.58,
+      "sl": 103.30686,
+      "tp1": 100.37119799999999,
+      "tp2": 99.162396,
+      "timestamp": "Friday, 11 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RIONQUSDT",
+      "base": "RIONQ",
+      "action": "SELL",
+      "entry": 37.16,
+      "sl": 37.79172,
+      "tp1": 36.71779599999999,
+      "tp2": 36.275591999999996,
+      "timestamp": "Friday, 11 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RCRMUSDT",
+      "base": "RCRM",
+      "action": "SELL",
+      "entry": 242.84,
+      "sl": 246.96828,
+      "tp1": 239.950204,
+      "tp2": 237.06040800000002,
+      "timestamp": "Friday, 11 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RSLBUSDT",
+      "base": "RSLB",
+      "action": "SELL",
+      "entry": 56.0,
+      "sl": 56.952,
+      "tp1": 55.333600000000004,
+      "tp2": 54.6672,
+      "timestamp": "Friday, 11 Sep 2026, 19:04 WIB"
+    }
   ]
 }
