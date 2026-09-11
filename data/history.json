@@ -3657,5 +3657,57 @@
       "tp2": 169.56593999999998,
       "timestamp": "Thursday, 10 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-11 13:42": [
+    {
+      "symbol": "RZSUSDT",
+      "base": "RZS",
+      "action": "SELL",
+      "entry": 163.3,
+      "sl": 166.07610000000003,
+      "tp1": 161.35673,
+      "tp2": 159.41346,
+      "timestamp": "Friday, 11 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RJCIUSDT",
+      "base": "RJCI",
+      "action": "SELL",
+      "entry": 142.0,
+      "sl": 144.414,
+      "tp1": 140.3102,
+      "tp2": 138.62040000000002,
+      "timestamp": "Friday, 11 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWMUSDT",
+      "base": "RWM",
+      "action": "SELL",
+      "entry": 214.43,
+      "sl": 218.07531,
+      "tp1": 211.878283,
+      "tp2": 209.326566,
+      "timestamp": "Friday, 11 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RKMBUSDT",
+      "base": "RKMB",
+      "action": "SELL",
+      "entry": 98.52,
+      "sl": 100.19484,
+      "tp1": 97.347612,
+      "tp2": 96.17522399999999,
+      "timestamp": "Friday, 11 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RBXUSDT",
+      "base": "RBX",
+      "action": "SELL",
+      "entry": 125.48,
+      "sl": 127.61316000000001,
+      "tp1": 123.986788,
+      "tp2": 122.493576,
+      "timestamp": "Friday, 11 Sep 2026, 13:35 WIB"
+    }
   ]
 }
