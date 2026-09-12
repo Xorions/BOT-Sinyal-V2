@@ -3813,5 +3813,17 @@
       "tp2": 56.775791999999996,
       "timestamp": "Saturday, 12 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-12 19:12": [
+    {
+      "symbol": "REOGUSDT",
+      "base": "REOG",
+      "action": "SELL",
+      "entry": 146.37,
+      "sl": 148.85829,
+      "tp1": 144.628197,
+      "tp2": 142.886394,
+      "timestamp": "Saturday, 12 Sep 2026, 19:05 WIB"
+    }
   ]
 }
