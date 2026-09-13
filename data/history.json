@@ -3837,5 +3837,37 @@
       "tp2": 74.77691999999999,
       "timestamp": "Sunday, 13 Sep 2026, 13:34 WIB"
     }
+  ],
+  "2026-09-13 19:11": [
+    {
+      "symbol": "RTTUSDT",
+      "base": "RTT",
+      "action": "SELL",
+      "entry": 440.05,
+      "sl": 447.53085,
+      "tp1": 434.81340500000005,
+      "tp2": 429.57681,
+      "timestamp": "Sunday, 13 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RVRTXUSDT",
+      "base": "RVRTX",
+      "action": "SELL",
+      "entry": 514.51,
+      "sl": 523.25667,
+      "tp1": 508.387331,
+      "tp2": 502.264662,
+      "timestamp": "Sunday, 13 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTGTUSDT",
+      "base": "RTGT",
+      "action": "SELL",
+      "entry": 155.83,
+      "sl": 158.47911000000002,
+      "tp1": 153.975623,
+      "tp2": 152.121246,
+      "timestamp": "Sunday, 13 Sep 2026, 19:04 WIB"
+    }
   ]
 }
