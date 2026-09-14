@@ -3869,5 +3869,57 @@
       "tp2": 152.121246,
       "timestamp": "Sunday, 13 Sep 2026, 19:04 WIB"
     }
+  ],
+  "2026-09-14 13:42": [
+    {
+      "symbol": "RVTRSUSDT",
+      "base": "RVTRS",
+      "action": "SELL",
+      "entry": 16.45,
+      "sl": 16.72965,
+      "tp1": 16.254244999999997,
+      "tp2": 16.05849,
+      "timestamp": "Monday, 14 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIWFUSDT",
+      "base": "RIWF",
+      "action": "SELL",
+      "entry": 122.0,
+      "sl": 124.074,
+      "tp1": 120.54820000000001,
+      "tp2": 119.0964,
+      "timestamp": "Monday, 14 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RESSUSDT",
+      "base": "RESS",
+      "action": "SELL",
+      "entry": 272.91,
+      "sl": 277.54947000000004,
+      "tp1": 269.662371,
+      "tp2": 266.414742,
+      "timestamp": "Monday, 14 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMKCUSDT",
+      "base": "RMKC",
+      "action": "SELL",
+      "entry": 51.32,
+      "sl": 52.19244,
+      "tp1": 50.709292000000005,
+      "tp2": 50.098584,
+      "timestamp": "Monday, 14 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RATOUSDT",
+      "base": "RATO",
+      "action": "SELL",
+      "entry": 163.19,
+      "sl": 165.96423,
+      "tp1": 161.248039,
+      "tp2": 159.306078,
+      "timestamp": "Monday, 14 Sep 2026, 13:35 WIB"
+    }
   ]
 }
