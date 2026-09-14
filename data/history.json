@@ -3921,5 +3921,57 @@
       "tp2": 159.306078,
       "timestamp": "Monday, 14 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-14 19:13": [
+    {
+      "symbol": "RVIRTUSDT",
+      "base": "RVIRT",
+      "action": "SELL",
+      "entry": 60.75,
+      "sl": 62.256209999999996,
+      "tp1": 59.695653,
+      "tp2": 58.64130600000001,
+      "timestamp": "Monday, 14 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RPFGCUSDT",
+      "base": "RPFGC",
+      "action": "SELL",
+      "entry": 93.94,
+      "sl": 95.53698,
+      "tp1": 92.822114,
+      "tp2": 91.704228,
+      "timestamp": "Monday, 14 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RAVGOUSDT",
+      "base": "RAVGO",
+      "action": "SELL",
+      "entry": 349.29,
+      "sl": 355.22793,
+      "tp1": 345.13344900000004,
+      "tp2": 340.976898,
+      "timestamp": "Monday, 14 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMUUSDT",
+      "base": "RMU",
+      "action": "SELL",
+      "entry": 919.35,
+      "sl": 934.97895,
+      "tp1": 908.409735,
+      "tp2": 897.46947,
+      "timestamp": "Monday, 14 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RTNAUSDT",
+      "base": "RTNA",
+      "action": "SELL",
+      "entry": 63.82,
+      "sl": 64.90494,
+      "tp1": 63.060542000000005,
+      "tp2": 62.301084,
+      "timestamp": "Monday, 14 Sep 2026, 19:06 WIB"
+    }
   ]
 }
