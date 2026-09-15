@@ -3973,5 +3973,57 @@
       "tp2": 62.301084,
       "timestamp": "Monday, 14 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-15 13:43": [
+    {
+      "symbol": "RIVVUSDT",
+      "base": "RIVV",
+      "action": "SELL",
+      "entry": 760.2,
+      "sl": 773.1234000000001,
+      "tp1": 751.15362,
+      "tp2": 742.10724,
+      "timestamp": "Tuesday, 15 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "REFAUSDT",
+      "base": "REFA",
+      "action": "SELL",
+      "entry": 105.4,
+      "sl": 107.1918,
+      "tp1": 104.14574,
+      "tp2": 102.89148000000002,
+      "timestamp": "Tuesday, 15 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RIAUUSDT",
+      "base": "RIAU",
+      "action": "SELL",
+      "entry": 80.64,
+      "sl": 82.01088,
+      "tp1": 79.680384,
+      "tp2": 78.720768,
+      "timestamp": "Tuesday, 15 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RDRAMUSDT",
+      "base": "RDRAM",
+      "action": "SELL",
+      "entry": 55.41,
+      "sl": 56.351969999999994,
+      "tp1": 54.750620999999995,
+      "tp2": 54.091242,
+      "timestamp": "Tuesday, 15 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RNXPIUSDT",
+      "base": "RNXPI",
+      "action": "SELL",
+      "entry": 223.91,
+      "sl": 227.71647,
+      "tp1": 221.245471,
+      "tp2": 218.58094200000002,
+      "timestamp": "Tuesday, 15 Sep 2026, 13:36 WIB"
+    }
   ]
 }
