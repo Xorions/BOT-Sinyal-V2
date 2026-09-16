@@ -4077,5 +4077,57 @@
       "tp2": 1104.8717060000001,
       "timestamp": "Tuesday, 15 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-16 13:43": [
+    {
+      "symbol": "RAXPUSDT",
+      "base": "RAXP",
+      "action": "SELL",
+      "entry": 324.88,
+      "sl": 330.40296,
+      "tp1": 321.01392799999996,
+      "tp2": 317.147856,
+      "timestamp": "Wednesday, 16 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RORLYUSDT",
+      "base": "RORLY",
+      "action": "SELL",
+      "entry": 85.0,
+      "sl": 86.445,
+      "tp1": 83.9885,
+      "tp2": 82.977,
+      "timestamp": "Wednesday, 16 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCMCSAUSDT",
+      "base": "RCMCSA",
+      "action": "SELL",
+      "entry": 24.42,
+      "sl": 24.835140000000003,
+      "tp1": 24.129402000000002,
+      "tp2": 23.838804,
+      "timestamp": "Wednesday, 16 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTJXUSDT",
+      "base": "RTJX",
+      "action": "SELL",
+      "entry": 124.61,
+      "sl": 126.72837,
+      "tp1": 123.127141,
+      "tp2": 121.644282,
+      "timestamp": "Wednesday, 16 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIEFAUSDT",
+      "base": "RIEFA",
+      "action": "SELL",
+      "entry": 98.12,
+      "sl": 99.78804000000001,
+      "tp1": 96.952372,
+      "tp2": 95.784744,
+      "timestamp": "Wednesday, 16 Sep 2026, 13:35 WIB"
+    }
   ]
 }
