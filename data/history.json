@@ -4129,5 +4129,57 @@
       "tp2": 95.784744,
       "timestamp": "Wednesday, 16 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-16 19:12": [
+    {
+      "symbol": "RBACUSDT",
+      "base": "RBAC",
+      "action": "SELL",
+      "entry": 59.64,
+      "sl": 60.65388,
+      "tp1": 58.930284,
+      "tp2": 58.220568,
+      "timestamp": "Wednesday, 16 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSLBUSDT",
+      "base": "RSLB",
+      "action": "SELL",
+      "entry": 53.97,
+      "sl": 54.88749,
+      "tp1": 53.327757,
+      "tp2": 52.685514,
+      "timestamp": "Wednesday, 16 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "ROKEUSDT",
+      "base": "ROKE",
+      "action": "SELL",
+      "entry": 94.4,
+      "sl": 96.0048,
+      "tp1": 93.27664000000001,
+      "tp2": 92.15328000000001,
+      "timestamp": "Wednesday, 16 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCDNSUSDT",
+      "base": "RCDNS",
+      "action": "SELL",
+      "entry": 273.36,
+      "sl": 278.00712,
+      "tp1": 270.10701600000004,
+      "tp2": 266.8540320000001,
+      "timestamp": "Wednesday, 16 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCCIUSDT",
+      "base": "RCCI",
+      "action": "SELL",
+      "entry": 72.78,
+      "sl": 74.01726000000001,
+      "tp1": 71.36,
+      "tp2": 71.04783599999999,
+      "timestamp": "Wednesday, 16 Sep 2026, 19:05 WIB"
+    }
   ]
 }
