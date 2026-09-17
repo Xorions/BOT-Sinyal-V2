@@ -4181,5 +4181,57 @@
       "tp2": 71.04783599999999,
       "timestamp": "Wednesday, 16 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-17 13:42": [
+    {
+      "symbol": "RKLACUSDT",
+      "base": "RKLAC",
+      "action": "SELL",
+      "entry": 168.44,
+      "sl": 171.30348,
+      "tp1": 166.435564,
+      "tp2": 164.43112799999997,
+      "timestamp": "Thursday, 17 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHYGUSDT",
+      "base": "RHYG",
+      "action": "SELL",
+      "entry": 78.44,
+      "sl": 79.77347999999999,
+      "tp1": 77.506564,
+      "tp2": 76.57312800000001,
+      "timestamp": "Thursday, 17 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWWDUSDT",
+      "base": "RWWD",
+      "action": "SELL",
+      "entry": 317.99,
+      "sl": 323.39583,
+      "tp1": 314.20591900000005,
+      "tp2": 310.42183800000004,
+      "timestamp": "Thursday, 17 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RRIVNUSDT",
+      "base": "RRIVN",
+      "action": "SELL",
+      "entry": 15.29,
+      "sl": 15.54993,
+      "tp1": 15.108049,
+      "tp2": 14.926097999999998,
+      "timestamp": "Thursday, 17 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCVXUSDT",
+      "base": "RCVX",
+      "action": "SELL",
+      "entry": 211.47,
+      "sl": 215.06499,
+      "tp1": 208.953507,
+      "tp2": 206.437014,
+      "timestamp": "Thursday, 17 Sep 2026, 13:35 WIB"
+    }
   ]
 }
