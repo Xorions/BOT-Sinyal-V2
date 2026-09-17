@@ -4233,5 +4233,57 @@
       "tp2": 206.437014,
       "timestamp": "Thursday, 17 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-17 19:12": [
+    {
+      "symbol": "ROXYUSDT",
+      "base": "ROXY",
+      "action": "SELL",
+      "entry": 59.11,
+      "sl": 60.114869999999996,
+      "tp1": 58.406591,
+      "tp2": 57.703182000000005,
+      "timestamp": "Thursday, 17 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVTVUSDT",
+      "base": "RVTV",
+      "action": "SELL",
+      "entry": 220.95,
+      "sl": 224.70614999999998,
+      "tp1": 218.320695,
+      "tp2": 215.69139,
+      "timestamp": "Thursday, 17 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "SELL",
+      "entry": 250.0,
+      "sl": 254.25,
+      "tp1": 247.025,
+      "tp2": 244.05,
+      "timestamp": "Thursday, 17 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPEPUSDT",
+      "base": "RPEP",
+      "action": "SELL",
+      "entry": 134.53,
+      "sl": 136.81701,
+      "tp1": 132.929093,
+      "tp2": 131.328186,
+      "timestamp": "Thursday, 17 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSOXSUSDT",
+      "base": "RSOXS",
+      "action": "SELL",
+      "entry": 46.69,
+      "sl": 47.483729999999994,
+      "tp1": 45.86,
+      "tp2": 45.578778,
+      "timestamp": "Thursday, 17 Sep 2026, 19:05 WIB"
+    }
   ]
 }
