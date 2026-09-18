@@ -4337,5 +4337,57 @@
       "tp2": 188.621364,
       "timestamp": "Friday, 18 Sep 2026, 13:36 WIB"
     }
+  ],
+  "2026-09-18 19:11": [
+    {
+      "symbol": "RMSUSDT",
+      "base": "RMS",
+      "action": "SELL",
+      "entry": 203.59,
+      "sl": 207.05103,
+      "tp1": 201.167279,
+      "tp2": 198.744558,
+      "timestamp": "Friday, 18 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RSHOPUSDT",
+      "base": "RSHOP",
+      "action": "SELL",
+      "entry": 128.63,
+      "sl": 130.81671,
+      "tp1": 127.09930299999999,
+      "tp2": 125.56860599999999,
+      "timestamp": "Friday, 18 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RTUSDT",
+      "base": "RT",
+      "action": "SELL",
+      "entry": 25.22,
+      "sl": 25.64874,
+      "tp1": 24.919881999999998,
+      "tp2": 24.619763999999996,
+      "timestamp": "Friday, 18 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RFANGUSDT",
+      "base": "RFANG",
+      "action": "SELL",
+      "entry": 195.57,
+      "sl": 198.89469,
+      "tp1": 191.49,
+      "tp2": 190.91543399999998,
+      "timestamp": "Friday, 18 Sep 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RBMYUSDT",
+      "base": "RBMY",
+      "action": "SELL",
+      "entry": 62.71,
+      "sl": 63.776070000000004,
+      "tp1": 61.963751,
+      "tp2": 61.217501999999996,
+      "timestamp": "Friday, 18 Sep 2026, 19:04 WIB"
+    }
   ]
 }
