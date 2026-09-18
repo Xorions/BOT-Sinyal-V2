@@ -4285,5 +4285,57 @@
       "tp2": 45.578778,
       "timestamp": "Thursday, 17 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-18 13:43": [
+    {
+      "symbol": "RGEVUSDT",
+      "base": "RGEV",
+      "action": "BUY",
+      "entry": 932.23,
+      "sl": 916.3820900000001,
+      "tp1": 943.323537,
+      "tp2": 954.417074,
+      "timestamp": "Friday, 18 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RXLKUSDT",
+      "base": "RXLK",
+      "action": "BUY",
+      "entry": 189.0,
+      "sl": 185.787,
+      "tp1": 191.2491,
+      "tp2": 193.4982,
+      "timestamp": "Friday, 18 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RCIENUSDT",
+      "base": "RCIEN",
+      "action": "BUY",
+      "entry": 348.0,
+      "sl": 342.084,
+      "tp1": 352.1412,
+      "tp2": 356.2824,
+      "timestamp": "Friday, 18 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RTSMUSDT",
+      "base": "RTSM",
+      "action": "BUY",
+      "entry": 431.17,
+      "sl": 423.84011000000004,
+      "tp1": 436.300923,
+      "tp2": 441.431846,
+      "timestamp": "Friday, 18 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RRTXUSDT",
+      "base": "RRTX",
+      "action": "SELL",
+      "entry": 193.22,
+      "sl": 196.50474,
+      "tp1": 190.920682,
+      "tp2": 188.621364,
+      "timestamp": "Friday, 18 Sep 2026, 13:36 WIB"
+    }
   ]
 }
