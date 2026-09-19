@@ -4441,5 +4441,57 @@
       "tp2": 49.512864,
       "timestamp": "Saturday, 19 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-19 19:12": [
+    {
+      "symbol": "REEMUSDT",
+      "base": "REEM",
+      "action": "BUY",
+      "entry": 67.17,
+      "sl": 66.02811,
+      "tp1": 67.969323,
+      "tp2": 68.768646,
+      "timestamp": "Saturday, 19 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCBRSUSDT",
+      "base": "RCBRS",
+      "action": "BUY",
+      "entry": 198.88,
+      "sl": 195.49904,
+      "tp1": 201.4,
+      "tp2": 203.61334399999998,
+      "timestamp": "Saturday, 19 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RGILDUSDT",
+      "base": "RGILD",
+      "action": "BUY",
+      "entry": 151.5,
+      "sl": 148.9245,
+      "tp1": 153.30285,
+      "tp2": 155.1057,
+      "timestamp": "Saturday, 19 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVEEVUSDT",
+      "base": "RVEEV",
+      "action": "SELL",
+      "entry": 260.0,
+      "sl": 264.42,
+      "tp1": 256.906,
+      "tp2": 253.81199999999998,
+      "timestamp": "Saturday, 19 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDEUSDT",
+      "base": "RDE",
+      "action": "BUY",
+      "entry": 687.23,
+      "sl": 675.54709,
+      "tp1": 695.408037,
+      "tp2": 703.586074,
+      "timestamp": "Saturday, 19 Sep 2026, 19:05 WIB"
+    }
   ]
 }
