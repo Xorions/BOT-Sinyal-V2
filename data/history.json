@@ -4493,5 +4493,27 @@
       "tp2": 703.586074,
       "timestamp": "Saturday, 19 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-20 13:42": [
+    {
+      "symbol": "RTDGUSDT",
+      "base": "RTDG",
+      "action": "SELL",
+      "entry": 1079.56,
+      "sl": 1097.9125199999999,
+      "tp1": 1066.713236,
+      "tp2": 1053.8664720000002,
+      "timestamp": "Sunday, 20 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RROPUSDT",
+      "base": "RROP",
+      "action": "SELL",
+      "entry": 372.37,
+      "sl": 378.70029,
+      "tp1": 367.938797,
+      "tp2": 363.50759400000004,
+      "timestamp": "Sunday, 20 Sep 2026, 13:35 WIB"
+    }
   ]
 }
