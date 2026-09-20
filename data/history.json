@@ -4515,5 +4515,57 @@
       "tp2": 363.50759400000004,
       "timestamp": "Sunday, 20 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-20 19:13": [
+    {
+      "symbol": "RAZOUSDT",
+      "base": "RAZO",
+      "action": "SELL",
+      "entry": 2840.0,
+      "sl": 2888.28,
+      "tp1": 2806.2039999999997,
+      "tp2": 2772.408,
+      "timestamp": "Sunday, 20 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDHIUSDT",
+      "base": "RDHI",
+      "action": "SELL",
+      "entry": 137.7,
+      "sl": 140.0409,
+      "tp1": 136.06136999999998,
+      "tp2": 134.42273999999998,
+      "timestamp": "Sunday, 20 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPMUSDT",
+      "base": "RPM",
+      "action": "SELL",
+      "entry": 188.64,
+      "sl": 191.84688,
+      "tp1": 186.39518399999997,
+      "tp2": 184.15036799999996,
+      "timestamp": "Sunday, 20 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "REOGUSDT",
+      "base": "REOG",
+      "action": "SELL",
+      "entry": 143.7,
+      "sl": 146.1429,
+      "tp1": 141.98996999999997,
+      "tp2": 140.27993999999998,
+      "timestamp": "Sunday, 20 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSLBUSDT",
+      "base": "RSLB",
+      "action": "SELL",
+      "entry": 50.72,
+      "sl": 51.58224,
+      "tp1": 50.116431999999996,
+      "tp2": 49.512864,
+      "timestamp": "Sunday, 20 Sep 2026, 19:05 WIB"
+    }
   ]
 }
