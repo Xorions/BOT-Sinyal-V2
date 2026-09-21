@@ -4619,5 +4619,57 @@
       "tp2": 528.085152,
       "timestamp": "Monday, 21 Sep 2026, 13:36 WIB"
     }
+  ],
+  "2026-09-21 19:13": [
+    {
+      "symbol": "RAXSUSDT",
+      "base": "RAXS",
+      "action": "SELL",
+      "entry": 99.2,
+      "sl": 100.88640000000001,
+      "tp1": 98.01952,
+      "tp2": 96.83904,
+      "timestamp": "Monday, 21 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RGLDUSDT",
+      "base": "RGLD",
+      "action": "BUY",
+      "entry": 400.42,
+      "sl": 393.61286,
+      "tp1": 405.184998,
+      "tp2": 409.949996,
+      "timestamp": "Monday, 21 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "ROUTUSDT",
+      "base": "ROUT",
+      "action": "SELL",
+      "entry": 27.98,
+      "sl": 28.45566,
+      "tp1": 27.647038,
+      "tp2": 27.314076,
+      "timestamp": "Monday, 21 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAAPLUSDT",
+      "base": "RAAPL",
+      "action": "BUY",
+      "entry": 336.1,
+      "sl": 330.3863,
+      "tp1": 340.09959000000003,
+      "tp2": 344.09918000000005,
+      "timestamp": "Monday, 21 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RFELEUSDT",
+      "base": "RFELE",
+      "action": "SELL",
+      "entry": 95.51,
+      "sl": 97.13367000000001,
+      "tp1": 94.373431,
+      "tp2": 93.236862,
+      "timestamp": "Monday, 21 Sep 2026, 19:05 WIB"
+    }
   ]
 }
