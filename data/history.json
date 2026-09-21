@@ -4567,5 +4567,57 @@
       "tp2": 49.512864,
       "timestamp": "Sunday, 20 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-21 13:43": [
+    {
+      "symbol": "RMKLUSDT",
+      "base": "RMKL",
+      "action": "SELL",
+      "entry": 1776.33,
+      "sl": 1806.5276099999999,
+      "tp1": 1755.191673,
+      "tp2": 1734.053346,
+      "timestamp": "Monday, 21 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RAEEUSDT",
+      "base": "RAEE",
+      "action": "SELL",
+      "entry": 102.23,
+      "sl": 103.96791,
+      "tp1": 101.013463,
+      "tp2": 99.796926,
+      "timestamp": "Monday, 21 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RUSMVUSDT",
+      "base": "RUSMV",
+      "action": "SELL",
+      "entry": 98.02,
+      "sl": 99.68634,
+      "tp1": 96.853562,
+      "tp2": 95.68712399999998,
+      "timestamp": "Monday, 21 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RVCSHUSDT",
+      "base": "RVCSH",
+      "action": "SELL",
+      "entry": 77.68,
+      "sl": 79.00056000000001,
+      "tp1": 76.75560800000001,
+      "tp2": 75.83121600000001,
+      "timestamp": "Monday, 21 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RULTAUSDT",
+      "base": "RULTA",
+      "action": "SELL",
+      "entry": 540.96,
+      "sl": 550.15632,
+      "tp1": 534.5225760000001,
+      "tp2": 528.085152,
+      "timestamp": "Monday, 21 Sep 2026, 13:36 WIB"
+    }
   ]
 }
