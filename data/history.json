@@ -4671,5 +4671,57 @@
       "tp2": 93.236862,
       "timestamp": "Monday, 21 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-22 13:43": [
+    {
+      "symbol": "RTFCUSDT",
+      "base": "RTFC",
+      "action": "SELL",
+      "entry": 48.63,
+      "sl": 49.45671,
+      "tp1": 48.051303000000004,
+      "tp2": 47.472606000000006,
+      "timestamp": "Tuesday, 22 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RNEMUSDT",
+      "base": "RNEM",
+      "action": "SELL",
+      "entry": 122.11,
+      "sl": 124.18587,
+      "tp1": 120.656891,
+      "tp2": 119.203782,
+      "timestamp": "Tuesday, 22 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RMUBUSDT",
+      "base": "RMUB",
+      "action": "SELL",
+      "entry": 102.55,
+      "sl": 104.29335,
+      "tp1": 101.32965499999999,
+      "tp2": 100.10931,
+      "timestamp": "Tuesday, 22 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RUTHRUSDT",
+      "base": "RUTHR",
+      "action": "SELL",
+      "entry": 490.75,
+      "sl": 499.09275,
+      "tp1": 484.910075,
+      "tp2": 479.07014999999996,
+      "timestamp": "Tuesday, 22 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RGDXUSDT",
+      "base": "RGDX",
+      "action": "SELL",
+      "entry": 93.64,
+      "sl": 95.23188,
+      "tp1": 92.525684,
+      "tp2": 91.411368,
+      "timestamp": "Tuesday, 22 Sep 2026, 13:36 WIB"
+    }
   ]
 }
