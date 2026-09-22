@@ -4723,5 +4723,57 @@
       "tp2": 91.411368,
       "timestamp": "Tuesday, 22 Sep 2026, 13:36 WIB"
     }
+  ],
+  "2026-09-22 19:14": [
+    {
+      "symbol": "RHOODUSDT",
+      "base": "RHOOD",
+      "action": "BUY",
+      "entry": 122.11,
+      "sl": 120.03413,
+      "tp1": 125.016218,
+      "tp2": 125.26,
+      "timestamp": "Tuesday, 22 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RPANWUSDT",
+      "base": "RPANW",
+      "action": "BUY",
+      "entry": 373.84,
+      "sl": 367.48472,
+      "tp1": 378.28869599999996,
+      "tp2": 382.73739199999994,
+      "timestamp": "Tuesday, 22 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIEFUSDT",
+      "base": "RIEF",
+      "action": "BUY",
+      "entry": 91.35,
+      "sl": 89.79705,
+      "tp1": 92.43706499999999,
+      "tp2": 93.52412999999999,
+      "timestamp": "Tuesday, 22 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIWMUSDT",
+      "base": "RIWM",
+      "action": "BUY",
+      "entry": 287.12,
+      "sl": 282.23896,
+      "tp1": 290.536728,
+      "tp2": 293.95345599999996,
+      "timestamp": "Tuesday, 22 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIVVUSDT",
+      "base": "RIVV",
+      "action": "BUY",
+      "entry": 777.29,
+      "sl": 764.07607,
+      "tp1": 786.539751,
+      "tp2": 795.789502,
+      "timestamp": "Tuesday, 22 Sep 2026, 19:06 WIB"
+    }
   ]
 }
