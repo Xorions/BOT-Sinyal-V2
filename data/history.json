@@ -4775,5 +4775,57 @@
       "tp2": 795.789502,
       "timestamp": "Tuesday, 22 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-23 13:42": [
+    {
+      "symbol": "RLQDUSDT",
+      "base": "RLQD",
+      "action": "BUY",
+      "entry": 105.3,
+      "sl": 103.5099,
+      "tp1": 106.55306999999999,
+      "tp2": 107.80613999999998,
+      "timestamp": "Wednesday, 23 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RGLDUSDT",
+      "base": "RGLD",
+      "action": "SELL",
+      "entry": 397.0,
+      "sl": 403.749,
+      "tp1": 392.2757,
+      "tp2": 387.55139999999994,
+      "timestamp": "Wednesday, 23 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTJXUSDT",
+      "base": "RTJX",
+      "action": "BUY",
+      "entry": 131.13,
+      "sl": 128.90079,
+      "tp1": 132.690447,
+      "tp2": 134.250894,
+      "timestamp": "Wednesday, 23 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNEEUSDT",
+      "base": "RNEE",
+      "action": "SELL",
+      "entry": 79.3,
+      "sl": 80.6481,
+      "tp1": 78.35633,
+      "tp2": 77.41265999999999,
+      "timestamp": "Wednesday, 23 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMSFTUSDT",
+      "base": "RMSFT",
+      "action": "BUY",
+      "entry": 500.69,
+      "sl": 492.17827,
+      "tp1": 506.648211,
+      "tp2": 512.606422,
+      "timestamp": "Wednesday, 23 Sep 2026, 13:35 WIB"
+    }
   ]
 }
