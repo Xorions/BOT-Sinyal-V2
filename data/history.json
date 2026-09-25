@@ -5035,5 +5035,57 @@
       "tp2": 231.906072,
       "timestamp": "Friday, 25 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-25 19:14": [
+    {
+      "symbol": "RMELIUSDT",
+      "base": "RMELI",
+      "action": "SELL",
+      "entry": 1749.99,
+      "sl": 1779.73983,
+      "tp1": 1729.165119,
+      "tp2": 1708.340238,
+      "timestamp": "Friday, 25 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMRSHUSDT",
+      "base": "RMRSH",
+      "action": "SELL",
+      "entry": 169.1,
+      "sl": 171.97469999999998,
+      "tp1": 167.08771000000002,
+      "tp2": 165.07542,
+      "timestamp": "Friday, 25 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RORCLUSDT",
+      "base": "RORCL",
+      "action": "SELL",
+      "entry": 139.25,
+      "sl": 141.61725,
+      "tp1": 135.93585,
+      "tp2": 133.48,
+      "timestamp": "Friday, 25 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RHBANUSDT",
+      "base": "RHBAN",
+      "action": "SELL",
+      "entry": 15.35,
+      "sl": 15.610949999999999,
+      "tp1": 15.167335,
+      "tp2": 14.984670000000001,
+      "timestamp": "Friday, 25 Sep 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RALLUSDT",
+      "base": "RALL",
+      "action": "SELL",
+      "entry": 226.3,
+      "sl": 230.14710000000002,
+      "tp1": 223.60703,
+      "tp2": 220.91406,
+      "timestamp": "Friday, 25 Sep 2026, 19:06 WIB"
+    }
   ]
 }
