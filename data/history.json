@@ -5139,5 +5139,57 @@
       "tp2": 230.96892,
       "timestamp": "Saturday, 26 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-26 19:12": [
+    {
+      "symbol": "RSGOVUSDT",
+      "base": "RSGOV",
+      "action": "BUY",
+      "entry": 100.66,
+      "sl": 98.94878,
+      "tp1": 101.85785399999999,
+      "tp2": 103.055708,
+      "timestamp": "Saturday, 26 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMARUSDT",
+      "base": "RMAR",
+      "action": "BUY",
+      "entry": 353.67,
+      "sl": 347.65761000000003,
+      "tp1": 357.878673,
+      "tp2": 362.08734599999997,
+      "timestamp": "Saturday, 26 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RXLKUSDT",
+      "base": "RXLK",
+      "action": "BUY",
+      "entry": 196.7,
+      "sl": 193.3561,
+      "tp1": 199.04073,
+      "tp2": 201.38145999999998,
+      "timestamp": "Saturday, 26 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RHWMUSDT",
+      "base": "RHWM",
+      "action": "BUY",
+      "entry": 232.9,
+      "sl": 228.9407,
+      "tp1": 235.67151,
+      "tp2": 238.44302000000002,
+      "timestamp": "Saturday, 26 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMBBUSDT",
+      "base": "RMBB",
+      "action": "SELL",
+      "entry": 89.99,
+      "sl": 91.51983,
+      "tp1": 88.919119,
+      "tp2": 87.848238,
+      "timestamp": "Saturday, 26 Sep 2026, 19:05 WIB"
+    }
   ]
 }
