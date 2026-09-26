@@ -5087,5 +5087,57 @@
       "tp2": 220.91406,
       "timestamp": "Friday, 25 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-09-26 13:43": [
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "SELL",
+      "entry": 71.17,
+      "sl": 72.37989,
+      "tp1": 70.323077,
+      "tp2": 69.476154,
+      "timestamp": "Saturday, 26 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RELVUSDT",
+      "base": "RELV",
+      "action": "SELL",
+      "entry": 396.09,
+      "sl": 402.82352999999995,
+      "tp1": 391.376529,
+      "tp2": 386.66305800000004,
+      "timestamp": "Saturday, 26 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "REMBUSDT",
+      "base": "REMB",
+      "action": "SELL",
+      "entry": 91.76,
+      "sl": 93.31992000000001,
+      "tp1": 90.668056,
+      "tp2": 89.576112,
+      "timestamp": "Saturday, 26 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCBUSDT",
+      "base": "RCB",
+      "action": "SELL",
+      "entry": 332.47,
+      "sl": 338.12199000000004,
+      "tp1": 328.51360700000004,
+      "tp2": 324.557214,
+      "timestamp": "Saturday, 26 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMCDUSDT",
+      "base": "RMCD",
+      "action": "SELL",
+      "entry": 236.6,
+      "sl": 240.6222,
+      "tp1": 233.78446,
+      "tp2": 230.96892,
+      "timestamp": "Saturday, 26 Sep 2026, 13:35 WIB"
+    }
   ]
 }
