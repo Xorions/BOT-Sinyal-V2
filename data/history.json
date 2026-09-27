@@ -5191,5 +5191,57 @@
       "tp2": 87.848238,
       "timestamp": "Saturday, 26 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-27 13:43": [
+    {
+      "symbol": "RVNQUSDT",
+      "base": "RVNQ",
+      "action": "SELL",
+      "entry": 90.76,
+      "sl": 92.30292,
+      "tp1": 89.679956,
+      "tp2": 88.59991200000002,
+      "timestamp": "Sunday, 27 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCUSDT",
+      "base": "RC",
+      "action": "BUY",
+      "entry": 134.75,
+      "sl": 132.45925,
+      "tp1": 136.353525,
+      "tp2": 137.95705,
+      "timestamp": "Sunday, 27 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RPMUSDT",
+      "base": "RPM",
+      "action": "BUY",
+      "entry": 190.48,
+      "sl": 187.24184,
+      "tp1": 192.74671199999997,
+      "tp2": 195.013424,
+      "timestamp": "Sunday, 27 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RONUSDT",
+      "base": "RON",
+      "action": "BUY",
+      "entry": 77.6,
+      "sl": 76.26052999999999,
+      "tp1": 78.537629,
+      "tp2": 79.475258,
+      "timestamp": "Sunday, 27 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RROPUSDT",
+      "base": "RROP",
+      "action": "SELL",
+      "entry": 356.23,
+      "sl": 366.45608,
+      "tp1": 349.071744,
+      "tp2": 341.9134880000001,
+      "timestamp": "Sunday, 27 Sep 2026, 13:35 WIB"
+    }
   ]
 }
