@@ -5347,5 +5347,57 @@
       "tp2": 131.34771,
       "timestamp": "Monday, 28 Sep 2026, 13:35 WIB"
     }
+  ],
+  "2026-09-28 19:13": [
+    {
+      "symbol": "ROUTUSDT",
+      "base": "ROUT",
+      "action": "SELL",
+      "entry": 27.45,
+      "sl": 28.09403,
+      "tp1": 26.999178999999998,
+      "tp2": 26.548357999999997,
+      "timestamp": "Monday, 28 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSKTUSDT",
+      "base": "RSKT",
+      "action": "SELL",
+      "entry": 34.73,
+      "sl": 35.320409999999995,
+      "tp1": 34.316713,
+      "tp2": 33.903425999999996,
+      "timestamp": "Monday, 28 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAHRUSDT",
+      "base": "RAHR",
+      "action": "SELL",
+      "entry": 52.02,
+      "sl": 52.904340000000005,
+      "tp1": 51.400962,
+      "tp2": 50.781924000000004,
+      "timestamp": "Monday, 28 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMIDDUSDT",
+      "base": "RMIDD",
+      "action": "SELL",
+      "entry": 107.66,
+      "sl": 109.49022,
+      "tp1": 106.378846,
+      "tp2": 105.097692,
+      "timestamp": "Monday, 28 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "ROGSUSDT",
+      "base": "ROGS",
+      "action": "SELL",
+      "entry": 71.8,
+      "sl": 73.0206,
+      "tp1": 70.94557999999999,
+      "tp2": 70.09115999999999,
+      "timestamp": "Monday, 28 Sep 2026, 19:05 WIB"
+    }
   ]
 }
