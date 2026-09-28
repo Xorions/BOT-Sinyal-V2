@@ -5295,5 +5295,57 @@
       "tp2": 230.96892,
       "timestamp": "Sunday, 27 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-28 13:42": [
+    {
+      "symbol": "RPPLUSDT",
+      "base": "RPPL",
+      "action": "SELL",
+      "entry": 31.8,
+      "sl": 32.3406,
+      "tp1": 31.42158,
+      "tp2": 31.04316,
+      "timestamp": "Monday, 28 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RRBAUSDT",
+      "base": "RRBA",
+      "action": "SELL",
+      "entry": 82.49,
+      "sl": 83.89233,
+      "tp1": 81.50836899999999,
+      "tp2": 80.52673799999998,
+      "timestamp": "Monday, 28 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMTCHUSDT",
+      "base": "RMTCH",
+      "action": "SELL",
+      "entry": 40.55,
+      "sl": 41.239349999999995,
+      "tp1": 40.067455,
+      "tp2": 39.58491,
+      "timestamp": "Monday, 28 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAVDEUSDT",
+      "base": "RAVDE",
+      "action": "SELL",
+      "entry": 91.42,
+      "sl": 92.97414,
+      "tp1": 90.33210199999999,
+      "tp2": 89.244204,
+      "timestamp": "Monday, 28 Sep 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCBREUSDT",
+      "base": "RCBRE",
+      "action": "SELL",
+      "entry": 134.55,
+      "sl": 136.83735000000001,
+      "tp1": 132.948855,
+      "tp2": 131.34771,
+      "timestamp": "Monday, 28 Sep 2026, 13:35 WIB"
+    }
   ]
 }
