@@ -5451,5 +5451,57 @@
       "tp2": 399.3843800000001,
       "timestamp": "Tuesday, 29 Sep 2026, 13:36 WIB"
     }
+  ],
+  "2026-09-29 19:12": [
+    {
+      "symbol": "RRCLUSDT",
+      "base": "RRCL",
+      "action": "BUY",
+      "entry": 244.52,
+      "sl": 240.36316000000002,
+      "tp1": 247.429788,
+      "tp2": 250.339576,
+      "timestamp": "Tuesday, 29 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RTRPUSDT",
+      "base": "RTRP",
+      "action": "SELL",
+      "entry": 58.68,
+      "sl": 59.67756,
+      "tp1": 57.981708,
+      "tp2": 57.283416,
+      "timestamp": "Tuesday, 29 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVEUUSDT",
+      "base": "RVEU",
+      "action": "SELL",
+      "entry": 82.84,
+      "sl": 84.24828000000001,
+      "tp1": 81.854204,
+      "tp2": 80.868408,
+      "timestamp": "Tuesday, 29 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCLUSDT",
+      "base": "RCL",
+      "action": "BUY",
+      "entry": 86.69,
+      "sl": 85.21627,
+      "tp1": 87.721611,
+      "tp2": 88.75322200000001,
+      "timestamp": "Tuesday, 29 Sep 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPEPUSDT",
+      "base": "RPEP",
+      "action": "SELL",
+      "entry": 127.27,
+      "sl": 129.43359,
+      "tp1": 125.75548699999999,
+      "tp2": 124.24097399999998,
+      "timestamp": "Tuesday, 29 Sep 2026, 19:05 WIB"
+    }
   ]
 }
