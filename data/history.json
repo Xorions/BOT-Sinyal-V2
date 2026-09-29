@@ -5399,5 +5399,57 @@
       "tp2": 70.09115999999999,
       "timestamp": "Monday, 28 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-29 13:44": [
+    {
+      "symbol": "RRTXUSDT",
+      "base": "RRTX",
+      "action": "SELL",
+      "entry": 187.9,
+      "sl": 191.0943,
+      "tp1": 185.66399,
+      "tp2": 183.42798000000002,
+      "timestamp": "Tuesday, 29 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RIEFAUSDT",
+      "base": "RIEFA",
+      "action": "SELL",
+      "entry": 97.85,
+      "sl": 99.51344999999999,
+      "tp1": 96.685585,
+      "tp2": 95.52117,
+      "timestamp": "Tuesday, 29 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RVUGUSDT",
+      "base": "RVUG",
+      "action": "SELL",
+      "entry": 89.83,
+      "sl": 91.35710999999999,
+      "tp1": 88.76102300000001,
+      "tp2": 87.692046,
+      "timestamp": "Tuesday, 29 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RLLYUSDT",
+      "base": "RLLY",
+      "action": "BUY",
+      "entry": 1187.8,
+      "sl": 1167.6073999999999,
+      "tp1": 1201.93482,
+      "tp2": 1216.0696400000002,
+      "timestamp": "Tuesday, 29 Sep 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RVLOUSDT",
+      "base": "RVLO",
+      "action": "BUY",
+      "entry": 390.1,
+      "sl": 383.4683,
+      "tp1": 394.74219000000005,
+      "tp2": 399.3843800000001,
+      "timestamp": "Tuesday, 29 Sep 2026, 13:36 WIB"
+    }
   ]
 }
