@@ -5503,5 +5503,57 @@
       "tp2": 124.24097399999998,
       "timestamp": "Tuesday, 29 Sep 2026, 19:05 WIB"
     }
+  ],
+  "2026-09-30 13:41": [
+    {
+      "symbol": "REEMUSDT",
+      "base": "REEM",
+      "action": "SELL",
+      "entry": 67.04,
+      "sl": 68.17968,
+      "tp1": 66.24222400000001,
+      "tp2": 65.44444800000001,
+      "timestamp": "Wednesday, 30 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RVWOUSDT",
+      "base": "RVWO",
+      "action": "SELL",
+      "entry": 59.37,
+      "sl": 60.37929,
+      "tp1": 58.663497,
+      "tp2": 57.956993999999995,
+      "timestamp": "Wednesday, 30 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RANETUSDT",
+      "base": "RANET",
+      "action": "SELL",
+      "entry": 202.9,
+      "sl": 206.3493,
+      "tp1": 200.48549,
+      "tp2": 198.07098000000002,
+      "timestamp": "Wednesday, 30 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RGDUSDT",
+      "base": "RGD",
+      "action": "SELL",
+      "entry": 332.2,
+      "sl": 337.8474,
+      "tp1": 328.24682,
+      "tp2": 324.29364,
+      "timestamp": "Wednesday, 30 Sep 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RAPPUSDT",
+      "base": "RAPP",
+      "action": "SELL",
+      "entry": 306.1,
+      "sl": 311.30370000000005,
+      "tp1": 302.45741,
+      "tp2": 298.81482,
+      "timestamp": "Wednesday, 30 Sep 2026, 13:34 WIB"
+    }
   ]
 }
