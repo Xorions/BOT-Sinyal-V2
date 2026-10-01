@@ -5659,5 +5659,57 @@
       "tp2": 198.19788599999998,
       "timestamp": "Thursday, 01 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-01 19:13": [
+    {
+      "symbol": "REMBUSDT",
+      "base": "REMB",
+      "action": "SELL",
+      "entry": 90.4,
+      "sl": 91.9368,
+      "tp1": 89.32424,
+      "tp2": 88.24848,
+      "timestamp": "Thursday, 01 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBLKUSDT",
+      "base": "RBLK",
+      "action": "SELL",
+      "entry": 1055.0,
+      "sl": 1072.935,
+      "tp1": 1042.4455,
+      "tp2": 1029.891,
+      "timestamp": "Thursday, 01 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCBRSUSDT",
+      "base": "RCBRS",
+      "action": "SELL",
+      "entry": 180.13,
+      "sl": 183.19221,
+      "tp1": 177.775,
+      "tp2": 175.842906,
+      "timestamp": "Thursday, 01 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAZOUSDT",
+      "base": "RAZO",
+      "action": "SELL",
+      "entry": 2820.38,
+      "sl": 2868.32646,
+      "tp1": 2786.817478,
+      "tp2": 2753.2549559999998,
+      "timestamp": "Thursday, 01 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RRCLUSDT",
+      "base": "RRCL",
+      "action": "BUY",
+      "entry": 266.6,
+      "sl": 262.06780000000003,
+      "tp1": 269.77254,
+      "tp2": 272.94508,
+      "timestamp": "Thursday, 01 Oct 2026, 19:05 WIB"
+    }
   ]
 }
