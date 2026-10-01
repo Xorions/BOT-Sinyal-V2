@@ -5607,5 +5607,57 @@
       "tp2": 326.919618,
       "timestamp": "Wednesday, 30 Sep 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-01 13:43": [
+    {
+      "symbol": "RIEIUSDT",
+      "base": "RIEI",
+      "action": "SELL",
+      "entry": 112.86,
+      "sl": 114.77862,
+      "tp1": 111.516966,
+      "tp2": 110.173932,
+      "timestamp": "Thursday, 01 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "BUY",
+      "entry": 47.74,
+      "sl": 46.92842,
+      "tp1": 48.308106,
+      "tp2": 48.876212,
+      "timestamp": "Thursday, 01 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTSMUSDT",
+      "base": "RTSM",
+      "action": "BUY",
+      "entry": 462.2,
+      "sl": 454.3426,
+      "tp1": 467.70018,
+      "tp2": 473.20036,
+      "timestamp": "Thursday, 01 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RWBDUSDT",
+      "base": "RWBD",
+      "action": "BUY",
+      "entry": 30.96,
+      "sl": 30.433680000000003,
+      "tp1": 31.328424,
+      "tp2": 31.696848,
+      "timestamp": "Thursday, 01 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCVXUSDT",
+      "base": "RCVX",
+      "action": "SELL",
+      "entry": 203.03,
+      "sl": 206.48151000000001,
+      "tp1": 200.613943,
+      "tp2": 198.19788599999998,
+      "timestamp": "Thursday, 01 Oct 2026, 13:35 WIB"
+    }
   ]
 }
