@@ -5763,5 +5763,57 @@
       "tp2": 75.1674,
       "timestamp": "Friday, 02 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-02 19:12": [
+    {
+      "symbol": "RGSUSDT",
+      "base": "RGS",
+      "action": "SELL",
+      "entry": 899.0,
+      "sl": 914.283,
+      "tp1": 888.3018999999999,
+      "tp2": 877.6038,
+      "timestamp": "Friday, 02 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RSOUSDT",
+      "base": "RSO",
+      "action": "BUY",
+      "entry": 84.3,
+      "sl": 82.8669,
+      "tp1": 85.30317,
+      "tp2": 86.30633999999999,
+      "timestamp": "Friday, 02 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RMETAUSDT",
+      "base": "RMETA",
+      "action": "SELL",
+      "entry": 728.16,
+      "sl": 740.53872,
+      "tp1": 719.4948959999999,
+      "tp2": 710.8297919999999,
+      "timestamp": "Friday, 02 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RMDBUSDT",
+      "base": "RMDB",
+      "action": "SELL",
+      "entry": 350.4,
+      "sl": 356.35679999999996,
+      "tp1": 346.23024,
+      "tp2": 342.06048,
+      "timestamp": "Friday, 02 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RETNUSDT",
+      "base": "RETN",
+      "action": "BUY",
+      "entry": 440.0,
+      "sl": 432.52,
+      "tp1": 445.236,
+      "tp2": 450.47200000000004,
+      "timestamp": "Friday, 02 Oct 2026, 19:04 WIB"
+    }
   ]
 }
