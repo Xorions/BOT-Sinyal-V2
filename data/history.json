@@ -5711,5 +5711,57 @@
       "tp2": 272.94508,
       "timestamp": "Thursday, 01 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-02 13:43": [
+    {
+      "symbol": "RNBISUSDT",
+      "base": "RNBIS",
+      "action": "SELL",
+      "entry": 233.87,
+      "sl": 237.84579,
+      "tp1": 231.086947,
+      "tp2": 228.303894,
+      "timestamp": "Friday, 02 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMAUSDT",
+      "base": "RMA",
+      "action": "SELL",
+      "entry": 550.41,
+      "sl": 559.76697,
+      "tp1": 543.8601209999999,
+      "tp2": 537.3102419999999,
+      "timestamp": "Friday, 02 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RBEUSDT",
+      "base": "RBE",
+      "action": "SELL",
+      "entry": 279.12,
+      "sl": 283.86504,
+      "tp1": 275.798472,
+      "tp2": 272.476944,
+      "timestamp": "Friday, 02 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RASMLUSDT",
+      "base": "RASML",
+      "action": "BUY",
+      "entry": 1819.64,
+      "sl": 1788.70612,
+      "tp1": 1841.2937160000001,
+      "tp2": 1862.9474320000002,
+      "timestamp": "Friday, 02 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RVCSHUSDT",
+      "base": "RVCSH",
+      "action": "SELL",
+      "entry": 77.0,
+      "sl": 78.309,
+      "tp1": 76.08370000000001,
+      "tp2": 75.1674,
+      "timestamp": "Friday, 02 Oct 2026, 13:35 WIB"
+    }
   ]
 }
