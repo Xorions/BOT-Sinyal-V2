@@ -5867,5 +5867,47 @@
       "tp2": 40.921286,
       "timestamp": "Saturday, 03 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-03 19:13": [
+    {
+      "symbol": "RNOCUSDT",
+      "base": "RNOC",
+      "action": "SELL",
+      "entry": 478.5,
+      "sl": 486.6345,
+      "tp1": 472.80585,
+      "tp2": 467.1117,
+      "timestamp": "Saturday, 03 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSQQQUSDT",
+      "base": "RSQQQ",
+      "action": "SELL",
+      "entry": 33.09,
+      "sl": 33.73089,
+      "tp1": 32.641377000000006,
+      "tp2": 32.19275400000001,
+      "timestamp": "Saturday, 03 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSBUXUSDT",
+      "base": "RSBUX",
+      "action": "SELL",
+      "entry": 94.55,
+      "sl": 96.15735,
+      "tp1": 93.424855,
+      "tp2": 92.29971,
+      "timestamp": "Saturday, 03 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RNEEUSDT",
+      "base": "RNEE",
+      "action": "SELL",
+      "entry": 76.7,
+      "sl": 78.0039,
+      "tp1": 75.78727,
+      "tp2": 74.87454000000001,
+      "timestamp": "Saturday, 03 Oct 2026, 19:05 WIB"
+    }
   ]
 }
