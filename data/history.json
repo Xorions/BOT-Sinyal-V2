@@ -5909,5 +5909,57 @@
       "tp2": 74.87454000000001,
       "timestamp": "Saturday, 03 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-04 13:43": [
+    {
+      "symbol": "RJNKUSDT",
+      "base": "RJNK",
+      "action": "SELL",
+      "entry": 92.01,
+      "sl": 93.57417000000001,
+      "tp1": 90.915081,
+      "tp2": 89.820162,
+      "timestamp": "Sunday, 04 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCSXUSDT",
+      "base": "RCSX",
+      "action": "BUY",
+      "entry": 47.68,
+      "sl": 46.86944,
+      "tp1": 48.247392000000005,
+      "tp2": 48.814784,
+      "timestamp": "Sunday, 04 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RABNBUSDT",
+      "base": "RABNB",
+      "action": "BUY",
+      "entry": 162.88,
+      "sl": 160.11104,
+      "tp1": 164.81827199999998,
+      "tp2": 166.756544,
+      "timestamp": "Sunday, 04 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCRDOUSDT",
+      "base": "RCRDO",
+      "action": "BUY",
+      "entry": 218.9,
+      "sl": 213.8232285714286,
+      "tp1": 226.00748,
+      "tp2": 231.59,
+      "timestamp": "Sunday, 04 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNXPIUSDT",
+      "base": "RNXPI",
+      "action": "BUY",
+      "entry": 245.51,
+      "sl": 241.33633,
+      "tp1": 248.86,
+      "tp2": 251.35313799999997,
+      "timestamp": "Sunday, 04 Oct 2026, 13:35 WIB"
+    }
   ]
 }
