@@ -5961,5 +5961,57 @@
       "tp2": 251.35313799999997,
       "timestamp": "Sunday, 04 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-04 19:13": [
+    {
+      "symbol": "RIEIUSDT",
+      "base": "RIEI",
+      "action": "SELL",
+      "entry": 112.75,
+      "sl": 114.66675,
+      "tp1": 111.408275,
+      "tp2": 110.06655,
+      "timestamp": "Sunday, 04 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RIDEVUSDT",
+      "base": "RIDEV",
+      "action": "SELL",
+      "entry": 89.2,
+      "sl": 90.71640000000001,
+      "tp1": 88.13852,
+      "tp2": 87.07704,
+      "timestamp": "Sunday, 04 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPGUSDT",
+      "base": "RPG",
+      "action": "SELL",
+      "entry": 144.08,
+      "sl": 146.52936000000003,
+      "tp1": 142.36544800000001,
+      "tp2": 140.650896,
+      "timestamp": "Sunday, 04 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBMYUSDT",
+      "base": "RBMY",
+      "action": "SELL",
+      "entry": 61.02,
+      "sl": 62.05734,
+      "tp1": 60.293862000000004,
+      "tp2": 59.567724000000005,
+      "timestamp": "Sunday, 04 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RXLUUSDT",
+      "base": "RXLU",
+      "action": "BUY",
+      "entry": 39.97,
+      "sl": 39.29051,
+      "tp1": 40.445643,
+      "tp2": 40.921286,
+      "timestamp": "Sunday, 04 Oct 2026, 19:05 WIB"
+    }
   ]
 }
