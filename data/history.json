@@ -6013,5 +6013,57 @@
       "tp2": 40.921286,
       "timestamp": "Sunday, 04 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-05 13:43": [
+    {
+      "symbol": "RFTIUSDT",
+      "base": "RFTI",
+      "action": "SELL",
+      "entry": 68.82,
+      "sl": 69.98993999999999,
+      "tp1": 68.001042,
+      "tp2": 67.182084,
+      "timestamp": "Monday, 05 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTIPUSDT",
+      "base": "RTIP",
+      "action": "BUY",
+      "entry": 104.66,
+      "sl": 102.88078,
+      "tp1": 105.90545399999999,
+      "tp2": 107.15090799999999,
+      "timestamp": "Monday, 05 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCUBEUSDT",
+      "base": "RCUBE",
+      "action": "SELL",
+      "entry": 37.52,
+      "sl": 38.15784,
+      "tp1": 37.07351200000001,
+      "tp2": 36.627024000000006,
+      "timestamp": "Monday, 05 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIFFUSDT",
+      "base": "RIFF",
+      "action": "SELL",
+      "entry": 82.42,
+      "sl": 83.82114,
+      "tp1": 81.43920200000001,
+      "tp2": 80.458404,
+      "timestamp": "Monday, 05 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RROIVUSDT",
+      "base": "RROIV",
+      "action": "SELL",
+      "entry": 35.5,
+      "sl": 36.1035,
+      "tp1": 35.07755,
+      "tp2": 34.655100000000004,
+      "timestamp": "Monday, 05 Oct 2026, 13:35 WIB"
+    }
   ]
 }
