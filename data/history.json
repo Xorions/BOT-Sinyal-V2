@@ -6117,5 +6117,57 @@
       "tp2": 83.338194,
       "timestamp": "Monday, 05 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-06 13:44": [
+    {
+      "symbol": "RTDUSDT",
+      "base": "RTD",
+      "action": "SELL",
+      "entry": 117.1,
+      "sl": 119.0907,
+      "tp1": 115.70651,
+      "tp2": 114.31302,
+      "timestamp": "Tuesday, 06 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RSOXSUSDT",
+      "base": "RSOXS",
+      "action": "SELL",
+      "entry": 29.54,
+      "sl": 30.04218,
+      "tp1": 29.188474,
+      "tp2": 28.836948,
+      "timestamp": "Tuesday, 06 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RAGGUSDT",
+      "base": "RAGG",
+      "action": "SELL",
+      "entry": 94.13,
+      "sl": 95.73021,
+      "tp1": 93.00985299999999,
+      "tp2": 91.88970599999999,
+      "timestamp": "Tuesday, 06 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RPEPUSDT",
+      "base": "RPEP",
+      "action": "SELL",
+      "entry": 125.5,
+      "sl": 127.6335,
+      "tp1": 124.00655,
+      "tp2": 122.51310000000001,
+      "timestamp": "Tuesday, 06 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RHLUSDT",
+      "base": "RHL",
+      "action": "SELL",
+      "entry": 16.87,
+      "sl": 17.211479999999998,
+      "tp1": 16.630964000000002,
+      "tp2": 16.391928000000004,
+      "timestamp": "Tuesday, 06 Oct 2026, 13:36 WIB"
+    }
   ]
 }
