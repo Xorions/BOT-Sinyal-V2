@@ -6169,5 +6169,57 @@
       "tp2": 16.391928000000004,
       "timestamp": "Tuesday, 06 Oct 2026, 13:36 WIB"
     }
+  ],
+  "2026-10-06 19:14": [
+    {
+      "symbol": "RCLOAUSDT",
+      "base": "RCLOA",
+      "action": "SELL",
+      "entry": 51.58,
+      "sl": 52.45686,
+      "tp1": 50.966198,
+      "tp2": 50.352396,
+      "timestamp": "Tuesday, 06 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "BUY",
+      "entry": 48.84,
+      "sl": 48.00972,
+      "tp1": 49.421196,
+      "tp2": 50.00239200000001,
+      "timestamp": "Tuesday, 06 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RLRCXUSDT",
+      "base": "RLRCX",
+      "action": "BUY",
+      "entry": 348.0,
+      "sl": 342.084,
+      "tp1": 352.1412,
+      "tp2": 356.2824,
+      "timestamp": "Tuesday, 06 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RADIUSDT",
+      "base": "RADI",
+      "action": "BUY",
+      "entry": 420.44,
+      "sl": 413.29252,
+      "tp1": 425.44323599999996,
+      "tp2": 430.44647199999997,
+      "timestamp": "Tuesday, 06 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RXLIUSDT",
+      "base": "RXLI",
+      "action": "BUY",
+      "entry": 170.85,
+      "sl": 167.94555,
+      "tp1": 172.883115,
+      "tp2": 174.91622999999998,
+      "timestamp": "Tuesday, 06 Oct 2026, 19:05 WIB"
+    }
   ]
 }
