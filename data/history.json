@@ -6273,5 +6273,57 @@
       "tp2": 873.201138,
       "timestamp": "Wednesday, 07 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-07 19:14": [
+    {
+      "symbol": "RGEUSDT",
+      "base": "RGE",
+      "action": "SELL",
+      "entry": 307.64,
+      "sl": 312.86987999999997,
+      "tp1": 303.979084,
+      "tp2": 300.318168,
+      "timestamp": "Wednesday, 07 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCOINUSDT",
+      "base": "RCOIN",
+      "action": "SELL",
+      "entry": 180.77,
+      "sl": 184.17085999999998,
+      "tp1": 178.38939800000003,
+      "tp2": 176.00879600000005,
+      "timestamp": "Wednesday, 07 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RLQDUSDT",
+      "base": "RLQD",
+      "action": "SELL",
+      "entry": 101.69,
+      "sl": 103.41873,
+      "tp1": 100.479889,
+      "tp2": 99.269778,
+      "timestamp": "Wednesday, 07 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RINTCUSDT",
+      "base": "RINTC",
+      "action": "SELL",
+      "entry": 112.66,
+      "sl": 114.57522,
+      "tp1": 111.319346,
+      "tp2": 109.978692,
+      "timestamp": "Wednesday, 07 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIEFUSDT",
+      "base": "RIEF",
+      "action": "SELL",
+      "entry": 88.79,
+      "sl": 90.29943,
+      "tp1": 87.733399,
+      "tp2": 86.67679800000002,
+      "timestamp": "Wednesday, 07 Oct 2026, 19:06 WIB"
+    }
   ]
 }
