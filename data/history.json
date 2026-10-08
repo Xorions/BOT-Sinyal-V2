@@ -6325,5 +6325,57 @@
       "tp2": 86.67679800000002,
       "timestamp": "Wednesday, 07 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-08 13:44": [
+    {
+      "symbol": "RUBERUSDT",
+      "base": "RUBER",
+      "action": "SELL",
+      "entry": 68.38,
+      "sl": 69.54245999999999,
+      "tp1": 67.566278,
+      "tp2": 66.752556,
+      "timestamp": "Thursday, 08 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTMOUSDT",
+      "base": "RTMO",
+      "action": "SELL",
+      "entry": 661.0,
+      "sl": 672.237,
+      "tp1": 653.1341,
+      "tp2": 645.2682000000001,
+      "timestamp": "Thursday, 08 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIBMUSDT",
+      "base": "RIBM",
+      "action": "SELL",
+      "entry": 219.82,
+      "sl": 223.55694,
+      "tp1": 217.204142,
+      "tp2": 214.588284,
+      "timestamp": "Thursday, 08 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCBRSUSDT",
+      "base": "RCBRS",
+      "action": "SELL",
+      "entry": 173.01,
+      "sl": 175.95117,
+      "tp1": 170.951181,
+      "tp2": 168.892362,
+      "timestamp": "Thursday, 08 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTSMUSDT",
+      "base": "RTSM",
+      "action": "SELL",
+      "entry": 470.41,
+      "sl": 478.40697,
+      "tp1": 464.81212100000005,
+      "tp2": 459.21424200000007,
+      "timestamp": "Thursday, 08 Oct 2026, 13:35 WIB"
+    }
   ]
 }
