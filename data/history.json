@@ -6377,5 +6377,57 @@
       "tp2": 459.21424200000007,
       "timestamp": "Thursday, 08 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-08 19:15": [
+    {
+      "symbol": "RVTEBUSDT",
+      "base": "RVTEB",
+      "action": "SELL",
+      "entry": 47.04,
+      "sl": 47.83968,
+      "tp1": 46.480224,
+      "tp2": 45.92044799999999,
+      "timestamp": "Thursday, 08 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIYRUSDT",
+      "base": "RIYR",
+      "action": "SELL",
+      "entry": 94.1,
+      "sl": 95.69969999999999,
+      "tp1": 92.98021,
+      "tp2": 91.86041999999999,
+      "timestamp": "Thursday, 08 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMDYUSDT",
+      "base": "RMDY",
+      "action": "SELL",
+      "entry": 659.7,
+      "sl": 670.9149000000001,
+      "tp1": 651.84957,
+      "tp2": 643.99914,
+      "timestamp": "Thursday, 08 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCOHRUSDT",
+      "base": "RCOHR",
+      "action": "SELL",
+      "entry": 320.89,
+      "sl": 326.34513,
+      "tp1": 316.85,
+      "tp2": 313.252818,
+      "timestamp": "Thursday, 08 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RRSPUSDT",
+      "base": "RRSP",
+      "action": "SELL",
+      "entry": 209.72,
+      "sl": 213.28524,
+      "tp1": 207.224332,
+      "tp2": 204.728664,
+      "timestamp": "Thursday, 08 Oct 2026, 19:06 WIB"
+    }
   ]
 }
