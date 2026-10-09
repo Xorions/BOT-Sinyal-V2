@@ -6429,5 +6429,37 @@
       "tp2": 204.728664,
       "timestamp": "Thursday, 08 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-09 13:45": [
+    {
+      "symbol": "RMUBUSDT",
+      "base": "RMUB",
+      "action": "SELL",
+      "entry": 100.33,
+      "sl": 102.03560999999999,
+      "tp1": 99.13607300000001,
+      "tp2": 97.94214600000001,
+      "timestamp": "Friday, 09 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RUNHUSDT",
+      "base": "RUNH",
+      "action": "SELL",
+      "entry": 370.64,
+      "sl": 376.94088,
+      "tp1": 366.229384,
+      "tp2": 361.818768,
+      "timestamp": "Friday, 09 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RPANWUSDT",
+      "base": "RPANW",
+      "action": "SELL",
+      "entry": 400.3,
+      "sl": 407.1051,
+      "tp1": 395.53643,
+      "tp2": 390.77286000000004,
+      "timestamp": "Friday, 09 Oct 2026, 13:36 WIB"
+    }
   ]
 }
