@@ -6461,5 +6461,57 @@
       "tp2": 390.77286000000004,
       "timestamp": "Friday, 09 Oct 2026, 13:36 WIB"
     }
+  ],
+  "2026-10-09 19:13": [
+    {
+      "symbol": "RBAUSDT",
+      "base": "RBA",
+      "action": "SELL",
+      "entry": 188.0,
+      "sl": 191.196,
+      "tp1": 185.7628,
+      "tp2": 183.5256,
+      "timestamp": "Friday, 09 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RCMCSAUSDT",
+      "base": "RCMCSA",
+      "action": "SELL",
+      "entry": 21.06,
+      "sl": 21.41802,
+      "tp1": 20.809386,
+      "tp2": 20.558771999999998,
+      "timestamp": "Friday, 09 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RWDCUSDT",
+      "base": "RWDC",
+      "action": "SELL",
+      "entry": 397.85,
+      "sl": 404.61345,
+      "tp1": 393.115585,
+      "tp2": 388.38117000000005,
+      "timestamp": "Friday, 09 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RAXPUSDT",
+      "base": "RAXP",
+      "action": "SELL",
+      "entry": 303.44,
+      "sl": 308.59848,
+      "tp1": 299.829064,
+      "tp2": 296.218128,
+      "timestamp": "Friday, 09 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RARGXUSDT",
+      "base": "RARGX",
+      "action": "SELL",
+      "entry": 819.66,
+      "sl": 833.59422,
+      "tp1": 809.906046,
+      "tp2": 800.152092,
+      "timestamp": "Friday, 09 Oct 2026, 19:04 WIB"
+    }
   ]
 }
