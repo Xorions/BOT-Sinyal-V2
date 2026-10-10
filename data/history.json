@@ -6535,5 +6535,17 @@
       "tp2": 310.93922399999997,
       "timestamp": "Saturday, 10 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-10 19:14": [
+    {
+      "symbol": "RPCARUSDT",
+      "base": "RPCAR",
+      "action": "SELL",
+      "entry": 107.48,
+      "sl": 109.30716000000001,
+      "tp1": 106.200988,
+      "tp2": 104.921976,
+      "timestamp": "Saturday, 10 Oct 2026, 19:05 WIB"
+    }
   ]
 }
