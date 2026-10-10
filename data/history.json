@@ -6513,5 +6513,27 @@
       "tp2": 800.152092,
       "timestamp": "Friday, 09 Oct 2026, 19:04 WIB"
     }
+  ],
+  "2026-10-10 13:44": [
+    {
+      "symbol": "RCMCSAUSDT",
+      "base": "RCMCSA",
+      "action": "SELL",
+      "entry": 20.63,
+      "sl": 20.98071,
+      "tp1": 20.384503,
+      "tp2": 20.139006,
+      "timestamp": "Saturday, 10 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RLRCXUSDT",
+      "base": "RLRCX",
+      "action": "SELL",
+      "entry": 318.52,
+      "sl": 323.93484,
+      "tp1": 314.729612,
+      "tp2": 310.93922399999997,
+      "timestamp": "Saturday, 10 Oct 2026, 13:35 WIB"
+    }
   ]
 }
