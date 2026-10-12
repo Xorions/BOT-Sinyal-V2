@@ -6622,5 +6622,57 @@
       "tp2": 327.00172,
       "timestamp": "Monday, 12 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-12 19:15": [
+    {
+      "symbol": "RNVDAUSDT",
+      "base": "RNVDA",
+      "action": "SELL",
+      "entry": 228.87,
+      "sl": 232.76079000000001,
+      "tp1": 226.146447,
+      "tp2": 223.42289399999999,
+      "timestamp": "Monday, 12 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCLOAUSDT",
+      "base": "RCLOA",
+      "action": "SELL",
+      "entry": 51.59,
+      "sl": 52.46703,
+      "tp1": 50.976079000000006,
+      "tp2": 50.36215800000001,
+      "timestamp": "Monday, 12 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSMHUSDT",
+      "base": "RSMH",
+      "action": "SELL",
+      "entry": 599.0,
+      "sl": 609.183,
+      "tp1": 591.8719,
+      "tp2": 584.7438,
+      "timestamp": "Monday, 12 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RNOKUSDT",
+      "base": "RNOK",
+      "action": "SELL",
+      "entry": 10.32,
+      "sl": 10.49544,
+      "tp1": 10.197192000000001,
+      "tp2": 10.074384,
+      "timestamp": "Monday, 12 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSWUSDT",
+      "base": "RSW",
+      "action": "SELL",
+      "entry": 41.0,
+      "sl": 41.697,
+      "tp1": 40.5121,
+      "tp2": 40.02419999999999,
+      "timestamp": "Monday, 12 Oct 2026, 19:06 WIB"
+    }
   ]
 }
