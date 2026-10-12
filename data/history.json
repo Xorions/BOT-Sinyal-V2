@@ -6570,5 +6570,57 @@
       "tp2": 310.93922399999997,
       "timestamp": "Sunday, 11 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-12 13:44": [
+    {
+      "symbol": "RBXPUSDT",
+      "base": "RBXP",
+      "action": "SELL",
+      "entry": 59.05,
+      "sl": 60.05385,
+      "tp1": 58.347305,
+      "tp2": 57.64461,
+      "timestamp": "Monday, 12 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAZOUSDT",
+      "base": "RAZO",
+      "action": "BUY",
+      "entry": 2936.0,
+      "sl": 2886.088,
+      "tp1": 2970.9384,
+      "tp2": 3005.8767999999995,
+      "timestamp": "Monday, 12 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RVMCUSDT",
+      "base": "RVMC",
+      "action": "SELL",
+      "entry": 244.58,
+      "sl": 248.73786,
+      "tp1": 241.669498,
+      "tp2": 238.75899600000002,
+      "timestamp": "Monday, 12 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RKNXUSDT",
+      "base": "RKNX",
+      "action": "SELL",
+      "entry": 64.47,
+      "sl": 65.56599,
+      "tp1": 63.702807,
+      "tp2": 62.935614,
+      "timestamp": "Monday, 12 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RPENUSDT",
+      "base": "RPEN",
+      "action": "BUY",
+      "entry": 319.4,
+      "sl": 313.9702,
+      "tp1": 323.20086,
+      "tp2": 327.00172,
+      "timestamp": "Monday, 12 Oct 2026, 13:35 WIB"
+    }
   ]
 }
