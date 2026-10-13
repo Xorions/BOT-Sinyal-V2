@@ -6726,5 +6726,57 @@
       "tp2": 232.842834,
       "timestamp": "Tuesday, 13 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-13 19:15": [
+    {
+      "symbol": "RNETUSDT",
+      "base": "RNET",
+      "action": "SELL",
+      "entry": 346.65,
+      "sl": 352.54305,
+      "tp1": 342.524865,
+      "tp2": 338.39973,
+      "timestamp": "Tuesday, 13 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDELLUSDT",
+      "base": "RDELL",
+      "action": "SELL",
+      "entry": 562.2,
+      "sl": 573.7159999999999,
+      "tp1": 554.1388000000002,
+      "tp2": 546.0776000000003,
+      "timestamp": "Tuesday, 13 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RTTMIUSDT",
+      "base": "RTTMI",
+      "action": "SELL",
+      "entry": 107.7,
+      "sl": 109.92879999999998,
+      "tp1": 106.13984000000002,
+      "tp2": 104.57968000000004,
+      "timestamp": "Tuesday, 13 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSMCIUSDT",
+      "base": "RSMCI",
+      "action": "SELL",
+      "entry": 38.78,
+      "sl": 39.60847,
+      "tp1": 38.200071,
+      "tp2": 37.62014200000001,
+      "timestamp": "Tuesday, 13 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RASTSUSDT",
+      "base": "RASTS",
+      "action": "SELL",
+      "entry": 49.3,
+      "sl": 50.430839999999996,
+      "tp1": 47.716823999999995,
+      "tp2": 47.57,
+      "timestamp": "Tuesday, 13 Oct 2026, 19:05 WIB"
+    }
   ]
 }
