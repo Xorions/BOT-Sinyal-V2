@@ -6674,5 +6674,57 @@
       "tp2": 40.02419999999999,
       "timestamp": "Monday, 12 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-13 13:45": [
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "SELL",
+      "entry": 237.8,
+      "sl": 241.8426,
+      "tp1": 234.97018000000003,
+      "tp2": 232.14036000000002,
+      "timestamp": "Tuesday, 13 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RLQDUSDT",
+      "base": "RLQD",
+      "action": "BUY",
+      "entry": 102.63,
+      "sl": 100.88529,
+      "tp1": 103.85129699999999,
+      "tp2": 105.072594,
+      "timestamp": "Tuesday, 13 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMCDUSDT",
+      "base": "RMCD",
+      "action": "BUY",
+      "entry": 236.73,
+      "sl": 232.70559,
+      "tp1": 239.54708699999998,
+      "tp2": 242.36417399999996,
+      "timestamp": "Tuesday, 13 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMSUSDT",
+      "base": "RMS",
+      "action": "BUY",
+      "entry": 191.06,
+      "sl": 187.81198,
+      "tp1": 193.333614,
+      "tp2": 195.607228,
+      "timestamp": "Tuesday, 13 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIBMUSDT",
+      "base": "RIBM",
+      "action": "BUY",
+      "entry": 227.43,
+      "sl": 223.56369,
+      "tp1": 230.136417,
+      "tp2": 232.842834,
+      "timestamp": "Tuesday, 13 Oct 2026, 13:35 WIB"
+    }
   ]
 }
