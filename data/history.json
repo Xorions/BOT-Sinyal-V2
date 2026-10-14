@@ -6778,5 +6778,57 @@
       "tp2": 47.57,
       "timestamp": "Tuesday, 13 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-14 13:44": [
+    {
+      "symbol": "RWDCUSDT",
+      "base": "RWDC",
+      "action": "SELL",
+      "entry": 375.99,
+      "sl": 382.38183000000004,
+      "tp1": 367.04143799999997,
+      "tp2": 354.0,
+      "timestamp": "Wednesday, 14 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMPWRUSDT",
+      "base": "RMPWR",
+      "action": "SELL",
+      "entry": 1310.02,
+      "sl": 1332.29034,
+      "tp1": 1294.430762,
+      "tp2": 1278.841524,
+      "timestamp": "Wednesday, 14 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSMCIUSDT",
+      "base": "RSMCI",
+      "action": "SELL",
+      "entry": 39.01,
+      "sl": 39.67317,
+      "tp1": 38.545781,
+      "tp2": 38.081562,
+      "timestamp": "Wednesday, 14 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSTXUSDT",
+      "base": "RSTX",
+      "action": "SELL",
+      "entry": 736.99,
+      "sl": 749.51883,
+      "tp1": 719.449638,
+      "tp2": 687.05,
+      "timestamp": "Wednesday, 14 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSMHUSDT",
+      "base": "RSMH",
+      "action": "SELL",
+      "entry": 584.49,
+      "sl": 594.42633,
+      "tp1": 577.534569,
+      "tp2": 570.5791380000001,
+      "timestamp": "Wednesday, 14 Oct 2026, 13:35 WIB"
+    }
   ]
 }
