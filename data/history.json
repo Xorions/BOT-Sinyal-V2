@@ -6830,5 +6830,57 @@
       "tp2": 570.5791380000001,
       "timestamp": "Wednesday, 14 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-14 19:13": [
+    {
+      "symbol": "RTSLAUSDT",
+      "base": "RTSLA",
+      "action": "SELL",
+      "entry": 374.77,
+      "sl": 381.14108999999996,
+      "tp1": 370.310237,
+      "tp2": 365.850474,
+      "timestamp": "Wednesday, 14 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RNXPIUSDT",
+      "base": "RNXPI",
+      "action": "SELL",
+      "entry": 224.12,
+      "sl": 227.93004,
+      "tp1": 221.45297200000002,
+      "tp2": 218.78594400000003,
+      "timestamp": "Wednesday, 14 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RIWMUSDT",
+      "base": "RIWM",
+      "action": "SELL",
+      "entry": 277.28,
+      "sl": 281.99375999999995,
+      "tp1": 273.980368,
+      "tp2": 270.680736,
+      "timestamp": "Wednesday, 14 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPWRUSDT",
+      "base": "RPWR",
+      "action": "SELL",
+      "entry": 685.0,
+      "sl": 696.645,
+      "tp1": 676.8485000000001,
+      "tp2": 668.697,
+      "timestamp": "Wednesday, 14 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCIFRUSDT",
+      "base": "RCIFR",
+      "action": "SELL",
+      "entry": 11.16,
+      "sl": 11.44423,
+      "tp1": 10.762078,
+      "tp2": 10.68,
+      "timestamp": "Wednesday, 14 Oct 2026, 19:05 WIB"
+    }
   ]
 }
