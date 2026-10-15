@@ -6882,5 +6882,57 @@
       "tp2": 10.68,
       "timestamp": "Wednesday, 14 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-15 13:45": [
+    {
+      "symbol": "RXLCUSDT",
+      "base": "RXLC",
+      "action": "SELL",
+      "entry": 110.0,
+      "sl": 111.87,
+      "tp1": 108.691,
+      "tp2": 107.38199999999999,
+      "timestamp": "Thursday, 15 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RHWMUSDT",
+      "base": "RHWM",
+      "action": "SELL",
+      "entry": 216.28,
+      "sl": 219.95676,
+      "tp1": 213.706268,
+      "tp2": 211.132536,
+      "timestamp": "Thursday, 15 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RMELIUSDT",
+      "base": "RMELI",
+      "action": "SELL",
+      "entry": 1828.0,
+      "sl": 1859.076,
+      "tp1": 1806.2468,
+      "tp2": 1784.4936,
+      "timestamp": "Thursday, 15 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RJCIUSDT",
+      "base": "RJCI",
+      "action": "SELL",
+      "entry": 152.11,
+      "sl": 154.69587,
+      "tp1": 150.299891,
+      "tp2": 148.48978200000002,
+      "timestamp": "Thursday, 15 Oct 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RKREUSDT",
+      "base": "RKRE",
+      "action": "SELL",
+      "entry": 68.55,
+      "sl": 69.71535,
+      "tp1": 67.73425499999999,
+      "tp2": 66.91851,
+      "timestamp": "Thursday, 15 Oct 2026, 13:36 WIB"
+    }
   ]
 }
