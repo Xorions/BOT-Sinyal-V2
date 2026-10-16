@@ -6986,5 +6986,37 @@
       "tp2": 517.2102840000001,
       "timestamp": "Thursday, 15 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-16 13:44": [
+    {
+      "symbol": "REWTUSDT",
+      "base": "REWT",
+      "action": "SELL",
+      "entry": 108.99,
+      "sl": 110.84282999999999,
+      "tp1": 107.69301899999999,
+      "tp2": 106.396038,
+      "timestamp": "Friday, 16 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTERUSDT",
+      "base": "RTER",
+      "action": "SELL",
+      "entry": 343.51,
+      "sl": 349.34967,
+      "tp1": 337.02,
+      "tp2": 335.334462,
+      "timestamp": "Friday, 16 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAMATUSDT",
+      "base": "RAMAT",
+      "action": "SELL",
+      "entry": 428.8,
+      "sl": 436.0896,
+      "tp1": 423.69728,
+      "tp2": 418.59456,
+      "timestamp": "Friday, 16 Oct 2026, 13:35 WIB"
+    }
   ]
 }
