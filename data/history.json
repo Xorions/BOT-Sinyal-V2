@@ -7018,5 +7018,57 @@
       "tp2": 418.59456,
       "timestamp": "Friday, 16 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-16 19:15": [
+    {
+      "symbol": "RMPWRUSDT",
+      "base": "RMPWR",
+      "action": "SELL",
+      "entry": 1239.55,
+      "sl": 1260.6223499999999,
+      "tp1": 1224.799355,
+      "tp2": 1210.04871,
+      "timestamp": "Friday, 16 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAVGOUSDT",
+      "base": "RAVGO",
+      "action": "SELL",
+      "entry": 342.29,
+      "sl": 348.10893000000004,
+      "tp1": 338.216749,
+      "tp2": 334.14349799999997,
+      "timestamp": "Friday, 16 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RGEVUSDT",
+      "base": "RGEV",
+      "action": "SELL",
+      "entry": 918.95,
+      "sl": 934.5721500000001,
+      "tp1": 897.07899,
+      "tp2": 871.155,
+      "timestamp": "Friday, 16 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSTXUSDT",
+      "base": "RSTX",
+      "action": "SELL",
+      "entry": 684.2,
+      "sl": 695.8314,
+      "tp1": 670.16,
+      "tp2": 667.9160400000001,
+      "timestamp": "Friday, 16 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RRKLBUSDT",
+      "base": "RRKLB",
+      "action": "SELL",
+      "entry": 55.17,
+      "sl": 56.107890000000005,
+      "tp1": 54.513477,
+      "tp2": 53.856953999999995,
+      "timestamp": "Friday, 16 Oct 2026, 19:05 WIB"
+    }
   ]
 }
