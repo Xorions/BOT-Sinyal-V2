@@ -7122,5 +7122,57 @@
       "tp2": 163.27551599999998,
       "timestamp": "Saturday, 17 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-17 19:15": [
+    {
+      "symbol": "RCSCOUSDT",
+      "base": "RCSCO",
+      "action": "SELL",
+      "entry": 107.0,
+      "sl": 109.32699999999998,
+      "tp1": 105.37110000000001,
+      "tp2": 103.74220000000003,
+      "timestamp": "Saturday, 17 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCDNSUSDT",
+      "base": "RCDNS",
+      "action": "SELL",
+      "entry": 318.0,
+      "sl": 325.84461,
+      "tp1": 312.508773,
+      "tp2": 307.01754600000004,
+      "timestamp": "Saturday, 17 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RPLTRUSDT",
+      "base": "RPLTR",
+      "action": "SELL",
+      "entry": 184.02,
+      "sl": 200.2514575,
+      "tp1": 172.65797975000004,
+      "tp2": 161.29595950000004,
+      "timestamp": "Saturday, 17 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDELLUSDT",
+      "base": "RDELL",
+      "action": "SELL",
+      "entry": 449.3,
+      "sl": 471.3096999999999,
+      "tp1": 433.89321000000007,
+      "tp2": 418.4864200000002,
+      "timestamp": "Saturday, 17 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCRWDUSDT",
+      "base": "RCRWD",
+      "action": "SELL",
+      "entry": 226.39,
+      "sl": 244.97271999999998,
+      "tp1": 213.382096,
+      "tp2": 200.374192,
+      "timestamp": "Saturday, 17 Oct 2026, 19:05 WIB"
+    }
   ]
 }
