@@ -7174,5 +7174,17 @@
       "tp2": 200.374192,
       "timestamp": "Saturday, 17 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-18 13:43": [
+    {
+      "symbol": "RVRTUSDT",
+      "base": "RVRT",
+      "action": "SELL",
+      "entry": 205.0,
+      "sl": 211.58284999999998,
+      "tp1": 200.392005,
+      "tp2": 195.78401000000002,
+      "timestamp": "Sunday, 18 Oct 2026, 13:35 WIB"
+    }
   ]
 }
