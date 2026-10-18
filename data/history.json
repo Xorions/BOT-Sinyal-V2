@@ -7186,5 +7186,57 @@
       "tp2": 195.78401000000002,
       "timestamp": "Sunday, 18 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-18 19:15": [
+    {
+      "symbol": "RMSFTUSDT",
+      "base": "RMSFT",
+      "action": "SELL",
+      "entry": 527.0,
+      "sl": 535.959,
+      "tp1": 520.7287,
+      "tp2": 514.4574000000001,
+      "timestamp": "Sunday, 18 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RIGVUSDT",
+      "base": "RIGV",
+      "action": "SELL",
+      "entry": 103.95,
+      "sl": 105.71715,
+      "tp1": 102.712995,
+      "tp2": 101.47599,
+      "timestamp": "Sunday, 18 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RGSUSDT",
+      "base": "RGS",
+      "action": "SELL",
+      "entry": 878.0,
+      "sl": 892.926,
+      "tp1": 867.5518,
+      "tp2": 857.1035999999999,
+      "timestamp": "Sunday, 18 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSNPSUSDT",
+      "base": "RSNPS",
+      "action": "SELL",
+      "entry": 452.57,
+      "sl": 460.26369,
+      "tp1": 447.184417,
+      "tp2": 441.798834,
+      "timestamp": "Sunday, 18 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RFTNTUSDT",
+      "base": "RFTNT",
+      "action": "SELL",
+      "entry": 168.0,
+      "sl": 171.37463142857143,
+      "tp1": 165.637758,
+      "tp2": 163.27551599999998,
+      "timestamp": "Sunday, 18 Oct 2026, 19:05 WIB"
+    }
   ]
 }
