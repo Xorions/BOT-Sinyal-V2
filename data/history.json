@@ -7238,5 +7238,57 @@
       "tp2": 163.27551599999998,
       "timestamp": "Sunday, 18 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-19 13:43": [
+    {
+      "symbol": "RBIVUSDT",
+      "base": "RBIV",
+      "action": "BUY",
+      "entry": 73.56,
+      "sl": 72.30948000000001,
+      "tp1": 74.43536399999999,
+      "tp2": 75.310728,
+      "timestamp": "Monday, 19 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSNAUSDT",
+      "base": "RSNA",
+      "action": "BUY",
+      "entry": 367.25,
+      "sl": 361.00675,
+      "tp1": 371.620275,
+      "tp2": 375.99055,
+      "timestamp": "Monday, 19 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "REHCUSDT",
+      "base": "REHC",
+      "action": "BUY",
+      "entry": 127.87,
+      "sl": 125.69621000000001,
+      "tp1": 129.391653,
+      "tp2": 130.913306,
+      "timestamp": "Monday, 19 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RVLTOUSDT",
+      "base": "RVLTO",
+      "action": "BUY",
+      "entry": 101.04,
+      "sl": 99.32232,
+      "tp1": 102.24237600000001,
+      "tp2": 103.44475200000001,
+      "timestamp": "Monday, 19 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCORUSDT",
+      "base": "RCOR",
+      "action": "BUY",
+      "entry": 340.92,
+      "sl": 335.12436,
+      "tp1": 344.976948,
+      "tp2": 349.033896,
+      "timestamp": "Monday, 19 Oct 2026, 13:35 WIB"
+    }
   ]
 }
