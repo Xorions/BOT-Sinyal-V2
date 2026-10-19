@@ -7290,5 +7290,57 @@
       "tp2": 349.033896,
       "timestamp": "Monday, 19 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-19 19:16": [
+    {
+      "symbol": "RPORUSDT",
+      "base": "RPOR",
+      "action": "SELL",
+      "entry": 44.1,
+      "sl": 44.8497,
+      "tp1": 43.575210000000006,
+      "tp2": 43.05042,
+      "timestamp": "Monday, 19 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RTCEHYUSDT",
+      "base": "RTCEHY",
+      "action": "SELL",
+      "entry": 52.75,
+      "sl": 53.64675,
+      "tp1": 52.122275,
+      "tp2": 51.494550000000004,
+      "timestamp": "Monday, 19 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RENSUSDT",
+      "base": "RENS",
+      "action": "SELL",
+      "entry": 168.72,
+      "sl": 173.80986999999996,
+      "tp1": 165.15709100000004,
+      "tp2": 161.59418200000005,
+      "timestamp": "Monday, 19 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RVLUEUSDT",
+      "base": "RVLUE",
+      "action": "SELL",
+      "entry": 191.4,
+      "sl": 196.37235499999997,
+      "tp1": 187.91935150000003,
+      "tp2": 184.43870300000006,
+      "timestamp": "Monday, 19 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RAAXJUSDT",
+      "base": "RAAXJ",
+      "action": "SELL",
+      "entry": 108.12,
+      "sl": 109.95804000000001,
+      "tp1": 106.833372,
+      "tp2": 105.54674399999999,
+      "timestamp": "Monday, 19 Oct 2026, 19:06 WIB"
+    }
   ]
 }
