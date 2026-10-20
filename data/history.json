@@ -7342,5 +7342,57 @@
       "tp2": 105.54674399999999,
       "timestamp": "Monday, 19 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-20 13:44": [
+    {
+      "symbol": "RIEMGUSDT",
+      "base": "RIEMG",
+      "action": "SELL",
+      "entry": 76.98,
+      "sl": 78.28866000000001,
+      "tp1": 76.06393800000001,
+      "tp2": 75.147876,
+      "timestamp": "Tuesday, 20 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RANETUSDT",
+      "base": "RANET",
+      "action": "SELL",
+      "entry": 181.7,
+      "sl": 184.78889999999998,
+      "tp1": 179.53777,
+      "tp2": 177.37554,
+      "timestamp": "Tuesday, 20 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCIENUSDT",
+      "base": "RCIEN",
+      "action": "SELL",
+      "entry": 338.64,
+      "sl": 346.29578,
+      "tp1": 333.15,
+      "tp2": 327.921908,
+      "timestamp": "Tuesday, 20 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "SELL",
+      "entry": 33.4,
+      "sl": 33.9678,
+      "tp1": 33.002539999999996,
+      "tp2": 32.60508,
+      "timestamp": "Tuesday, 20 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RVRTUSDT",
+      "base": "RVRT",
+      "action": "SELL",
+      "entry": 203.89,
+      "sl": 208.61397,
+      "tp1": 200.58322099999998,
+      "tp2": 197.27644199999997,
+      "timestamp": "Tuesday, 20 Oct 2026, 13:35 WIB"
+    }
   ]
 }
