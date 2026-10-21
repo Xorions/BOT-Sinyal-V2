@@ -7498,5 +7498,57 @@
       "tp2": 46.541948000000005,
       "timestamp": "Wednesday, 21 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-21 19:15": [
+    {
+      "symbol": "RWFCUSDT",
+      "base": "RWFC",
+      "action": "SELL",
+      "entry": 82.02,
+      "sl": 83.41434,
+      "tp1": 81.043962,
+      "tp2": 80.06792399999999,
+      "timestamp": "Wednesday, 21 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMELIUSDT",
+      "base": "RMELI",
+      "action": "BUY",
+      "entry": 1865.18,
+      "sl": 1833.4719400000001,
+      "tp1": 1887.375642,
+      "tp2": 1909.5712839999999,
+      "timestamp": "Wednesday, 21 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RXLFUSDT",
+      "base": "RXLF",
+      "action": "BUY",
+      "entry": 55.8,
+      "sl": 54.8514,
+      "tp1": 56.46402,
+      "tp2": 57.12804,
+      "timestamp": "Wednesday, 21 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RDIAUSDT",
+      "base": "RDIA",
+      "action": "BUY",
+      "entry": 525.03,
+      "sl": 516.1044899999999,
+      "tp1": 531.277857,
+      "tp2": 537.525714,
+      "timestamp": "Wednesday, 21 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RINTUUSDT",
+      "base": "RINTU",
+      "action": "BUY",
+      "entry": 332.34,
+      "sl": 326.69021999999995,
+      "tp1": 336.294846,
+      "tp2": 340.249692,
+      "timestamp": "Wednesday, 21 Oct 2026, 19:06 WIB"
+    }
   ]
 }
