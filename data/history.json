@@ -7446,5 +7446,57 @@
       "tp2": 264.25734,
       "timestamp": "Tuesday, 20 Oct 2026, 19:04 WIB"
     }
+  ],
+  "2026-10-21 13:45": [
+    {
+      "symbol": "RBNDUSDT",
+      "base": "RBND",
+      "action": "BUY",
+      "entry": 71.16,
+      "sl": 69.95027999999999,
+      "tp1": 72.006804,
+      "tp2": 72.85360800000001,
+      "timestamp": "Wednesday, 21 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RPMUSDT",
+      "base": "RPM",
+      "action": "SELL",
+      "entry": 198.93,
+      "sl": 202.31181,
+      "tp1": 196.562733,
+      "tp2": 194.195466,
+      "timestamp": "Wednesday, 21 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSNPSUSDT",
+      "base": "RSNPS",
+      "action": "SELL",
+      "entry": 448.0,
+      "sl": 455.616,
+      "tp1": 442.66880000000003,
+      "tp2": 437.3376,
+      "timestamp": "Wednesday, 21 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCVXUSDT",
+      "base": "RCVX",
+      "action": "BUY",
+      "entry": 225.8,
+      "sl": 221.9614,
+      "tp1": 228.48702000000003,
+      "tp2": 231.17404000000002,
+      "timestamp": "Wednesday, 21 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RBSXUSDT",
+      "base": "RBSX",
+      "action": "BUY",
+      "entry": 45.46,
+      "sl": 44.68718,
+      "tp1": 46.045,
+      "tp2": 46.541948000000005,
+      "timestamp": "Wednesday, 21 Oct 2026, 13:35 WIB"
+    }
   ]
 }
