@@ -7550,5 +7550,57 @@
       "tp2": 340.249692,
       "timestamp": "Wednesday, 21 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-22 13:44": [
+    {
+      "symbol": "REEMUSDT",
+      "base": "REEM",
+      "action": "SELL",
+      "entry": 62.27,
+      "sl": 63.750679999999996,
+      "tp1": 61.23352400000001,
+      "tp2": 60.19704800000002,
+      "timestamp": "Thursday, 22 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "SELL",
+      "entry": 64.89,
+      "sl": 65.99313000000001,
+      "tp1": 63.64,
+      "tp2": 63.34561799999999,
+      "timestamp": "Thursday, 22 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCSCOUSDT",
+      "base": "RCSCO",
+      "action": "SELL",
+      "entry": 106.25,
+      "sl": 108.05625,
+      "tp1": 104.985625,
+      "tp2": 103.72125,
+      "timestamp": "Thursday, 22 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMETAUSDT",
+      "base": "RMETA",
+      "action": "SELL",
+      "entry": 701.5,
+      "sl": 714.5165028571429,
+      "tp1": 692.3884479999999,
+      "tp2": 683.276896,
+      "timestamp": "Thursday, 22 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RXLIUSDT",
+      "base": "RXLI",
+      "action": "SELL",
+      "entry": 167.0,
+      "sl": 169.839,
+      "tp1": 165.0127,
+      "tp2": 163.0254,
+      "timestamp": "Thursday, 22 Oct 2026, 13:35 WIB"
+    }
   ]
 }
