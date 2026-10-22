@@ -7602,5 +7602,57 @@
       "tp2": 163.0254,
       "timestamp": "Thursday, 22 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-22 19:15": [
+    {
+      "symbol": "RSNPSUSDT",
+      "base": "RSNPS",
+      "action": "SELL",
+      "entry": 445.39,
+      "sl": 452.96163,
+      "tp1": 440.089859,
+      "tp2": 434.78971799999994,
+      "timestamp": "Thursday, 22 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RGLDUSDT",
+      "base": "RGLD",
+      "action": "SELL",
+      "entry": 371.98,
+      "sl": 378.30366000000004,
+      "tp1": 367.553438,
+      "tp2": 363.126876,
+      "timestamp": "Thursday, 22 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIEMGUSDT",
+      "base": "RIEMG",
+      "action": "SELL",
+      "entry": 75.79,
+      "sl": 77.56259179999999,
+      "tp1": 74.54918574000001,
+      "tp2": 73.30837148000002,
+      "timestamp": "Thursday, 22 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RGOOGLUSDT",
+      "base": "RGOOGL",
+      "action": "SELL",
+      "entry": 327.8,
+      "sl": 333.37260000000003,
+      "tp1": 323.89918,
+      "tp2": 319.99836,
+      "timestamp": "Thursday, 22 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RNEMUSDT",
+      "base": "RNEM",
+      "action": "SELL",
+      "entry": 113.25,
+      "sl": 115.83636969999999,
+      "tp1": 111.43954121,
+      "tp2": 109.62908242000002,
+      "timestamp": "Thursday, 22 Oct 2026, 19:06 WIB"
+    }
   ]
 }
