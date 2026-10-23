@@ -7654,5 +7654,57 @@
       "tp2": 109.62908242000002,
       "timestamp": "Thursday, 22 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-23 13:45": [
+    {
+      "symbol": "RMELIUSDT",
+      "base": "RMELI",
+      "action": "SELL",
+      "entry": 1818.59,
+      "sl": 1849.50603,
+      "tp1": 1796.9487789999998,
+      "tp2": 1775.3075579999997,
+      "timestamp": "Friday, 23 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHWMUSDT",
+      "base": "RHWM",
+      "action": "SELL",
+      "entry": 192.09,
+      "sl": 195.58499999999998,
+      "tp1": 189.64350000000002,
+      "tp2": 187.19700000000003,
+      "timestamp": "Friday, 23 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "REFAUSDT",
+      "base": "REFA",
+      "action": "SELL",
+      "entry": 102.74,
+      "sl": 104.48657999999999,
+      "tp1": 101.517394,
+      "tp2": 100.294788,
+      "timestamp": "Friday, 23 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RDXCMUSDT",
+      "base": "RDXCM",
+      "action": "SELL",
+      "entry": 78.27,
+      "sl": 79.60059,
+      "tp1": 77.11,
+      "tp2": 76.407174,
+      "timestamp": "Friday, 23 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCDNSUSDT",
+      "base": "RCDNS",
+      "action": "SELL",
+      "entry": 307.78,
+      "sl": 316.09544999999997,
+      "tp1": 301.959185,
+      "tp2": 296.13836999999995,
+      "timestamp": "Friday, 23 Oct 2026, 13:35 WIB"
+    }
   ]
 }
