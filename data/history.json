@@ -7706,5 +7706,57 @@
       "tp2": 296.13836999999995,
       "timestamp": "Friday, 23 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-23 19:13": [
+    {
+      "symbol": "RTUSDT",
+      "base": "RT",
+      "action": "SELL",
+      "entry": 21.73,
+      "sl": 22.09941,
+      "tp1": 21.471413000000002,
+      "tp2": 21.212826000000003,
+      "timestamp": "Friday, 23 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RHPEUSDT",
+      "base": "RHPE",
+      "action": "SELL",
+      "entry": 55.45,
+      "sl": 56.39265,
+      "tp1": 54.790145,
+      "tp2": 54.13029,
+      "timestamp": "Friday, 23 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSHOPUSDT",
+      "base": "RSHOP",
+      "action": "SELL",
+      "entry": 168.5,
+      "sl": 171.3645,
+      "tp1": 166.49485,
+      "tp2": 164.4897,
+      "timestamp": "Friday, 23 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBEUSDT",
+      "base": "RBE",
+      "action": "SELL",
+      "entry": 210.42,
+      "sl": 217.5351257142857,
+      "tp1": 200.458824,
+      "tp2": 200.0,
+      "timestamp": "Friday, 23 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAVGOUSDT",
+      "base": "RAVGO",
+      "action": "SELL",
+      "entry": 324.44,
+      "sl": 329.95548,
+      "tp1": 320.579164,
+      "tp2": 316.718328,
+      "timestamp": "Friday, 23 Oct 2026, 19:05 WIB"
+    }
   ]
 }
