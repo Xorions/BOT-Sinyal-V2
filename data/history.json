@@ -7810,5 +7810,47 @@
       "tp2": 533.2430420000001,
       "timestamp": "Saturday, 24 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-24 19:15": [
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "SELL",
+      "entry": 704.53,
+      "sl": 716.5070099999999,
+      "tp1": 696.1460930000001,
+      "tp2": 687.762186,
+      "timestamp": "Saturday, 24 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSOXLUSDT",
+      "base": "RSOXL",
+      "action": "SELL",
+      "entry": 83.19,
+      "sl": 85.48679142857142,
+      "tp1": 81.582246,
+      "tp2": 79.974492,
+      "timestamp": "Saturday, 24 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBEUSDT",
+      "base": "RBE",
+      "action": "SELL",
+      "entry": 191.85,
+      "sl": 195.11145,
+      "tp1": 189.566985,
+      "tp2": 187.28397,
+      "timestamp": "Saturday, 24 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RTERUSDT",
+      "base": "RTER",
+      "action": "SELL",
+      "entry": 308.5,
+      "sl": 315.18151639999996,
+      "tp1": 303.82293852000004,
+      "tp2": 299.1458770400001,
+      "timestamp": "Saturday, 24 Oct 2026, 19:05 WIB"
+    }
   ]
 }
