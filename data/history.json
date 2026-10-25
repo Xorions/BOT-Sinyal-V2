@@ -7864,5 +7864,57 @@
       "tp2": 164.753274,
       "timestamp": "Sunday, 25 Oct 2026, 13:34 WIB"
     }
+  ],
+  "2026-10-25 19:13": [
+    {
+      "symbol": "RVONGUSDT",
+      "base": "RVONG",
+      "action": "SELL",
+      "entry": 123.16,
+      "sl": 125.25372,
+      "tp1": 121.694396,
+      "tp2": 120.22879199999998,
+      "timestamp": "Sunday, 25 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "SELL",
+      "entry": 45.9,
+      "sl": 46.680299999999995,
+      "tp1": 45.353790000000004,
+      "tp2": 44.80758,
+      "timestamp": "Sunday, 25 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RIWFUSDT",
+      "base": "RIWF",
+      "action": "SELL",
+      "entry": 119.64,
+      "sl": 121.67388,
+      "tp1": 118.216284,
+      "tp2": 116.792568,
+      "timestamp": "Sunday, 25 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RVOUSDT",
+      "base": "RVO",
+      "action": "SELL",
+      "entry": 80.48,
+      "sl": 81.84816000000001,
+      "tp1": 79.522288,
+      "tp2": 78.564576,
+      "timestamp": "Sunday, 25 Oct 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RPWRUSDT",
+      "base": "RPWR",
+      "action": "SELL",
+      "entry": 546.9,
+      "sl": 556.6549699999999,
+      "tp1": 540.071521,
+      "tp2": 533.2430420000001,
+      "timestamp": "Sunday, 25 Oct 2026, 19:04 WIB"
+    }
   ]
 }
