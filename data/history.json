@@ -7852,5 +7852,17 @@
       "tp2": 299.1458770400001,
       "timestamp": "Saturday, 24 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-25 13:43": [
+    {
+      "symbol": "RSHOPUSDT",
+      "base": "RSHOP",
+      "action": "SELL",
+      "entry": 168.77,
+      "sl": 171.63909,
+      "tp1": 166.761637,
+      "tp2": 164.753274,
+      "timestamp": "Sunday, 25 Oct 2026, 13:34 WIB"
+    }
   ]
 }
