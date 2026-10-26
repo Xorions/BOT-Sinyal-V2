@@ -7968,5 +7968,57 @@
       "tp2": 66.31326600000001,
       "timestamp": "Monday, 26 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-26 19:15": [
+    {
+      "symbol": "RROGUSDT",
+      "base": "RROG",
+      "action": "SELL",
+      "entry": 124.96,
+      "sl": 127.08431999999999,
+      "tp1": 123.47297599999999,
+      "tp2": 121.985952,
+      "timestamp": "Monday, 26 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "SELL",
+      "entry": 45.44,
+      "sl": 46.21248,
+      "tp1": 44.899263999999995,
+      "tp2": 44.35852799999999,
+      "timestamp": "Monday, 26 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RPENUSDT",
+      "base": "RPEN",
+      "action": "SELL",
+      "entry": 321.15,
+      "sl": 326.60954999999996,
+      "tp1": 317.328315,
+      "tp2": 313.50663000000003,
+      "timestamp": "Monday, 26 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RITGRUSDT",
+      "base": "RITGR",
+      "action": "SELL",
+      "entry": 126.54,
+      "sl": 128.69118,
+      "tp1": 125.03417400000001,
+      "tp2": 123.52834800000001,
+      "timestamp": "Monday, 26 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSHOOUSDT",
+      "base": "RSHOO",
+      "action": "SELL",
+      "entry": 42.79,
+      "sl": 43.51743,
+      "tp1": 42.280799,
+      "tp2": 41.771598000000004,
+      "timestamp": "Monday, 26 Oct 2026, 19:06 WIB"
+    }
   ]
 }
