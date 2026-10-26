@@ -7916,5 +7916,57 @@
       "tp2": 533.2430420000001,
       "timestamp": "Sunday, 25 Oct 2026, 19:04 WIB"
     }
+  ],
+  "2026-10-26 13:44": [
+    {
+      "symbol": "RSNXUSDT",
+      "base": "RSNX",
+      "action": "SELL",
+      "entry": 247.34,
+      "sl": 251.54478,
+      "tp1": 244.396654,
+      "tp2": 241.453308,
+      "timestamp": "Monday, 26 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "SELL",
+      "entry": 703.68,
+      "sl": 715.64256,
+      "tp1": 695.306208,
+      "tp2": 686.9324159999999,
+      "timestamp": "Monday, 26 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCZRUSDT",
+      "base": "RCZR",
+      "action": "SELL",
+      "entry": 28.75,
+      "sl": 29.23875,
+      "tp1": 28.407875,
+      "tp2": 28.06575,
+      "timestamp": "Monday, 26 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSEICUSDT",
+      "base": "RSEIC",
+      "action": "SELL",
+      "entry": 102.3,
+      "sl": 104.03909999999999,
+      "tp1": 101.08263,
+      "tp2": 99.86526,
+      "timestamp": "Monday, 26 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RDYNFUSDT",
+      "base": "RDYNF",
+      "action": "SELL",
+      "entry": 67.93,
+      "sl": 69.08481,
+      "tp1": 67.121633,
+      "tp2": 66.31326600000001,
+      "timestamp": "Monday, 26 Oct 2026, 13:35 WIB"
+    }
   ]
 }
