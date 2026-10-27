@@ -8072,5 +8072,57 @@
       "tp2": 362.71687199999997,
       "timestamp": "Tuesday, 27 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-27 19:16": [
+    {
+      "symbol": "RPFEUSDT",
+      "base": "RPFE",
+      "action": "SELL",
+      "entry": 29.68,
+      "sl": 30.18456,
+      "tp1": 29.326808,
+      "tp2": 28.973615999999996,
+      "timestamp": "Tuesday, 27 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIVWUSDT",
+      "base": "RIVW",
+      "action": "SELL",
+      "entry": 137.48,
+      "sl": 139.81716,
+      "tp1": 135.84398799999997,
+      "tp2": 134.20797599999997,
+      "timestamp": "Tuesday, 27 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "SELL",
+      "entry": 254.75,
+      "sl": 259.08075,
+      "tp1": 251.71847499999998,
+      "tp2": 248.68694999999997,
+      "timestamp": "Tuesday, 27 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSQQQUSDT",
+      "base": "RSQQQ",
+      "action": "SELL",
+      "entry": 37.95,
+      "sl": 38.61178889999999,
+      "tp1": 37.48674777000001,
+      "tp2": 37.02349554000001,
+      "timestamp": "Tuesday, 27 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCLSUSDT",
+      "base": "RCLS",
+      "action": "SELL",
+      "entry": 278.2,
+      "sl": 283.7645714285714,
+      "tp1": 272.22,
+      "tp2": 270.4096,
+      "timestamp": "Tuesday, 27 Oct 2026, 19:06 WIB"
+    }
   ]
 }
