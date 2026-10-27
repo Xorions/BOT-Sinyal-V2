@@ -8020,5 +8020,57 @@
       "tp2": 41.771598000000004,
       "timestamp": "Monday, 26 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-27 13:45": [
+    {
+      "symbol": "RORCLUSDT",
+      "base": "RORCL",
+      "action": "SELL",
+      "entry": 126.03,
+      "sl": 128.17251,
+      "tp1": 124.53024300000001,
+      "tp2": 123.03048600000002,
+      "timestamp": "Tuesday, 27 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "REFAUSDT",
+      "base": "REFA",
+      "action": "SELL",
+      "entry": 102.88,
+      "sl": 104.62895999999999,
+      "tp1": 101.655728,
+      "tp2": 100.431456,
+      "timestamp": "Tuesday, 27 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMPWRUSDT",
+      "base": "RMPWR",
+      "action": "SELL",
+      "entry": 1150.57,
+      "sl": 1170.12969,
+      "tp1": 1136.878217,
+      "tp2": 1123.186434,
+      "timestamp": "Tuesday, 27 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSOFIUSDT",
+      "base": "RSOFI",
+      "action": "SELL",
+      "entry": 14.42,
+      "sl": 14.66514,
+      "tp1": 14.248402,
+      "tp2": 14.076804000000001,
+      "timestamp": "Tuesday, 27 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RETNUSDT",
+      "base": "RETN",
+      "action": "SELL",
+      "entry": 371.56,
+      "sl": 377.87652,
+      "tp1": 367.13843599999996,
+      "tp2": 362.71687199999997,
+      "timestamp": "Tuesday, 27 Oct 2026, 13:35 WIB"
+    }
   ]
 }
