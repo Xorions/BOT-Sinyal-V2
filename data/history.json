@@ -8176,5 +8176,57 @@
       "tp2": 137.72229600000003,
       "timestamp": "Wednesday, 28 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-28 19:15": [
+    {
+      "symbol": "RCBUSDT",
+      "base": "RCB",
+      "action": "SELL",
+      "entry": 354.01,
+      "sl": 360.02817,
+      "tp1": 349.797281,
+      "tp2": 345.584562,
+      "timestamp": "Wednesday, 28 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RTUSDT",
+      "base": "RT",
+      "action": "SELL",
+      "entry": 20.87,
+      "sl": 21.224790000000002,
+      "tp1": 20.621647,
+      "tp2": 20.373293999999998,
+      "timestamp": "Wednesday, 28 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCOINUSDT",
+      "base": "RCOIN",
+      "action": "SELL",
+      "entry": 157.85,
+      "sl": 160.53345,
+      "tp1": 155.971585,
+      "tp2": 154.09317000000001,
+      "timestamp": "Wednesday, 28 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSCHWUSDT",
+      "base": "RSCHW",
+      "action": "SELL",
+      "entry": 89.27,
+      "sl": 90.78759,
+      "tp1": 88.20768699999999,
+      "tp2": 87.145374,
+      "timestamp": "Wednesday, 28 Oct 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RWMTUSDT",
+      "base": "RWMT",
+      "action": "SELL",
+      "entry": 118.13,
+      "sl": 120.13821,
+      "tp1": 116.72425299999999,
+      "tp2": 115.31850599999999,
+      "timestamp": "Wednesday, 28 Oct 2026, 19:06 WIB"
+    }
   ]
 }
