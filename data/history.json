@@ -8124,5 +8124,57 @@
       "tp2": 270.4096,
       "timestamp": "Tuesday, 27 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-28 13:45": [
+    {
+      "symbol": "RXLPUSDT",
+      "base": "RXLP",
+      "action": "SELL",
+      "entry": 86.76,
+      "sl": 88.23492,
+      "tp1": 85.727556,
+      "tp2": 84.69511200000001,
+      "timestamp": "Wednesday, 28 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCOINUSDT",
+      "base": "RCOIN",
+      "action": "SELL",
+      "entry": 158.75,
+      "sl": 161.44875,
+      "tp1": 156.86087500000002,
+      "tp2": 154.97175000000001,
+      "timestamp": "Wednesday, 28 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RPGUSDT",
+      "base": "RPG",
+      "action": "SELL",
+      "entry": 158.32,
+      "sl": 161.01144,
+      "tp1": 156.435992,
+      "tp2": 154.551984,
+      "timestamp": "Wednesday, 28 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMUBUSDT",
+      "base": "RMUB",
+      "action": "BUY",
+      "entry": 103.98,
+      "sl": 102.21234,
+      "tp1": 105.21736200000001,
+      "tp2": 106.45472400000001,
+      "timestamp": "Wednesday, 28 Oct 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMRKUSDT",
+      "base": "RMRK",
+      "action": "SELL",
+      "entry": 141.08,
+      "sl": 143.47836,
+      "tp1": 139.401148,
+      "tp2": 137.72229600000003,
+      "timestamp": "Wednesday, 28 Oct 2026, 13:35 WIB"
+    }
   ]
 }
