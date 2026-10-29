@@ -8280,5 +8280,57 @@
       "tp2": 46.03672000000001,
       "timestamp": "Thursday, 29 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-29 19:14": [
+    {
+      "symbol": "RULUSDT",
+      "base": "RUL",
+      "action": "SELL",
+      "entry": 63.96,
+      "sl": 65.04732,
+      "tp1": 63.198876,
+      "tp2": 62.437752,
+      "timestamp": "Thursday, 29 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMETAUSDT",
+      "base": "RMETA",
+      "action": "SELL",
+      "entry": 617.54,
+      "sl": 628.03818,
+      "tp1": 610.1912739999999,
+      "tp2": 602.8425479999999,
+      "timestamp": "Thursday, 29 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCRMUSDT",
+      "base": "RCRM",
+      "action": "SELL",
+      "entry": 229.0,
+      "sl": 233.19749999999996,
+      "tp1": 225.8,
+      "tp2": 223.12350000000006,
+      "timestamp": "Thursday, 29 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RACNUSDT",
+      "base": "RACN",
+      "action": "SELL",
+      "entry": 234.85,
+      "sl": 238.84244999999999,
+      "tp1": 232.055285,
+      "tp2": 229.26057,
+      "timestamp": "Thursday, 29 Oct 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "SELL",
+      "entry": 242.39,
+      "sl": 246.51063,
+      "tp1": 239.5,
+      "tp2": 236.62111799999997,
+      "timestamp": "Thursday, 29 Oct 2026, 19:05 WIB"
+    }
   ]
 }
