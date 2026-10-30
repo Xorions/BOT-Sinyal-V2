@@ -8332,5 +8332,57 @@
       "tp2": 236.62111799999997,
       "timestamp": "Thursday, 29 Oct 2026, 19:05 WIB"
     }
+  ],
+  "2026-10-30 13:44": [
+    {
+      "symbol": "RRIOUSDT",
+      "base": "RRIO",
+      "action": "SELL",
+      "entry": 82.28,
+      "sl": 84.10154999999999,
+      "tp1": 81.00491500000001,
+      "tp2": 79.72983000000002,
+      "timestamp": "Friday, 30 Oct 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RORLYUSDT",
+      "base": "RORLY",
+      "action": "SELL",
+      "entry": 89.61,
+      "sl": 91.52547428571428,
+      "tp1": 88.26916800000001,
+      "tp2": 86.928336,
+      "timestamp": "Friday, 30 Oct 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RIWFUSDT",
+      "base": "RIWF",
+      "action": "SELL",
+      "entry": 120.56,
+      "sl": 122.60952,
+      "tp1": 119.125336,
+      "tp2": 117.690672,
+      "timestamp": "Friday, 30 Oct 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RSYKUSDT",
+      "base": "RSYK",
+      "action": "SELL",
+      "entry": 275.51,
+      "sl": 281.3176742857143,
+      "tp1": 271.44462799999997,
+      "tp2": 267.37925599999994,
+      "timestamp": "Friday, 30 Oct 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RPINSUSDT",
+      "base": "RPINS",
+      "action": "SELL",
+      "entry": 18.36,
+      "sl": 19.120285714285714,
+      "tp1": 17.2956,
+      "tp2": 16.32,
+      "timestamp": "Friday, 30 Oct 2026, 13:34 WIB"
+    }
   ]
 }
