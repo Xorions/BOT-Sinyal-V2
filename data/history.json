@@ -8448,5 +8448,17 @@
       "tp2": 160.73133,
       "timestamp": "Saturday, 31 Oct 2026, 13:35 WIB"
     }
+  ],
+  "2026-10-31 19:15": [
+    {
+      "symbol": "RAVGOUSDT",
+      "base": "RAVGO",
+      "action": "SELL",
+      "entry": 326.5,
+      "sl": 332.0505,
+      "tp1": 322.61465,
+      "tp2": 318.7293,
+      "timestamp": "Saturday, 31 Oct 2026, 19:06 WIB"
+    }
   ]
 }
