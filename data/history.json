@@ -8436,5 +8436,17 @@
       "tp2": 1549.6882139999998,
       "timestamp": "Friday, 30 Oct 2026, 19:06 WIB"
     }
+  ],
+  "2026-10-31 13:44": [
+    {
+      "symbol": "RQCOMUSDT",
+      "base": "RQCOM",
+      "action": "SELL",
+      "entry": 164.65,
+      "sl": 167.44905,
+      "tp1": 161.72,
+      "tp2": 160.73133,
+      "timestamp": "Saturday, 31 Oct 2026, 13:35 WIB"
+    }
   ]
 }
