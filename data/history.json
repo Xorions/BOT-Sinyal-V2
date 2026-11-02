@@ -8474,5 +8474,57 @@
       "tp2": 265.217388,
       "timestamp": "Monday, 02 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-02 19:14": [
+    {
+      "symbol": "RMETAUSDT",
+      "base": "RMETA",
+      "action": "SELL",
+      "entry": 612.5,
+      "sl": 622.9125,
+      "tp1": 605.21125,
+      "tp2": 597.9225,
+      "timestamp": "Monday, 02 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "SELL",
+      "entry": 43.98,
+      "sl": 44.72766,
+      "tp1": 43.19,
+      "tp2": 42.93327599999999,
+      "timestamp": "Monday, 02 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSNDKUSDT",
+      "base": "RSNDK",
+      "action": "SELL",
+      "entry": 1172.02,
+      "sl": 1191.94434,
+      "tp1": 1154.5,
+      "tp2": 1144.125924,
+      "timestamp": "Monday, 02 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMSTRUSDT",
+      "base": "RMSTR",
+      "action": "SELL",
+      "entry": 132.78,
+      "sl": 135.03726,
+      "tp1": 131.199918,
+      "tp2": 129.619836,
+      "timestamp": "Monday, 02 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMRVLUSDT",
+      "base": "RMRVL",
+      "action": "SELL",
+      "entry": 195.94,
+      "sl": 199.27098,
+      "tp1": 191.276628,
+      "tp2": 190.15,
+      "timestamp": "Monday, 02 Nov 2026, 19:05 WIB"
+    }
   ]
 }
