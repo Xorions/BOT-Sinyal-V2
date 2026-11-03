@@ -8578,5 +8578,57 @@
       "tp2": 454.635864,
       "timestamp": "Tuesday, 03 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-03 19:16": [
+    {
+      "symbol": "REWYUSDT",
+      "base": "REWY",
+      "action": "SELL",
+      "entry": 153.36,
+      "sl": 155.96712000000002,
+      "tp1": 151.535016,
+      "tp2": 149.710032,
+      "timestamp": "Tuesday, 03 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSPCXUSDT",
+      "base": "RSPCX",
+      "action": "SELL",
+      "entry": 136.86,
+      "sl": 139.18662,
+      "tp1": 135.231366,
+      "tp2": 133.60273200000003,
+      "timestamp": "Tuesday, 03 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCRWDUSDT",
+      "base": "RCRWD",
+      "action": "SELL",
+      "entry": 243.51,
+      "sl": 247.64967,
+      "tp1": 240.4254,
+      "tp2": 237.714462,
+      "timestamp": "Tuesday, 03 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RXLCUSDT",
+      "base": "RXLC",
+      "action": "SELL",
+      "entry": 100.46,
+      "sl": 102.16781999999999,
+      "tp1": 99.26452599999999,
+      "tp2": 98.069052,
+      "timestamp": "Tuesday, 03 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RBACUSDT",
+      "base": "RBAC",
+      "action": "SELL",
+      "entry": 49.23,
+      "sl": 50.06691,
+      "tp1": 48.64416299999999,
+      "tp2": 48.058325999999994,
+      "timestamp": "Tuesday, 03 Nov 2026, 19:06 WIB"
+    }
   ]
 }
