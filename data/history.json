@@ -8526,5 +8526,57 @@
       "tp2": 190.15,
       "timestamp": "Monday, 02 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-03 13:45": [
+    {
+      "symbol": "RAPPUSDT",
+      "base": "RAPP",
+      "action": "SELL",
+      "entry": 228.76,
+      "sl": 232.64892,
+      "tp1": 226.03775599999997,
+      "tp2": 223.31551199999998,
+      "timestamp": "Tuesday, 03 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RGLDUSDT",
+      "base": "RGLD",
+      "action": "SELL",
+      "entry": 359.17,
+      "sl": 365.27589,
+      "tp1": 354.89587700000004,
+      "tp2": 350.621754,
+      "timestamp": "Tuesday, 03 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTMOUSDT",
+      "base": "RTMO",
+      "action": "SELL",
+      "entry": 679.73,
+      "sl": 691.2854100000001,
+      "tp1": 671.641213,
+      "tp2": 663.552426,
+      "timestamp": "Tuesday, 03 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNVDAUSDT",
+      "base": "RNVDA",
+      "action": "SELL",
+      "entry": 203.08,
+      "sl": 206.53236,
+      "tp1": 200.663348,
+      "tp2": 198.24669600000001,
+      "timestamp": "Tuesday, 03 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSNPSUSDT",
+      "base": "RSNPS",
+      "action": "SELL",
+      "entry": 465.72,
+      "sl": 473.63724,
+      "tp1": 460.17793200000006,
+      "tp2": 454.635864,
+      "timestamp": "Tuesday, 03 Nov 2026, 13:35 WIB"
+    }
   ]
 }
