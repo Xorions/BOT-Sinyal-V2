@@ -8682,5 +8682,57 @@
       "tp2": 59.87034599999999,
       "timestamp": "Wednesday, 04 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-04 19:13": [
+    {
+      "symbol": "RCEGUSDT",
+      "base": "RCEG",
+      "action": "SELL",
+      "entry": 255.86,
+      "sl": 260.20962000000003,
+      "tp1": 252.815266,
+      "tp2": 249.770532,
+      "timestamp": "Wednesday, 04 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RVSTUSDT",
+      "base": "RVST",
+      "action": "SELL",
+      "entry": 132.8,
+      "sl": 136.408,
+      "tp1": 130.2744,
+      "tp2": 127.74880000000005,
+      "timestamp": "Wednesday, 04 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RFIXUSDT",
+      "base": "RFIX",
+      "action": "SELL",
+      "entry": 1230.0,
+      "sl": 1253.6959457142857,
+      "tp1": 1213.412838,
+      "tp2": 1196.825676,
+      "timestamp": "Wednesday, 04 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RBILUSDT",
+      "base": "RBIL",
+      "action": "SELL",
+      "entry": 91.42,
+      "sl": 92.97414,
+      "tp1": 90.33210199999999,
+      "tp2": 89.244204,
+      "timestamp": "Wednesday, 04 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RIRENUSDT",
+      "base": "RIREN",
+      "action": "SELL",
+      "entry": 23.36,
+      "sl": 24.292659999999998,
+      "tp1": 22.707138,
+      "tp2": 22.054276,
+      "timestamp": "Wednesday, 04 Nov 2026, 19:04 WIB"
+    }
   ]
 }
