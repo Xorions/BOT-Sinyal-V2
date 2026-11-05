@@ -8734,5 +8734,57 @@
       "tp2": 22.054276,
       "timestamp": "Wednesday, 04 Nov 2026, 19:04 WIB"
     }
+  ],
+  "2026-11-05 13:45": [
+    {
+      "symbol": "RAGGUSDT",
+      "base": "RAGG",
+      "action": "BUY",
+      "entry": 96.5,
+      "sl": 94.8595,
+      "tp1": 97.64835000000001,
+      "tp2": 98.7967,
+      "timestamp": "Thursday, 05 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RGSUSDT",
+      "base": "RGS",
+      "action": "BUY",
+      "entry": 934.99,
+      "sl": 919.09517,
+      "tp1": 946.1163809999999,
+      "tp2": 957.242762,
+      "timestamp": "Thursday, 05 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAMZNUSDT",
+      "base": "RAMZN",
+      "action": "BUY",
+      "entry": 265.92,
+      "sl": 261.39936,
+      "tp1": 271.49,
+      "tp2": 272.24889600000006,
+      "timestamp": "Thursday, 05 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTSLAUSDT",
+      "base": "RTSLA",
+      "action": "SELL",
+      "entry": 377.02,
+      "sl": 383.42933999999997,
+      "tp1": 372.533462,
+      "tp2": 368.046924,
+      "timestamp": "Thursday, 05 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RXLPUSDT",
+      "base": "RXLP",
+      "action": "BUY",
+      "entry": 92.65,
+      "sl": 91.07495,
+      "tp1": 93.75253500000001,
+      "tp2": 94.85507000000001,
+      "timestamp": "Thursday, 05 Nov 2026, 13:35 WIB"
+    }
   ]
 }
