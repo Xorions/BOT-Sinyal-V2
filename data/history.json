@@ -8786,5 +8786,57 @@
       "tp2": 94.85507000000001,
       "timestamp": "Thursday, 05 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-05 19:16": [
+    {
+      "symbol": "RNTRAUSDT",
+      "base": "RNTRA",
+      "action": "SELL",
+      "entry": 389.03,
+      "sl": 395.64351,
+      "tp1": 384.40054299999997,
+      "tp2": 379.77108599999997,
+      "timestamp": "Thursday, 05 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RBEUSDT",
+      "base": "RBE",
+      "action": "SELL",
+      "entry": 191.12,
+      "sl": 195.02331999999998,
+      "tp1": 188.38767600000003,
+      "tp2": 185.65535200000002,
+      "timestamp": "Thursday, 05 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RAMATUSDT",
+      "base": "RAMAT",
+      "action": "SELL",
+      "entry": 356.03,
+      "sl": 363.41698999999994,
+      "tp1": 350.859107,
+      "tp2": 345.688214,
+      "timestamp": "Thursday, 05 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RLMTUSDT",
+      "base": "RLMT",
+      "action": "SELL",
+      "entry": 587.0,
+      "sl": 599.794,
+      "tp1": 578.0442,
+      "tp2": 569.0884,
+      "timestamp": "Thursday, 05 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RDELLUSDT",
+      "base": "RDELL",
+      "action": "SELL",
+      "entry": 361.2,
+      "sl": 367.82016,
+      "tp1": 356.565888,
+      "tp2": 351.931776,
+      "timestamp": "Thursday, 05 Nov 2026, 19:06 WIB"
+    }
   ]
 }
