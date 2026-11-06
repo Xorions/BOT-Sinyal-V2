@@ -8838,5 +8838,57 @@
       "tp2": 351.931776,
       "timestamp": "Thursday, 05 Nov 2026, 19:06 WIB"
     }
+  ],
+  "2026-11-06 13:43": [
+    {
+      "symbol": "RUSHYUSDT",
+      "base": "RUSHY",
+      "action": "SELL",
+      "entry": 35.54,
+      "sl": 36.14418,
+      "tp1": 35.117074,
+      "tp2": 34.694148,
+      "timestamp": "Friday, 06 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RCEGUSDT",
+      "base": "RCEG",
+      "action": "SELL",
+      "entry": 239.22,
+      "sl": 243.28674,
+      "tp1": 236.373282,
+      "tp2": 233.52656399999998,
+      "timestamp": "Friday, 06 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RCOINUSDT",
+      "base": "RCOIN",
+      "action": "SELL",
+      "entry": 136.2,
+      "sl": 138.5715,
+      "tp1": 134.53994999999998,
+      "tp2": 132.8799,
+      "timestamp": "Friday, 06 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RDIAUSDT",
+      "base": "RDIA",
+      "action": "SELL",
+      "entry": 509.6,
+      "sl": 518.2632,
+      "tp1": 503.53576000000004,
+      "tp2": 497.47152000000006,
+      "timestamp": "Friday, 06 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RVSTUSDT",
+      "base": "RVST",
+      "action": "SELL",
+      "entry": 113.53,
+      "sl": 115.46001,
+      "tp1": 111.0,
+      "tp2": 110.82798600000001,
+      "timestamp": "Friday, 06 Nov 2026, 13:34 WIB"
+    }
   ]
 }
