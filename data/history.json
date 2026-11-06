@@ -8890,5 +8890,57 @@
       "tp2": 110.82798600000001,
       "timestamp": "Friday, 06 Nov 2026, 13:34 WIB"
     }
+  ],
+  "2026-11-06 19:14": [
+    {
+      "symbol": "RMETAUSDT",
+      "base": "RMETA",
+      "action": "SELL",
+      "entry": 604.93,
+      "sl": 615.21381,
+      "tp1": 597.731333,
+      "tp2": 590.532666,
+      "timestamp": "Friday, 06 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RTJXUSDT",
+      "base": "RTJX",
+      "action": "SELL",
+      "entry": 137.0,
+      "sl": 139.329,
+      "tp1": 135.3697,
+      "tp2": 133.7394,
+      "timestamp": "Friday, 06 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCSCOUSDT",
+      "base": "RCSCO",
+      "action": "SELL",
+      "entry": 96.8,
+      "sl": 98.4456,
+      "tp1": 95.64808,
+      "tp2": 94.49615999999999,
+      "timestamp": "Friday, 06 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVOOUSDT",
+      "base": "RVOO",
+      "action": "SELL",
+      "entry": 675.99,
+      "sl": 687.4818300000001,
+      "tp1": 667.9457189999999,
+      "tp2": 659.901438,
+      "timestamp": "Friday, 06 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "REWZUSDT",
+      "base": "REWZ",
+      "action": "SELL",
+      "entry": 31.76,
+      "sl": 32.29992,
+      "tp1": 31.382056000000002,
+      "tp2": 31.004112000000003,
+      "timestamp": "Friday, 06 Nov 2026, 19:05 WIB"
+    }
   ]
 }
