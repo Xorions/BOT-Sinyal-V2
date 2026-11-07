@@ -8994,5 +8994,37 @@
       "tp2": 77.178372,
       "timestamp": "Saturday, 07 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-07 19:14": [
+    {
+      "symbol": "RVOUSDT",
+      "base": "RVO",
+      "action": "SELL",
+      "entry": 79.38,
+      "sl": 80.72945999999999,
+      "tp1": 78.435378,
+      "tp2": 77.490756,
+      "timestamp": "Saturday, 07 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVONGUSDT",
+      "base": "RVONG",
+      "action": "SELL",
+      "entry": 115.03,
+      "sl": 116.98551,
+      "tp1": 113.661143,
+      "tp2": 112.29228599999999,
+      "timestamp": "Saturday, 07 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "SELL",
+      "entry": 238.38,
+      "sl": 242.43246,
+      "tp1": 235.543278,
+      "tp2": 232.706556,
+      "timestamp": "Saturday, 07 Nov 2026, 19:05 WIB"
+    }
   ]
 }
