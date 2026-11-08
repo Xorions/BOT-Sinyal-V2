@@ -9048,5 +9048,47 @@
       "tp2": 63.062519999999985,
       "timestamp": "Sunday, 08 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-08 19:15": [
+    {
+      "symbol": "REEMUSDT",
+      "base": "REEM",
+      "action": "SELL",
+      "entry": 59.31,
+      "sl": 60.318270000000005,
+      "tp1": 58.604211,
+      "tp2": 57.898422,
+      "timestamp": "Sunday, 08 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDVNUSDT",
+      "base": "RDVN",
+      "action": "SELL",
+      "entry": 42.48,
+      "sl": 43.30954,
+      "tp1": 41.899322,
+      "tp2": 41.31864399999999,
+      "timestamp": "Sunday, 08 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RINTUUSDT",
+      "base": "RINTU",
+      "action": "SELL",
+      "entry": 340.0,
+      "sl": 345.78,
+      "tp1": 335.954,
+      "tp2": 331.908,
+      "timestamp": "Sunday, 08 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVCITUSDT",
+      "base": "RVCIT",
+      "action": "SELL",
+      "entry": 79.06,
+      "sl": 80.40402,
+      "tp1": 78.119186,
+      "tp2": 77.178372,
+      "timestamp": "Sunday, 08 Nov 2026, 19:05 WIB"
+    }
   ]
 }
