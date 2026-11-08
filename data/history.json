@@ -9026,5 +9026,27 @@
       "tp2": 232.706556,
       "timestamp": "Saturday, 07 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-08 13:44": [
+    {
+      "symbol": "RUSBUSDT",
+      "base": "RUSB",
+      "action": "SELL",
+      "entry": 59.45,
+      "sl": 60.46065,
+      "tp1": 58.74254500000001,
+      "tp2": 58.035090000000004,
+      "timestamp": "Sunday, 08 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSGIUSDT",
+      "base": "RSGI",
+      "action": "SELL",
+      "entry": 64.6,
+      "sl": 65.6982,
+      "tp1": 63.13,
+      "tp2": 63.062519999999985,
+      "timestamp": "Sunday, 08 Nov 2026, 13:35 WIB"
+    }
   ]
 }
