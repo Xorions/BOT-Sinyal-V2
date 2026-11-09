@@ -9142,5 +9142,57 @@
       "tp2": 335.058422,
       "timestamp": "Monday, 09 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-09 19:14": [
+    {
+      "symbol": "RSEBUSDT",
+      "base": "RSEB",
+      "action": "SELL",
+      "entry": 3529.0,
+      "sl": 3592.6048771428573,
+      "tp1": 3456.75,
+      "tp2": 3439.953172,
+      "timestamp": "Monday, 09 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDTMUSDT",
+      "base": "RDTM",
+      "action": "SELL",
+      "entry": 114.0,
+      "sl": 115.938,
+      "tp1": 112.6434,
+      "tp2": 111.2868,
+      "timestamp": "Monday, 09 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RRUSDT",
+      "base": "RR",
+      "action": "SELL",
+      "entry": 266.39,
+      "sl": 272.9163,
+      "tp1": 261.82159,
+      "tp2": 257.25318,
+      "timestamp": "Monday, 09 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RNFGUSDT",
+      "base": "RNFG",
+      "action": "SELL",
+      "entry": 73.43,
+      "sl": 74.67831000000001,
+      "tp1": 72.556183,
+      "tp2": 71.682366,
+      "timestamp": "Monday, 09 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RGVAUSDT",
+      "base": "RGVA",
+      "action": "SELL",
+      "entry": 120.52,
+      "sl": 122.56884,
+      "tp1": 119.085812,
+      "tp2": 117.651624,
+      "timestamp": "Monday, 09 Nov 2026, 19:05 WIB"
+    }
   ]
 }
