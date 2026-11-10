@@ -9194,5 +9194,47 @@
       "tp2": 117.651624,
       "timestamp": "Monday, 09 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-10 13:45": [
+    {
+      "symbol": "RAJGUSDT",
+      "base": "RAJG",
+      "action": "SELL",
+      "entry": 276.78,
+      "sl": 281.48526,
+      "tp1": 273.486318,
+      "tp2": 270.19263599999994,
+      "timestamp": "Tuesday, 10 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "SELL",
+      "entry": 42.16,
+      "sl": 42.87672,
+      "tp1": 41.65829599999999,
+      "tp2": 41.156591999999996,
+      "timestamp": "Tuesday, 10 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCOFUSDT",
+      "base": "RCOF",
+      "action": "SELL",
+      "entry": 198.25,
+      "sl": 201.99416999999997,
+      "tp1": 195.629081,
+      "tp2": 193.00816200000006,
+      "timestamp": "Tuesday, 10 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RUSOUSDT",
+      "base": "RUSO",
+      "action": "SELL",
+      "entry": 140.0,
+      "sl": 142.426,
+      "tp1": 138.30180000000001,
+      "tp2": 136.60360000000003,
+      "timestamp": "Tuesday, 10 Nov 2026, 13:35 WIB"
+    }
   ]
 }
