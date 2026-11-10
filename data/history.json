@@ -9236,5 +9236,57 @@
       "tp2": 136.60360000000003,
       "timestamp": "Tuesday, 10 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-10 19:15": [
+    {
+      "symbol": "RSMCIUSDT",
+      "base": "RSMCI",
+      "action": "SELL",
+      "entry": 28.61,
+      "sl": 29.09637,
+      "tp1": 28.269541,
+      "tp2": 27.929081999999998,
+      "timestamp": "Tuesday, 10 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RAKAMUSDT",
+      "base": "RAKAM",
+      "action": "SELL",
+      "entry": 79.8,
+      "sl": 81.1566,
+      "tp1": 78.85038,
+      "tp2": 77.90075999999999,
+      "timestamp": "Tuesday, 10 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RVLOUSDT",
+      "base": "RVLO",
+      "action": "SELL",
+      "entry": 351.9,
+      "sl": 357.8823,
+      "tp1": 347.71238999999997,
+      "tp2": 343.52477999999996,
+      "timestamp": "Tuesday, 10 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMCHPUSDT",
+      "base": "RMCHP",
+      "action": "SELL",
+      "entry": 60.63,
+      "sl": 61.83494999999999,
+      "tp1": 59.78653500000001,
+      "tp2": 58.94307000000002,
+      "timestamp": "Tuesday, 10 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RMELIUSDT",
+      "base": "RMELI",
+      "action": "SELL",
+      "entry": 1516.11,
+      "sl": 1541.88387,
+      "tp1": 1498.0682909999998,
+      "tp2": 1480.026582,
+      "timestamp": "Tuesday, 10 Nov 2026, 19:05 WIB"
+    }
   ]
 }
