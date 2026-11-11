@@ -9340,5 +9340,37 @@
       "tp2": 83.631054,
       "timestamp": "Wednesday, 11 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-11 19:16": [
+    {
+      "symbol": "RINTUUSDT",
+      "base": "RINTU",
+      "action": "SELL",
+      "entry": 337.5,
+      "sl": 343.2375,
+      "tp1": 333.48375,
+      "tp2": 329.4675,
+      "timestamp": "Wednesday, 11 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RABBVUSDT",
+      "base": "RABBV",
+      "action": "SELL",
+      "entry": 290.5,
+      "sl": 295.4385,
+      "tp1": 287.04305,
+      "tp2": 283.58610000000004,
+      "timestamp": "Wednesday, 11 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSQQQUSDT",
+      "base": "RSQQQ",
+      "action": "SELL",
+      "entry": 41.05,
+      "sl": 42.085879999999996,
+      "tp1": 40.324884,
+      "tp2": 39.599768,
+      "timestamp": "Wednesday, 11 Nov 2026, 19:06 WIB"
+    }
   ]
 }
