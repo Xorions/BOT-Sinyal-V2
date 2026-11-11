@@ -9288,5 +9288,57 @@
       "tp2": 1480.026582,
       "timestamp": "Tuesday, 10 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-11 13:44": [
+    {
+      "symbol": "RPFEUSDT",
+      "base": "RPFE",
+      "action": "SELL",
+      "entry": 29.21,
+      "sl": 29.70657,
+      "tp1": 28.862401000000002,
+      "tp2": 28.514802000000003,
+      "timestamp": "Wednesday, 11 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RSHELUSDT",
+      "base": "RSHEL",
+      "action": "SELL",
+      "entry": 97.04,
+      "sl": 98.68968000000001,
+      "tp1": 95.88522400000001,
+      "tp2": 94.730448,
+      "timestamp": "Wednesday, 11 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTLTUSDT",
+      "base": "RTLT",
+      "action": "SELL",
+      "entry": 80.67,
+      "sl": 82.04139,
+      "tp1": 79.710027,
+      "tp2": 78.75005399999999,
+      "timestamp": "Wednesday, 11 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RADBEUSDT",
+      "base": "RADBE",
+      "action": "SELL",
+      "entry": 235.58,
+      "sl": 239.58486000000002,
+      "tp1": 232.776598,
+      "tp2": 229.973196,
+      "timestamp": "Wednesday, 11 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNEEUSDT",
+      "base": "RNEE",
+      "action": "SELL",
+      "entry": 85.67,
+      "sl": 87.12639,
+      "tp1": 84.650527,
+      "tp2": 83.631054,
+      "timestamp": "Wednesday, 11 Nov 2026, 13:35 WIB"
+    }
   ]
 }
