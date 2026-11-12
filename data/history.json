@@ -9424,5 +9424,57 @@
       "tp2": 112.65935400000001,
       "timestamp": "Thursday, 12 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-12 19:16": [
+    {
+      "symbol": "RSOFIUSDT",
+      "base": "RSOFI",
+      "action": "SELL",
+      "entry": 16.1,
+      "sl": 16.373700000000003,
+      "tp1": 15.90841,
+      "tp2": 15.716819999999998,
+      "timestamp": "Thursday, 12 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIBITUSDT",
+      "base": "RIBIT",
+      "action": "SELL",
+      "entry": 41.19,
+      "sl": 41.890229999999995,
+      "tp1": 40.699839,
+      "tp2": 40.209678000000004,
+      "timestamp": "Thursday, 12 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCOINUSDT",
+      "base": "RCOIN",
+      "action": "SELL",
+      "entry": 131.22,
+      "sl": 133.45074,
+      "tp1": 129.658482,
+      "tp2": 128.096964,
+      "timestamp": "Thursday, 12 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMSFTUSDT",
+      "base": "RMSFT",
+      "action": "SELL",
+      "entry": 520.42,
+      "sl": 529.2671399999999,
+      "tp1": 514.227002,
+      "tp2": 508.034004,
+      "timestamp": "Thursday, 12 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMSTRUSDT",
+      "base": "RMSTR",
+      "action": "SELL",
+      "entry": 114.35,
+      "sl": 117.98288999999998,
+      "tp1": 111.806977,
+      "tp2": 109.26395400000001,
+      "timestamp": "Thursday, 12 Nov 2026, 19:06 WIB"
+    }
   ]
 }
