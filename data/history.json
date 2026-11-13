@@ -9528,5 +9528,57 @@
       "tp2": 110.721698,
       "timestamp": "Friday, 13 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-13 19:16": [
+    {
+      "symbol": "RMELIUSDT",
+      "base": "RMELI",
+      "action": "SELL",
+      "entry": 1483.84,
+      "sl": 1509.06528,
+      "tp1": 1466.182304,
+      "tp2": 1448.5246079999997,
+      "timestamp": "Friday, 13 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RTLTUSDT",
+      "base": "RTLT",
+      "action": "SELL",
+      "entry": 79.54,
+      "sl": 80.89218000000001,
+      "tp1": 78.593474,
+      "tp2": 77.646948,
+      "timestamp": "Friday, 13 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RNFLXUSDT",
+      "base": "RNFLX",
+      "action": "SELL",
+      "entry": 62.84,
+      "sl": 63.908280000000005,
+      "tp1": 62.092204,
+      "tp2": 61.344408,
+      "timestamp": "Friday, 13 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RACNUSDT",
+      "base": "RACN",
+      "action": "SELL",
+      "entry": 249.78,
+      "sl": 254.02626,
+      "tp1": 246.807618,
+      "tp2": 243.83523599999998,
+      "timestamp": "Friday, 13 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RIEFAUSDT",
+      "base": "RIEFA",
+      "action": "SELL",
+      "entry": 96.43,
+      "sl": 98.06931,
+      "tp1": 95.28248300000001,
+      "tp2": 94.13496600000002,
+      "timestamp": "Friday, 13 Nov 2026, 19:06 WIB"
+    }
   ]
 }
