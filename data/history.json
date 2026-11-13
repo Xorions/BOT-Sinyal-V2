@@ -9476,5 +9476,57 @@
       "tp2": 109.26395400000001,
       "timestamp": "Thursday, 12 Nov 2026, 19:06 WIB"
     }
+  ],
+  "2026-11-13 13:46": [
+    {
+      "symbol": "REWZUSDT",
+      "base": "REWZ",
+      "action": "SELL",
+      "entry": 31.48,
+      "sl": 32.01516,
+      "tp1": 31.105387999999998,
+      "tp2": 30.730776,
+      "timestamp": "Friday, 13 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNUUSDT",
+      "base": "RNU",
+      "action": "SELL",
+      "entry": 12.15,
+      "sl": 12.35655,
+      "tp1": 12.005415000000001,
+      "tp2": 11.86083,
+      "timestamp": "Friday, 13 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RRCLUSDT",
+      "base": "RRCL",
+      "action": "SELL",
+      "entry": 322.1,
+      "sl": 327.57570000000004,
+      "tp1": 318.26701,
+      "tp2": 314.43402,
+      "timestamp": "Friday, 13 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "SELL",
+      "entry": 33.24,
+      "sl": 33.82115999999999,
+      "tp1": 32.83318800000001,
+      "tp2": 32.42637600000002,
+      "timestamp": "Friday, 13 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNEMUSDT",
+      "base": "RNEM",
+      "action": "SELL",
+      "entry": 113.6,
+      "sl": 115.65592999999998,
+      "tp1": 112.160849,
+      "tp2": 110.721698,
+      "timestamp": "Friday, 13 Nov 2026, 13:35 WIB"
+    }
   ]
 }
