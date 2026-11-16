@@ -9736,5 +9736,57 @@
       "tp2": 42.572081999999995,
       "timestamp": "Sunday, 15 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-16 13:46": [
+    {
+      "symbol": "RPPLUSDT",
+      "base": "RPPL",
+      "action": "SELL",
+      "entry": 35.36,
+      "sl": 35.96112,
+      "tp1": 34.939216,
+      "tp2": 34.518432,
+      "timestamp": "Monday, 16 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RTSCOUSDT",
+      "base": "RTSCO",
+      "action": "SELL",
+      "entry": 36.16,
+      "sl": 36.774719999999995,
+      "tp1": 35.729696,
+      "tp2": 35.299392,
+      "timestamp": "Monday, 16 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RQQQUSDT",
+      "base": "RQQQ",
+      "action": "SELL",
+      "entry": 671.58,
+      "sl": 682.9968600000001,
+      "tp1": 663.588198,
+      "tp2": 655.596396,
+      "timestamp": "Monday, 16 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIEIUSDT",
+      "base": "RIEI",
+      "action": "SELL",
+      "entry": 113.54,
+      "sl": 115.47018000000001,
+      "tp1": 112.188874,
+      "tp2": 110.83774799999999,
+      "timestamp": "Monday, 16 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "base": "ETH",
+      "action": "SELL",
+      "entry": 1811.59,
+      "sl": 1842.3870299999999,
+      "tp1": 1790.032079,
+      "tp2": 1768.474158,
+      "timestamp": "Monday, 16 Nov 2026, 13:35 WIB"
+    }
   ]
 }
