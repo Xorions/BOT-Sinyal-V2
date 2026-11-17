@@ -9840,5 +9840,57 @@
       "tp2": 654.678768,
       "timestamp": "Monday, 16 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-17 13:44": [
+    {
+      "symbol": "RMSTRUSDT",
+      "base": "RMSTR",
+      "action": "SELL",
+      "entry": 102.74,
+      "sl": 104.48657999999999,
+      "tp1": 101.517394,
+      "tp2": 100.294788,
+      "timestamp": "Tuesday, 17 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RNVDAUSDT",
+      "base": "RNVDA",
+      "action": "SELL",
+      "entry": 157.04,
+      "sl": 159.70968,
+      "tp1": 155.171224,
+      "tp2": 153.302448,
+      "timestamp": "Tuesday, 17 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAMATUSDT",
+      "base": "RAMAT",
+      "action": "SELL",
+      "entry": 354.27,
+      "sl": 360.29258999999996,
+      "tp1": 350.054187,
+      "tp2": 345.838374,
+      "timestamp": "Tuesday, 17 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAGGUSDT",
+      "base": "RAGG",
+      "action": "SELL",
+      "entry": 95.07,
+      "sl": 96.68619,
+      "tp1": 93.938667,
+      "tp2": 92.80733399999998,
+      "timestamp": "Tuesday, 17 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAMDUSDT",
+      "base": "RAMD",
+      "action": "SELL",
+      "entry": 507.91,
+      "sl": 520.0454699999999,
+      "tp1": 499.4151710000001,
+      "tp2": 490.9203420000002,
+      "timestamp": "Tuesday, 17 Nov 2026, 13:35 WIB"
+    }
   ]
 }
