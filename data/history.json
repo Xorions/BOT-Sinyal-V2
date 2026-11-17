@@ -9892,5 +9892,57 @@
       "tp2": 490.9203420000002,
       "timestamp": "Tuesday, 17 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-17 19:14": [
+    {
+      "symbol": "RFLEXUSDT",
+      "base": "RFLEX",
+      "action": "SELL",
+      "entry": 74.27,
+      "sl": 75.53259,
+      "tp1": 73.38618699999999,
+      "tp2": 72.50237399999999,
+      "timestamp": "Tuesday, 17 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RABBVUSDT",
+      "base": "RABBV",
+      "action": "SELL",
+      "entry": 293.65,
+      "sl": 298.64205,
+      "tp1": 290.15556499999997,
+      "tp2": 286.66112999999996,
+      "timestamp": "Tuesday, 17 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RMPWRUSDT",
+      "base": "RMPWR",
+      "action": "SELL",
+      "entry": 1313.99,
+      "sl": 1336.7551571428571,
+      "tp1": 1290.0,
+      "tp2": 1282.11878,
+      "timestamp": "Tuesday, 17 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RWFCUSDT",
+      "base": "RWFC",
+      "action": "SELL",
+      "entry": 84.44,
+      "sl": 85.87548,
+      "tp1": 83.435164,
+      "tp2": 82.430328,
+      "timestamp": "Tuesday, 17 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RCRMUSDT",
+      "base": "RCRM",
+      "action": "SELL",
+      "entry": 211.99,
+      "sl": 215.59383,
+      "tp1": 208.88,
+      "tp2": 206.94463800000003,
+      "timestamp": "Tuesday, 17 Nov 2026, 19:04 WIB"
+    }
   ]
 }
