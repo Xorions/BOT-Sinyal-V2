@@ -9944,5 +9944,57 @@
       "tp2": 206.94463800000003,
       "timestamp": "Tuesday, 17 Nov 2026, 19:04 WIB"
     }
+  ],
+  "2026-11-18 13:45": [
+    {
+      "symbol": "RXOMUSDT",
+      "base": "RXOM",
+      "action": "SELL",
+      "entry": 166.6,
+      "sl": 169.4322,
+      "tp1": 164.61746,
+      "tp2": 162.63492,
+      "timestamp": "Wednesday, 18 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RVLOUSDT",
+      "base": "RVLO",
+      "action": "SELL",
+      "entry": 358.31,
+      "sl": 364.40127,
+      "tp1": 350.0,
+      "tp2": 349.782222,
+      "timestamp": "Wednesday, 18 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RGOOGLUSDT",
+      "base": "RGOOGL",
+      "action": "SELL",
+      "entry": 281.15,
+      "sl": 285.92954999999995,
+      "tp1": 277.804315,
+      "tp2": 274.45863,
+      "timestamp": "Wednesday, 18 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RFCXUSDT",
+      "base": "RFCX",
+      "action": "SELL",
+      "entry": 54.7,
+      "sl": 55.629900000000006,
+      "tp1": 54.04907,
+      "tp2": 53.39814,
+      "timestamp": "Wednesday, 18 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMUBUSDT",
+      "base": "RMUB",
+      "action": "SELL",
+      "entry": 102.9,
+      "sl": 104.64930000000001,
+      "tp1": 101.67549,
+      "tp2": 100.45098,
+      "timestamp": "Wednesday, 18 Nov 2026, 13:35 WIB"
+    }
   ]
 }
