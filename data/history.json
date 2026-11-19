@@ -9996,5 +9996,57 @@
       "tp2": 100.45098,
       "timestamp": "Wednesday, 18 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-19 13:46": [
+    {
+      "symbol": "REQIXUSDT",
+      "base": "REQIX",
+      "action": "SELL",
+      "entry": 1036.0,
+      "sl": 1053.612,
+      "tp1": 1023.6715999999999,
+      "tp2": 1011.3431999999999,
+      "timestamp": "Thursday, 19 Nov 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RAEPUSDT",
+      "base": "RAEP",
+      "action": "SELL",
+      "entry": 125.61,
+      "sl": 127.74537,
+      "tp1": 124.115241,
+      "tp2": 122.62048200000001,
+      "timestamp": "Thursday, 19 Nov 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RWELLUSDT",
+      "base": "RWELL",
+      "action": "SELL",
+      "entry": 241.16,
+      "sl": 245.73499999999999,
+      "tp1": 237.9575,
+      "tp2": 234.75500000000002,
+      "timestamp": "Thursday, 19 Nov 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RSITEUSDT",
+      "base": "RSITE",
+      "action": "SELL",
+      "entry": 110.5,
+      "sl": 112.3785,
+      "tp1": 109.18505,
+      "tp2": 107.8701,
+      "timestamp": "Thursday, 19 Nov 2026, 13:36 WIB"
+    },
+    {
+      "symbol": "RIEMGUSDT",
+      "base": "RIEMG",
+      "action": "SELL",
+      "entry": 69.77,
+      "sl": 71.29324,
+      "tp1": 68.703732,
+      "tp2": 67.637464,
+      "timestamp": "Thursday, 19 Nov 2026, 13:36 WIB"
+    }
   ]
 }
