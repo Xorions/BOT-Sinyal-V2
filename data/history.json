@@ -10048,5 +10048,57 @@
       "tp2": 67.637464,
       "timestamp": "Thursday, 19 Nov 2026, 13:36 WIB"
     }
+  ],
+  "2026-11-19 19:16": [
+    {
+      "symbol": "RSPOTUSDT",
+      "base": "RSPOT",
+      "action": "SELL",
+      "entry": 602.81,
+      "sl": 613.0577699999999,
+      "tp1": 595.636561,
+      "tp2": 588.463122,
+      "timestamp": "Thursday, 19 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RCMEUSDT",
+      "base": "RCME",
+      "action": "SELL",
+      "entry": 310.0,
+      "sl": 315.27,
+      "tp1": 306.31100000000004,
+      "tp2": 302.622,
+      "timestamp": "Thursday, 19 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RUNPUSDT",
+      "base": "RUNP",
+      "action": "SELL",
+      "entry": 300.89,
+      "sl": 306.00513,
+      "tp1": 297.30940899999996,
+      "tp2": 293.72881799999993,
+      "timestamp": "Thursday, 19 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RXLIUSDT",
+      "base": "RXLI",
+      "action": "SELL",
+      "entry": 164.66,
+      "sl": 167.45922,
+      "tp1": 162.700546,
+      "tp2": 160.741092,
+      "timestamp": "Thursday, 19 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RVZUSDT",
+      "base": "RVZ",
+      "action": "SELL",
+      "entry": 45.92,
+      "sl": 46.70064,
+      "tp1": 45.373552000000004,
+      "tp2": 44.827104000000006,
+      "timestamp": "Thursday, 19 Nov 2026, 19:06 WIB"
+    }
   ]
 }
