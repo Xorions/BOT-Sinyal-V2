@@ -10152,5 +10152,57 @@
       "tp2": 979.6644180000003,
       "timestamp": "Friday, 20 Nov 2026, 13:34 WIB"
     }
+  ],
+  "2026-11-20 19:17": [
+    {
+      "symbol": "RIWMUSDT",
+      "base": "RIWM",
+      "action": "SELL",
+      "entry": 263.85,
+      "sl": 268.33545000000004,
+      "tp1": 260.710185,
+      "tp2": 257.57037,
+      "timestamp": "Friday, 20 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RISRGUSDT",
+      "base": "RISRG",
+      "action": "SELL",
+      "entry": 407.0,
+      "sl": 413.919,
+      "tp1": 402.1567,
+      "tp2": 397.3134,
+      "timestamp": "Friday, 20 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RMRKUSDT",
+      "base": "RMRK",
+      "action": "SELL",
+      "entry": 132.98,
+      "sl": 135.24066,
+      "tp1": 131.397538,
+      "tp2": 129.81507599999998,
+      "timestamp": "Friday, 20 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSPOTUSDT",
+      "base": "RSPOT",
+      "action": "SELL",
+      "entry": 583.0,
+      "sl": 592.9110000000001,
+      "tp1": 576.0622999999999,
+      "tp2": 569.1245999999999,
+      "timestamp": "Friday, 20 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RBABAUSDT",
+      "base": "RBABA",
+      "action": "SELL",
+      "entry": 83.72,
+      "sl": 85.14324,
+      "tp1": 82.723732,
+      "tp2": 81.72746399999998,
+      "timestamp": "Friday, 20 Nov 2026, 19:06 WIB"
+    }
   ]
 }
