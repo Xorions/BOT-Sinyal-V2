@@ -10100,5 +10100,57 @@
       "tp2": 44.827104000000006,
       "timestamp": "Thursday, 19 Nov 2026, 19:06 WIB"
     }
+  ],
+  "2026-11-20 13:44": [
+    {
+      "symbol": "RGILDUSDT",
+      "base": "RGILD",
+      "action": "SELL",
+      "entry": 167.01,
+      "sl": 169.84917,
+      "tp1": 165.022581,
+      "tp2": 163.03516199999999,
+      "timestamp": "Friday, 20 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RVLOUSDT",
+      "base": "RVLO",
+      "action": "SELL",
+      "entry": 336.7,
+      "sl": 346.1353,
+      "tp1": 330.09529,
+      "tp2": 323.49058,
+      "timestamp": "Friday, 20 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RAPHUSDT",
+      "base": "RAPH",
+      "action": "SELL",
+      "entry": 74.4,
+      "sl": 75.84685999999999,
+      "tp1": 73.38719800000001,
+      "tp2": 72.37439600000002,
+      "timestamp": "Friday, 20 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RVEAUSDT",
+      "base": "RVEA",
+      "action": "SELL",
+      "entry": 65.27,
+      "sl": 66.49889999999999,
+      "tp1": 64.40977,
+      "tp2": 63.54954,
+      "timestamp": "Friday, 20 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "REQIXUSDT",
+      "base": "REQIX",
+      "action": "SELL",
+      "entry": 1013.0,
+      "sl": 1036.8111299999998,
+      "tp1": 996.3322090000001,
+      "tp2": 979.6644180000003,
+      "timestamp": "Friday, 20 Nov 2026, 13:34 WIB"
+    }
   ]
 }
