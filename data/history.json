@@ -10256,5 +10256,57 @@
       "tp2": 164.860656,
       "timestamp": "Saturday, 21 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-21 19:16": [
+    {
+      "symbol": "RLMTUSDT",
+      "base": "RLMT",
+      "action": "SELL",
+      "entry": 566.57,
+      "sl": 576.2016900000001,
+      "tp1": 559.827817,
+      "tp2": 553.085634,
+      "timestamp": "Saturday, 21 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSHWUSDT",
+      "base": "RSHW",
+      "action": "SELL",
+      "entry": 339.74,
+      "sl": 345.51558,
+      "tp1": 335.697094,
+      "tp2": 331.65418800000003,
+      "timestamp": "Saturday, 21 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RDRAMUSDT",
+      "base": "RDRAM",
+      "action": "SELL",
+      "entry": 34.06,
+      "sl": 34.63902,
+      "tp1": 33.654686000000005,
+      "tp2": 33.249372,
+      "timestamp": "Saturday, 21 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RUNHUSDT",
+      "base": "RUNH",
+      "action": "SELL",
+      "entry": 335.45,
+      "sl": 342.01297,
+      "tp1": 329.0,
+      "tp2": 326.261842,
+      "timestamp": "Saturday, 21 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RLRCXUSDT",
+      "base": "RLRCX",
+      "action": "SELL",
+      "entry": 187.65,
+      "sl": 190.84005000000002,
+      "tp1": 185.416965,
+      "tp2": 183.18392999999998,
+      "timestamp": "Saturday, 21 Nov 2026, 19:05 WIB"
+    }
   ]
 }
