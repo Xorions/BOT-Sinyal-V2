@@ -10204,5 +10204,57 @@
       "tp2": 81.72746399999998,
       "timestamp": "Friday, 20 Nov 2026, 19:06 WIB"
     }
+  ],
+  "2026-11-21 13:46": [
+    {
+      "symbol": "RNOWUSDT",
+      "base": "RNOW",
+      "action": "SELL",
+      "entry": 88.68,
+      "sl": 90.68910857142858,
+      "tp1": 87.0,
+      "tp2": 85.867248,
+      "timestamp": "Saturday, 21 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RAMGNUSDT",
+      "base": "RAMGN",
+      "action": "SELL",
+      "entry": 437.06,
+      "sl": 444.49002,
+      "tp1": 431.858986,
+      "tp2": 426.657972,
+      "timestamp": "Saturday, 21 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCMCSAUSDT",
+      "base": "RCMCSA",
+      "action": "SELL",
+      "entry": 24.83,
+      "sl": 25.25211,
+      "tp1": 24.534523,
+      "tp2": 24.239046,
+      "timestamp": "Saturday, 21 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RHUMUSDT",
+      "base": "RHUM",
+      "action": "SELL",
+      "entry": 382.0,
+      "sl": 388.7196485714286,
+      "tp1": 377.296246,
+      "tp2": 372.592492,
+      "timestamp": "Saturday, 21 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RPGUSDT",
+      "base": "RPG",
+      "action": "SELL",
+      "entry": 168.88,
+      "sl": 171.75096,
+      "tp1": 166.870328,
+      "tp2": 164.860656,
+      "timestamp": "Saturday, 21 Nov 2026, 13:35 WIB"
+    }
   ]
 }
