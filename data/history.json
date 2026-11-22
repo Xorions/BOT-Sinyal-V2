@@ -10308,5 +10308,57 @@
       "tp2": 183.18392999999998,
       "timestamp": "Saturday, 21 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-22 13:43": [
+    {
+      "symbol": "RXELUSDT",
+      "base": "RXEL",
+      "action": "SELL",
+      "entry": 79.63,
+      "sl": 80.98371,
+      "tp1": 78.682403,
+      "tp2": 77.73480599999999,
+      "timestamp": "Sunday, 22 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RSPGIUSDT",
+      "base": "RSPGI",
+      "action": "SELL",
+      "entry": 436.25,
+      "sl": 443.66625,
+      "tp1": 431.058625,
+      "tp2": 425.86725,
+      "timestamp": "Sunday, 22 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RKDPUSDT",
+      "base": "RKDP",
+      "action": "SELL",
+      "entry": 34.62,
+      "sl": 35.20854,
+      "tp1": 34.208022,
+      "tp2": 33.796043999999995,
+      "timestamp": "Sunday, 22 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RDUKUSDT",
+      "base": "RDUK",
+      "action": "SELL",
+      "entry": 128.28,
+      "sl": 130.46076,
+      "tp1": 126.75346800000001,
+      "tp2": 125.22693600000001,
+      "timestamp": "Sunday, 22 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RSYKUSDT",
+      "base": "RSYK",
+      "action": "SELL",
+      "entry": 309.75,
+      "sl": 315.01575,
+      "tp1": 306.06397499999997,
+      "tp2": 302.37794999999994,
+      "timestamp": "Sunday, 22 Nov 2026, 13:34 WIB"
+    }
   ]
 }
