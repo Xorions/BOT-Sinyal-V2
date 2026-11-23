@@ -10464,5 +10464,57 @@
       "tp2": 106.79628,
       "timestamp": "Monday, 23 Nov 2026, 13:34 WIB"
     }
+  ],
+  "2026-11-23 19:16": [
+    {
+      "symbol": "RKRGUSDT",
+      "base": "RKRG",
+      "action": "SELL",
+      "entry": 24.61,
+      "sl": 25.02837,
+      "tp1": 24.317141,
+      "tp2": 24.024282,
+      "timestamp": "Monday, 23 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RBALLUSDT",
+      "base": "RBALL",
+      "action": "SELL",
+      "entry": 63.65,
+      "sl": 64.73205,
+      "tp1": 62.892565,
+      "tp2": 62.13513,
+      "timestamp": "Monday, 23 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RKIEUSDT",
+      "base": "RKIE",
+      "action": "SELL",
+      "entry": 64.08,
+      "sl": 65.16936,
+      "tp1": 63.317448,
+      "tp2": 62.554896,
+      "timestamp": "Monday, 23 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RPFGCUSDT",
+      "base": "RPFGC",
+      "action": "SELL",
+      "entry": 108.28,
+      "sl": 110.12076,
+      "tp1": 106.991468,
+      "tp2": 105.702936,
+      "timestamp": "Monday, 23 Nov 2026, 19:06 WIB"
+    },
+    {
+      "symbol": "RSLABUSDT",
+      "base": "RSLAB",
+      "action": "SELL",
+      "entry": 220.21,
+      "sl": 223.95357,
+      "tp1": 217.589501,
+      "tp2": 214.969002,
+      "timestamp": "Monday, 23 Nov 2026, 19:06 WIB"
+    }
   ]
 }
