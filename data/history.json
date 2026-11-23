@@ -10412,5 +10412,57 @@
       "tp2": 363.85788042000013,
       "timestamp": "Sunday, 22 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-23 13:43": [
+    {
+      "symbol": "RKIMUSDT",
+      "base": "RKIM",
+      "action": "SELL",
+      "entry": 25.37,
+      "sl": 25.80129,
+      "tp1": 25.068097,
+      "tp2": 24.766194,
+      "timestamp": "Monday, 23 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RBDXUSDT",
+      "base": "RBDX",
+      "action": "SELL",
+      "entry": 212.78,
+      "sl": 216.39726,
+      "tp1": 210.247918,
+      "tp2": 207.71583600000002,
+      "timestamp": "Monday, 23 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RVLTOUSDT",
+      "base": "RVLTO",
+      "action": "SELL",
+      "entry": 116.63,
+      "sl": 118.61270999999999,
+      "tp1": 115.242103,
+      "tp2": 113.854206,
+      "timestamp": "Monday, 23 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RAEEUSDT",
+      "base": "RAEE",
+      "action": "SELL",
+      "entry": 111.93,
+      "sl": 113.83281000000001,
+      "tp1": 110.598033,
+      "tp2": 109.26606600000001,
+      "timestamp": "Monday, 23 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RLUSDT",
+      "base": "RL",
+      "action": "SELL",
+      "entry": 109.4,
+      "sl": 111.25980000000001,
+      "tp1": 108.09814,
+      "tp2": 106.79628,
+      "timestamp": "Monday, 23 Nov 2026, 13:34 WIB"
+    }
   ]
 }
