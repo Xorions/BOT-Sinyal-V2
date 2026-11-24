@@ -10568,5 +10568,57 @@
       "tp2": 364.633942,
       "timestamp": "Tuesday, 24 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-24 19:14": [
+    {
+      "symbol": "RIGVUSDT",
+      "base": "RIGV",
+      "action": "SELL",
+      "entry": 94.42,
+      "sl": 96.02514000000001,
+      "tp1": 93.296402,
+      "tp2": 92.172804,
+      "timestamp": "Tuesday, 24 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCRMUSDT",
+      "base": "RCRM",
+      "action": "SELL",
+      "entry": 184.41,
+      "sl": 187.54497,
+      "tp1": 182.215521,
+      "tp2": 180.021042,
+      "timestamp": "Tuesday, 24 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RBKNGUSDT",
+      "base": "RBKNG",
+      "action": "SELL",
+      "entry": 145.2,
+      "sl": 147.6684,
+      "tp1": 143.47212,
+      "tp2": 141.74424,
+      "timestamp": "Tuesday, 24 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RKEYSUSDT",
+      "base": "RKEYS",
+      "action": "SELL",
+      "entry": 283.56,
+      "sl": 289.2784371428571,
+      "tp1": 279.557094,
+      "tp2": 275.55418800000007,
+      "timestamp": "Tuesday, 24 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RCIENUSDT",
+      "base": "RCIEN",
+      "action": "SELL",
+      "entry": 256.12,
+      "sl": 260.47404,
+      "tp1": 250.024344,
+      "tp2": 245.0,
+      "timestamp": "Tuesday, 24 Nov 2026, 19:05 WIB"
+    }
   ]
 }
