@@ -10620,5 +10620,57 @@
       "tp2": 245.0,
       "timestamp": "Tuesday, 24 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-25 13:44": [
+    {
+      "symbol": "RFXIUSDT",
+      "base": "RFXI",
+      "action": "SELL",
+      "entry": 30.95,
+      "sl": 31.47615,
+      "tp1": 30.581695,
+      "tp2": 30.213389999999997,
+      "timestamp": "Wednesday, 25 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "REOGUSDT",
+      "base": "REOG",
+      "action": "SELL",
+      "entry": 146.65,
+      "sl": 149.14305000000002,
+      "tp1": 144.904865,
+      "tp2": 143.15973,
+      "timestamp": "Wednesday, 25 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RMSFTUSDT",
+      "base": "RMSFT",
+      "action": "SELL",
+      "entry": 491.32,
+      "sl": 499.67244,
+      "tp1": 485.473292,
+      "tp2": 479.626584,
+      "timestamp": "Wednesday, 25 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RIEMGUSDT",
+      "base": "RIEMG",
+      "action": "SELL",
+      "entry": 68.33,
+      "sl": 69.49161,
+      "tp1": 66.98,
+      "tp2": 66.70374600000001,
+      "timestamp": "Wednesday, 25 Nov 2026, 13:34 WIB"
+    },
+    {
+      "symbol": "RJCIUSDT",
+      "base": "RJCI",
+      "action": "SELL",
+      "entry": 136.2,
+      "sl": 138.5154,
+      "tp1": 134.57922,
+      "tp2": 132.95843999999997,
+      "timestamp": "Wednesday, 25 Nov 2026, 13:34 WIB"
+    }
   ]
 }
