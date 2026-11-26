@@ -10724,5 +10724,27 @@
       "tp2": 339.7176,
       "timestamp": "Wednesday, 25 Nov 2026, 19:06 WIB"
     }
+  ],
+  "2026-11-26 13:44": [
+    {
+      "symbol": "RTMOUSDT",
+      "base": "RTMO",
+      "action": "SELL",
+      "entry": 682.0,
+      "sl": 693.594,
+      "tp1": 673.8842,
+      "tp2": 665.7683999999999,
+      "timestamp": "Thursday, 26 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMDTUSDT",
+      "base": "RMDT",
+      "action": "SELL",
+      "entry": 96.06,
+      "sl": 97.69302,
+      "tp1": 94.916886,
+      "tp2": 93.773772,
+      "timestamp": "Thursday, 26 Nov 2026, 13:35 WIB"
+    }
   ]
 }
