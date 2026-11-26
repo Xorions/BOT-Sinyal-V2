@@ -10746,5 +10746,27 @@
       "tp2": 93.773772,
       "timestamp": "Thursday, 26 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-26 19:16": [
+    {
+      "symbol": "RASMLUSDT",
+      "base": "RASML",
+      "action": "SELL",
+      "entry": 1293.89,
+      "sl": 1315.88613,
+      "tp1": 1278.492709,
+      "tp2": 1263.095418,
+      "timestamp": "Thursday, 26 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RJCIUSDT",
+      "base": "RJCI",
+      "action": "SELL",
+      "entry": 135.74,
+      "sl": 138.04758,
+      "tp1": 134.124694,
+      "tp2": 132.509388,
+      "timestamp": "Thursday, 26 Nov 2026, 19:05 WIB"
+    }
   ]
 }
