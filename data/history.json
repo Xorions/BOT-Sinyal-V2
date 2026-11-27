@@ -10769,5 +10769,37 @@
       "timestamp": "Thursday, 26 Nov 2026, 19:05 WIB"
     }
   ],
-  "2026-11-27 13:45": []
+  "2026-11-27 13:45": [],
+  "2026-11-27 19:16": [
+    {
+      "symbol": "RBOKFUSDT",
+      "base": "RBOKF",
+      "action": "SELL",
+      "entry": 124.7,
+      "sl": 126.8199,
+      "tp1": 123.21607,
+      "tp2": 121.73214,
+      "timestamp": "Friday, 27 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RSLABUSDT",
+      "base": "RSLAB",
+      "action": "SELL",
+      "entry": 220.13,
+      "sl": 223.87221,
+      "tp1": 217.51045299999998,
+      "tp2": 214.890906,
+      "timestamp": "Friday, 27 Nov 2026, 19:05 WIB"
+    },
+    {
+      "symbol": "RGTESUSDT",
+      "base": "RGTES",
+      "action": "SELL",
+      "entry": 22.39,
+      "sl": 22.778129999999997,
+      "tp1": 22.01,
+      "tp2": 21.846618000000007,
+      "timestamp": "Friday, 27 Nov 2026, 19:05 WIB"
+    }
+  ]
 }
