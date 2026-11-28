@@ -10843,5 +10843,27 @@
       "tp2": 12.993452000000005,
       "timestamp": "Saturday, 28 Nov 2026, 13:35 WIB"
     }
+  ],
+  "2026-11-28 19:14": [
+    {
+      "symbol": "RSOXSUSDT",
+      "base": "RSOXS",
+      "action": "SELL",
+      "entry": 54.25,
+      "sl": 55.54040285714286,
+      "tp1": 53.27,
+      "tp2": 52.443436,
+      "timestamp": "Saturday, 28 Nov 2026, 19:04 WIB"
+    },
+    {
+      "symbol": "RETNUSDT",
+      "base": "RETN",
+      "action": "SELL",
+      "entry": 324.28,
+      "sl": 329.79276,
+      "tp1": 318.99,
+      "tp2": 316.56213599999995,
+      "timestamp": "Saturday, 28 Nov 2026, 19:04 WIB"
+    }
   ]
 }
