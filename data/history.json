@@ -10801,5 +10801,47 @@
       "tp2": 21.846618000000007,
       "timestamp": "Friday, 27 Nov 2026, 19:05 WIB"
     }
+  ],
+  "2026-11-28 13:46": [
+    {
+      "symbol": "RTLTUSDT",
+      "base": "RTLT",
+      "action": "SELL",
+      "entry": 81.12,
+      "sl": 82.49904000000001,
+      "tp1": 80.154672,
+      "tp2": 79.189344,
+      "timestamp": "Saturday, 28 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RCOINUSDT",
+      "base": "RCOIN",
+      "action": "SELL",
+      "entry": 107.52,
+      "sl": 109.34783999999999,
+      "tp1": 105.88,
+      "tp2": 104.96102400000001,
+      "timestamp": "Saturday, 28 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RMSTRUSDT",
+      "base": "RMSTR",
+      "action": "SELL",
+      "entry": 81.29,
+      "sl": 82.67193,
+      "tp1": 80.32264900000001,
+      "tp2": 79.355298,
+      "timestamp": "Saturday, 28 Nov 2026, 13:35 WIB"
+    },
+    {
+      "symbol": "RIRENUSDT",
+      "base": "RIREN",
+      "action": "SELL",
+      "entry": 13.57,
+      "sl": 13.981819999999997,
+      "tp1": 13.281726000000003,
+      "tp2": 12.993452000000005,
+      "timestamp": "Saturday, 28 Nov 2026, 13:35 WIB"
+    }
   ]
 }
